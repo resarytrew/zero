@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
   Compass,
   Lock,
@@ -7,13 +8,15 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { DISTRICTS, SPEAKER_META } from '../game/codexData';
-import type { FeedbackBanner } from '../game/engine';
+import { Fragment, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { DISTRICTS } from '../game/codexData';
+import {
+  resolveDialogPortraitState,
+  type FeedbackBanner,
+} from '../game/engine';
 import type {
   DistrictId,
   PlayerState,
-  SpeakerMood,
   StoryChoice,
   StoryNode,
 } from '../game/types';
@@ -36,26 +39,27 @@ interface DialogPanelProps {
   onToggleMobileModel?: () => void;
 }
 
-function resolveMood(
-  node: StoryNode,
-  feedback: FeedbackBanner | null,
-): SpeakerMood {
-  if (feedback?.isError) return 'alert';
-  if (feedback && !feedback.isError) return 'encourage';
-  if (node.mood) return node.mood;
-  if (node.speaker === 'shadow') return 'alert';
-  if (node.id.includes('outro') || node.id.includes('victory')) return 'triumph';
-  if (
-    node.formulaDisplay ||
-    node.numericTask ||
-    node.scratchpadTask ||
-    node.verificationTask ||
-    node.tableTask ||
-    node.dualNumericTask
-  ) {
-    return 'curious';
-  }
-  return 'neutral';
+/** Highlights quoted spoken lines («...») in warm terracotta italic like the storybook mockup */
+function ProseParagraph({ text }: { text: string }) {
+  const segments = text.split(/(«[^»]+»)/g);
+  return (
+    <>
+      {segments.map((seg, i) => {
+        if (seg.startsWith('«') && seg.endsWith('»')) {
+          return (
+            <span key={i} className="font-semibold italic text-[#a8461c]">
+              <MathText text={seg} />
+            </span>
+          );
+        }
+        return (
+          <Fragment key={i}>
+            <MathText text={seg} />
+          </Fragment>
+        );
+      })}
+    </>
+  );
 }
 
 export function DialogPanel({
@@ -139,8 +143,20 @@ export function DialogPanel({
     return () => window.removeEventListener('keydown', onKeySkip);
   }, [isFullyRevealed, revealAll]);
 
-  const speakerMeta = SPEAKER_META[node.speaker];
-  const speakerMood = resolveMood(node, feedback);
+  const hasDraftInput =
+    numericVal.trim().length > 0 ||
+    firstVal.trim().length > 0 ||
+    secondVal.trim().length > 0 ||
+    Object.values(fieldValues).some((v) => v.trim().length > 0) ||
+    Object.values(tableSelections).some((v) => v.trim().length > 0);
+
+  const portraitState = resolveDialogPortraitState({
+    node,
+    feedback,
+    completedDistrictsCount: playerState.completedDistricts.length,
+    totalDistrictsCount: DISTRICTS.length,
+    hasDraftInput,
+  });
   const allDistrictsDone = DISTRICTS.every((d) =>
     playerState.completedDistricts.includes(d.id),
   );
@@ -174,7 +190,6 @@ export function DialogPanel({
     onSubmitTable(tableSelections);
   };
 
-  // Compute revealed slice per paragraph cleanly
   const visibleParagraphs = useMemo(() => {
     let remaining = revealedChars;
     return node.text.map((p) => {
@@ -189,7 +204,6 @@ export function DialogPanel({
     });
   }, [node.text, revealedChars]);
 
-  // Fast-forward / Advance chevron button handler matching screenshot bottom-right ">>"
   const singleLinearChoice =
     !node.isCrossroadsHub &&
     !node.numericTask &&
@@ -212,10 +226,20 @@ export function DialogPanel({
     }
   };
 
-  // Pre-sized visual novel container; Crossroads docks wide & low at bottom-center cleanly below portals
+  const showTaskRibbon = Boolean(
+    node.mathTopic ||
+      node.numericTask ||
+      node.dualNumericTask ||
+      node.scratchpadTask ||
+      node.verificationTask ||
+      node.tableTask ||
+      node.choices?.some((c) => c.isCorrect === false),
+  );
+
+  // Pre-sized visual novel container; Crossroads docks cleanly above bottom edge & clears side portal pins
   const positionClasses = node.isCrossroadsHub
-    ? 'fixed right-3 bottom-3 left-3 z-20 max-h-[62vh] sm:max-h-[68vh] md:right-auto md:left-1/2 md:-translate-x-1/2 md:bottom-4 md:w-[680px] lg:w-[740px] md:max-h-[calc(100vh-14rem)]'
-    : 'fixed right-3 bottom-3 left-3 z-20 max-h-[62vh] sm:left-auto sm:right-5 sm:bottom-5 sm:max-h-[calc(100vh-7.5rem)] sm:w-[580px] lg:w-[640px]';
+    ? 'fixed right-3 bottom-3 left-3 z-20 max-h-[calc(100dvh-6rem)] md:right-auto md:left-[calc(50%+28px)] md:-translate-x-1/2 md:bottom-4 md:w-[560px] lg:w-[600px] md:max-h-[calc(100vh-14.5rem)]'
+    : 'fixed right-3 bottom-3 left-3 z-20 max-h-[calc(100dvh-5.75rem)] sm:left-auto sm:right-5 sm:bottom-5 sm:max-h-[calc(100vh-6.75rem)] sm:w-[600px] lg:w-[680px]';
 
   return (
     <motion.section
@@ -224,56 +248,67 @@ export function DialogPanel({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       aria-label={node.episodeTitle}
-      className={`${positionClasses} flex flex-col overflow-visible rounded-2xl border border-[#2f7ea8]/75 border-t-2 border-t-[#5be3f5] bg-gradient-to-b from-[#082d4b]/96 to-[#0b426a]/96 shadow-[0_22px_54px_rgba(2,12,24,0.82)]`}
+      className={`${positionClasses} flex flex-col overflow-visible rounded-2xl border-[3px] border-[#dfaa48] bg-gradient-to-b from-[#fdf3da] via-[#faecc8] to-[#f4dfb1] text-[#152d3c] ring-1 ring-inset ring-[#fff9ea]/85 shadow-[0_22px_52px_rgba(5,22,34,0.62)]`}
     >
-      {/* Enlarged Hologram Portrait anchored on Top-Right Cyan Rim */}
+      {/* Framed Storybook Character Portrait anchored at Top-Right */}
       <div
         className={`pointer-events-none absolute z-30 ${
           node.isCrossroadsHub
-            ? '-top-[78px] right-3 sm:-top-[106px] sm:right-5 lg:-top-[118px] lg:right-6'
-            : '-top-[92px] right-3 sm:-top-[118px] sm:right-5 lg:-top-[146px] lg:right-6'
+            ? '-top-9 right-3 sm:-top-12 sm:right-5'
+            : '-top-9 right-3 sm:-top-14 sm:right-6'
         }`}
       >
         <SpeakerPortrait
-          speaker={node.speaker}
-          mood={speakerMood}
+          speaker={portraitState.speaker}
+          emotion={portraitState.emotion}
           variant="popout"
           compact={node.isCrossroadsHub}
         />
       </div>
 
-      {/* Main Panel Content (pre-sized to full required node height immediately) */}
+      {/* Main Parchment Content */}
       <div
-        className={`quest-scroll flex-1 overflow-y-auto px-5 ${
+        className={`quest-scroll flex-1 overflow-y-auto px-4 ${
           node.isCrossroadsHub
-            ? 'space-y-2 pt-3.5 pb-3.5 sm:px-6 sm:pt-4 sm:pb-4'
-            : 'space-y-3 pt-4 pb-4 sm:px-7 sm:pt-5 sm:pb-5'
+            ? 'space-y-2 pt-3 pb-3 sm:space-y-2.5 sm:px-6 sm:pt-4 sm:pb-4'
+            : 'space-y-2.5 pt-3 pb-3.5 sm:space-y-3 sm:px-7 sm:pt-5 sm:pb-5'
         }`}
       >
-        {/* Top-Left Speaker Kicker & Episode Context (padded right to clear hologram) */}
+        {/* Top-Left Speaker Kicker with Gold Diamond Ornament & Episode Subtitle */}
         <div
           className={
             node.isCrossroadsHub
-              ? 'pr-28 sm:pr-36 lg:pr-40'
-              : 'pr-32 sm:pr-40 lg:pr-48'
+              ? 'pr-24 sm:pr-40 lg:pr-42'
+              : 'pr-24 sm:pr-44 lg:pr-48'
           }
         >
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
-            <span className="text-xs font-bold uppercase tracking-[0.13em] text-[#5be3f5] sm:text-[13px]">
+          <div className="flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className="hidden items-center sm:inline-flex"
+            >
+              <span className="h-[2px] w-4 bg-[#df9b36]" />
+              <span className="h-2.5 w-2.5 rotate-45 border-[1.5px] border-[#d98520] bg-[#fdf3da]" />
+              <span className="h-[2px] w-3 bg-[#df9b36]" />
+            </span>
+            <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-[#0d3347] sm:text-[22px]">
               {node.speakerName}
-            </span>
-            <span aria-hidden="true" className="hidden text-sky-400/50 sm:inline">
-              ·
-            </span>
-            <span className="text-xs font-medium text-sky-100/80">
-              {node.episodeTitle}
-            </span>
+            </h2>
           </div>
 
-          {(node.mathTopic || node.formulaDisplay || (hasInteractiveModel && onToggleMobileModel)) && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <div className="mt-0.5 text-xs font-semibold text-[#47687a] sm:text-[13px]">
+            {node.episodeTitle}
+          </div>
+
+          {(showTaskRibbon || node.formulaDisplay || (hasInteractiveModel && onToggleMobileModel)) && (
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {showTaskRibbon && (
+                <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fad269] to-[#eeb138] px-4 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#113144] shadow-xs">
+                  Задача
+                </span>
+              )}
               {node.mathTopic && (
-                <span className="text-xs text-slate-300/90">
+                <span className="text-xs font-bold text-[#355a6e]">
                   <MathText text={node.mathTopic} />
                 </span>
               )}
@@ -282,9 +317,9 @@ export function DialogPanel({
                 <button
                   type="button"
                   onClick={onToggleMobileModel}
-                  className="flex min-h-[32px] items-center gap-1.5 rounded-lg border border-sky-400/50 bg-[#0d3554] px-2.5 py-1 text-xs font-medium text-sky-100 hover:bg-[#144b75] lg:hidden"
+                  className="flex min-h-[32px] items-center gap-1.5 rounded-lg border border-[#3d768d] bg-[#0e394f] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#15516e] lg:hidden"
                 >
-                  <Scale className="h-3.5 w-3.5 text-amber-300" />
+                  <Scale className="h-3.5 w-3.5 text-[#f6c959]" />
                   <span>Модель</span>
                 </button>
               )}
@@ -295,30 +330,28 @@ export function DialogPanel({
         {/* Fixed-Height Narrative Prose Container: Ghost Full Text Sets Final Box Height Immediately */}
         <div
           onClick={!isFullyRevealed ? revealAll : undefined}
-          className={`relative pr-8 text-[15px] leading-relaxed text-white sm:text-[16px] ${
+          className={`relative pr-1 text-[14.5px] leading-snug font-medium text-[#152d3c] sm:pr-6 sm:text-[16px] sm:leading-relaxed ${
             !isFullyRevealed ? 'cursor-pointer' : ''
           }`}
         >
-          {/* Invisible full text locks exact height from frame 0 */}
           <div
             aria-hidden="true"
             className="invisible pointer-events-none select-none space-y-2"
           >
             {node.text.map((paragraph, idx) => (
               <p key={idx} className="text-pretty">
-                <MathText text={paragraph} />
+                <ProseParagraph text={paragraph} />
               </p>
             ))}
           </div>
 
-          {/* Visible progressive typewriter overlay */}
           <div className="absolute inset-0 space-y-2">
             {node.text.map((_, idx) => {
               const visible = visibleParagraphs[idx] ?? '';
               if (!visible && idx > 0) return null;
               return (
                 <p key={idx} className="text-pretty">
-                  <MathText text={visible} />
+                  <ProseParagraph text={visible} />
                 </p>
               );
             })}
@@ -332,30 +365,30 @@ export function DialogPanel({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
             role="status"
-            className={`border-t pt-3 text-sm leading-relaxed ${
+            className={`rounded-xl border-2 px-3.5 py-2.5 text-sm leading-relaxed shadow-xs ${
               feedback.isError
-                ? 'border-amber-400/45 text-amber-100'
-                : 'border-emerald-400/45 text-emerald-100'
+                ? 'border-[#d97706] bg-[#fff4d4] text-[#612c05]'
+                : 'border-[#1d856a] bg-[#e0f6ee] text-[#0b4536]'
             }`}
           >
-            <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+            <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
               <span className="flex items-center gap-1.5 tracking-wide">
                 {feedback.isError ? (
-                  <AlertTriangle className="h-4 w-4 shrink-0 text-amber-300" />
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-[#c2580b]" />
                 ) : (
-                  <Sparkles className="h-4 w-4 shrink-0 text-emerald-300" />
+                  <Sparkles className="h-4 w-4 shrink-0 text-[#137b61]" />
                 )}
                 <span>{feedback.speaker}</span>
               </span>
               {feedback.hintLevel && (
-                <span className="text-[11px] font-medium text-amber-200/90">
+                <span className="text-[11px] font-bold text-[#9c480a]">
                   {feedback.hintLevel === 1
                     ? 'Подсказка 1/2 · Наводящий вопрос'
                     : 'Подсказка 2/2 · Разбор правила'}
                 </span>
               )}
             </div>
-            <p className="rounded-lg bg-[#051d30]/75 px-3 py-2.5">
+            <p className="font-medium">
               <MathText text={feedback.text} />
             </p>
           </motion.div>
@@ -364,19 +397,19 @@ export function DialogPanel({
         {/* Crossroads Hub: Desktop guides to Map Pins + Mobile keeps touch list */}
         {node.isCrossroadsHub && (
           <>
-            <div className="hidden border-t border-sky-300/20 pt-2.5 md:block">
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="flex items-center gap-1.5 font-semibold text-[#5be3f5]">
-                  <Compass className="h-4 w-4 text-amber-300" />
+            <div className="hidden border-t border-[#d8b46e]/60 pt-2.5 md:block">
+              <div className="flex items-center justify-between gap-2 text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-[#0e4259]">
+                  <Compass className="h-4 w-4 text-[#c96814]" />
                   <span>Нажми на любой портал на карте острова выше</span>
                 </span>
-                <span className="font-math font-semibold text-amber-200 tabular-nums">
+                <span className="font-math text-[#8e4b0c] tabular-nums">
                   {playerState.completedDistricts.length}/4 районов
                 </span>
               </div>
             </div>
 
-            <div className="space-y-2 border-t border-sky-300/20 pt-3 md:hidden">
+            <div className="space-y-2 border-t border-[#d8b46e]/60 pt-3 md:hidden">
               {DISTRICTS.map((district) => {
                 const done = playerState.completedDistricts.includes(district.id);
                 return (
@@ -384,26 +417,24 @@ export function DialogPanel({
                     key={district.id}
                     type="button"
                     onClick={() => onSelectDistrict(district.id)}
-                    className={`flex min-h-[44px] w-full flex-col justify-between gap-1 rounded-xl border px-3.5 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 ${
+                    className={`flex min-h-[44px] w-full flex-col justify-between gap-1 rounded-xl border-2 px-3.5 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#d66613] ${
                       done
-                        ? 'border-emerald-400/45 bg-emerald-950/35 text-emerald-100 hover:bg-emerald-950/55'
-                        : 'border-[#4a8ab5]/70 bg-[#0d3d61]/75 text-white hover:border-sky-300 hover:bg-[#15527f]'
+                        ? 'border-[#2f856d] bg-[#d6f3e8] text-[#0c3f31] hover:bg-[#c3ebd9]'
+                        : 'border-[#3d768d] bg-gradient-to-b from-[#d2edf3] to-[#aad7e3] text-[#0d2e3f] hover:from-[#f08b2d] hover:to-[#d46714] hover:border-[#913e06] hover:text-white'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-2 text-sm font-semibold">
+                      <span className="flex items-center gap-2 text-sm font-bold">
                         {done && (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-[#157a5e]" />
                         )}
                         <span>{district.title}</span>
                       </span>
-                      <span className="shrink-0 font-math text-xs text-amber-200/90 tabular-nums">
+                      <span className="shrink-0 font-math text-xs font-bold tabular-nums opacity-85">
                         {done ? 'Восстановлен' : <MathText text={district.mathTheme} />}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-300/85">
-                      {district.subtitle}
-                    </div>
+                    <div className="text-xs opacity-85">{district.subtitle}</div>
                   </button>
                 );
               })}
@@ -411,17 +442,17 @@ export function DialogPanel({
               <button
                 type="button"
                 onClick={onEnterTemple}
-                className={`mt-1 flex min-h-[44px] w-full items-center justify-between gap-3 rounded-xl border px-3.5 py-3 text-left font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 ${
+                className={`mt-1 flex min-h-[44px] w-full items-center justify-between gap-3 rounded-xl border-2 px-3.5 py-3 text-left font-bold transition-colors focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
                   allDistrictsDone
-                    ? 'border-amber-300 bg-amber-500 text-slate-950 hover:bg-amber-400'
-                    : 'border-slate-500/45 bg-[#051d30] text-slate-300 hover:bg-[#0d3554]'
+                    ? 'border-[#8f4207] bg-gradient-to-b from-[#f29132] to-[#d46511] text-white hover:from-[#f79f45] hover:to-[#df711c]'
+                    : 'border-[#b99555] bg-[#ecd6a7] text-[#544020] hover:bg-[#e5cb94]'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {allDistrictsDone ? (
                     <Sparkles className="h-4 w-4 shrink-0" />
                   ) : (
-                    <Lock className="h-4 w-4 shrink-0 text-slate-400" />
+                    <Lock className="h-4 w-4 shrink-0 opacity-75" />
                   )}
                   <span className="text-sm">
                     Храм Великого Баланса (Финал)
@@ -435,19 +466,60 @@ export function DialogPanel({
           </>
         )}
 
-        {/* Standard Choices */}
+        {/* Standard Choices styled to match the warm terracotta / sky-teal arrow buttons */}
         {node.choices && node.choices.length > 0 && (
-          <div className="space-y-2 border-t border-sky-300/20 pt-3 pr-8">
-            {node.choices.map((choice) => (
-              <button
-                key={choice.id}
-                type="button"
-                onClick={() => onChoice(choice)}
-                className="min-h-[44px] w-full rounded-xl border border-[#4a8ab5]/70 bg-[#06243d]/75 px-4 py-2.5 text-left text-sm font-medium text-slate-50 transition-colors hover:border-[#5be3f5] hover:bg-[#114974] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
-              >
-                <MathText text={choice.label} />
-              </button>
-            ))}
+          <div className="space-y-2 border-t border-[#d8b46e]/60 pt-3 pr-6">
+            {node.choices.map((choice) => {
+              const isSecret = Boolean(choice.secretId);
+              const secretFound = Boolean(
+                choice.secretId &&
+                  (playerState.foundSecrets ?? []).includes(choice.secretId),
+              );
+              const isSingleContinue = node.choices!.length === 1 && !isSecret;
+
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  onClick={() => onChoice(choice)}
+                  className={`group flex min-h-[46px] w-full items-center justify-between gap-3 rounded-xl border-2 px-4 py-2.5 text-left text-sm font-bold shadow-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] ${
+                    secretFound
+                      ? 'border-[#2f856d] bg-gradient-to-b from-[#d8f5ea] to-[#bcead9] text-[#0c3f31] hover:brightness-97'
+                      : isSecret
+                        ? 'border-[#b97719] bg-gradient-to-b from-[#fbe5a8] to-[#f1cd77] text-[#452707] hover:from-[#f08b2d] hover:to-[#d46714] hover:border-[#8e3d05] hover:text-white'
+                        : isSingleContinue
+                          ? 'border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] text-white hover:from-[#f69a3d] hover:to-[#df721b]'
+                          : 'border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] text-[#0d2e3f] hover:from-[#f08b2d] hover:to-[#d46714] hover:border-[#8e3d05] hover:text-white'
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    {secretFound ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[#157a5e]" />
+                    ) : isSecret ? (
+                      <Compass className="h-4 w-4 shrink-0 text-[#9c520a] group-hover:text-white" />
+                    ) : null}
+                    <span>
+                      <MathText text={choice.label} />
+                    </span>
+                  </span>
+
+                  <span className="flex shrink-0 items-center gap-2">
+                    {isSecret && (
+                      <span
+                        className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                          secretFound
+                            ? 'text-[#157a5e]'
+                            : 'text-[#874308] group-hover:text-white'
+                        }`}
+                      >
+                        {secretFound ? 'Изучено' : 'Тайна'}
+                      </span>
+                    )}
+                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -455,13 +527,13 @@ export function DialogPanel({
         {node.scratchpadTask && (
           <form
             onSubmit={handleScratchpadForm}
-            className="space-y-3 border-t border-sky-300/20 pt-3.5"
+            className="space-y-3 border-t border-[#d8b46e]/60 pt-3.5"
           >
             <div>
-              <div className="text-xs font-semibold text-amber-300">
+              <div className="text-xs font-extrabold uppercase tracking-wide text-[#9c480a]">
                 {node.scratchpadTask.title}
               </div>
-              <p className="mt-0.5 text-xs text-slate-200">
+              <p className="mt-0.5 text-xs font-semibold text-[#2d4d5e]">
                 <MathText text={node.scratchpadTask.equationContext} />
               </p>
             </div>
@@ -470,13 +542,13 @@ export function DialogPanel({
                 <div key={field.id}>
                   <label
                     htmlFor={`scratch-${field.id}`}
-                    className="mb-1 block text-xs text-slate-300"
+                    className="mb-1 block text-xs font-bold text-[#2b4d5f]"
                   >
                     <MathText text={field.label} />
                   </label>
                   <div className="flex items-center gap-1.5 font-math">
                     {field.prefix && (
-                      <span className="text-sm text-sky-200">
+                      <span className="text-sm font-bold text-[#0e4259]">
                         <MathText text={field.prefix} />
                       </span>
                     )}
@@ -492,10 +564,10 @@ export function DialogPanel({
                         }))
                       }
                       placeholder={field.placeholder ?? '?'}
-                      className="font-math h-11 w-full min-w-0 rounded-lg border border-[#4a8ab5]/80 bg-[#051d30] px-3 py-0 text-base leading-normal text-white placeholder:text-slate-400 focus:border-amber-300 focus:outline-none tabular-nums"
+                      className="font-math h-11 w-full min-w-0 rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none tabular-nums"
                     />
                     {field.suffix && (
-                      <span className="text-sm text-amber-200">
+                      <span className="text-sm font-bold text-[#9c480a]">
                         <MathText text={field.suffix} />
                       </span>
                     )}
@@ -505,7 +577,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-300 focus-visible:outline-2 focus-visible:outline-white"
+              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
             >
               Записать шаг черновика
             </button>
@@ -516,13 +588,13 @@ export function DialogPanel({
         {node.verificationTask && (
           <form
             onSubmit={handleVerificationForm}
-            className="space-y-3 border-t border-emerald-400/35 pt-3.5"
+            className="space-y-3 border-t border-[#439b81]/45 pt-3.5"
           >
             <div>
-              <div className="text-xs font-semibold text-emerald-300">
+              <div className="text-xs font-extrabold uppercase tracking-wide text-[#0f6b53]">
                 {node.verificationTask.title}
               </div>
-              <p className="mt-0.5 text-xs text-slate-200">
+              <p className="mt-0.5 text-xs font-semibold text-[#2d4d5e]">
                 <MathText text={node.verificationTask.prompt} />
               </p>
             </div>
@@ -538,13 +610,13 @@ export function DialogPanel({
                 >
                   <label
                     htmlFor={`verify-${field.id}`}
-                    className="mb-1 block text-xs text-slate-300"
+                    className="mb-1 block text-xs font-bold text-[#2b4d5f]"
                   >
                     <MathText text={field.label} />
                   </label>
                   <div className="flex items-center gap-1.5 font-math">
                     {field.prefix && (
-                      <span className="shrink-0 text-xs text-emerald-200">
+                      <span className="shrink-0 text-xs font-bold text-[#0f6b53]">
                         <MathText text={field.prefix} />
                       </span>
                     )}
@@ -560,10 +632,10 @@ export function DialogPanel({
                         }))
                       }
                       placeholder={field.placeholder ?? '?'}
-                      className="font-math h-11 w-full min-w-0 rounded-lg border border-emerald-400/60 bg-[#051d30] px-3 py-0 text-base leading-normal text-white placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none tabular-nums"
+                      className="font-math h-11 w-full min-w-0 rounded-xl border-2 border-[#318f75] bg-[#fffaf0] px-3 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#0f6b53] focus:outline-none tabular-nums"
                     />
                     {field.suffix && (
-                      <span className="shrink-0 text-xs text-slate-300">
+                      <span className="shrink-0 text-xs font-semibold text-[#2d4d5e]">
                         {field.suffix}
                       </span>
                     )}
@@ -573,7 +645,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-emerald-300 focus-visible:outline-2 focus-visible:outline-white"
+              className="min-h-[44px] w-full rounded-xl border-2 border-[#0b4f42] bg-gradient-to-b from-[#1e9e84] to-[#127662] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#24b094] hover:to-[#168871] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить проверку
             </button>
@@ -584,11 +656,11 @@ export function DialogPanel({
         {node.numericTask && (
           <form
             onSubmit={handleNumericForm}
-            className="space-y-2.5 border-t border-sky-300/20 pt-3"
+            className="space-y-2.5 border-t border-[#d8b46e]/60 pt-3"
           >
             <label
               htmlFor="numeric-answer-input"
-              className="block text-xs font-semibold text-sky-200"
+              className="block text-xs font-extrabold text-[#0e4259]"
             >
               <MathText text={node.numericTask.prompt} />
             </label>
@@ -600,16 +672,16 @@ export function DialogPanel({
                 value={numericVal}
                 onChange={(e) => setNumericVal(e.target.value)}
                 placeholder={node.numericTask.placeholder ?? 'Введи число'}
-                className="font-math h-11 min-w-0 flex-1 rounded-xl border border-[#4a8ab5]/80 bg-[#051d30] px-3.5 py-0 text-base leading-normal text-white placeholder:text-slate-400 focus:border-amber-300 focus:outline-none tabular-nums"
+                className="font-math h-11 min-w-0 flex-1 rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3.5 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none tabular-nums"
               />
               {node.numericTask.unit && (
-                <span className="shrink-0 text-xs font-medium text-slate-300">
+                <span className="shrink-0 text-xs font-bold text-[#2d4d5e]">
                   {node.numericTask.unit}
                 </span>
               )}
               <button
                 type="submit"
-                className="min-h-[44px] shrink-0 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white whitespace-nowrap"
+                className="min-h-[44px] shrink-0 rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
               >
                 Проверить
               </button>
@@ -621,16 +693,16 @@ export function DialogPanel({
         {node.dualNumericTask && (
           <form
             onSubmit={handleDualForm}
-            className="space-y-3 border-t border-sky-300/20 pt-3"
+            className="space-y-3 border-t border-[#d8b46e]/60 pt-3"
           >
-            <p className="text-xs font-semibold text-sky-200">
+            <p className="text-xs font-extrabold text-[#0e4259]">
               <MathText text={node.dualNumericTask.prompt} />
             </p>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div>
                 <label
                   htmlFor="dual-first-input"
-                  className="mb-1 block text-xs text-slate-300"
+                  className="mb-1 block text-xs font-bold text-[#2b4d5f]"
                 >
                   {node.dualNumericTask.firstLabel}
                 </label>
@@ -641,13 +713,13 @@ export function DialogPanel({
                   value={firstVal}
                   onChange={(e) => setFirstVal(e.target.value)}
                   placeholder="Число"
-                  className="font-math h-11 w-full rounded-xl border border-[#4a8ab5]/80 bg-[#051d30] px-3 py-0 text-base leading-normal text-white placeholder:text-slate-400 focus:border-amber-300 focus:outline-none tabular-nums"
+                  className="font-math h-11 w-full rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none tabular-nums"
                 />
               </div>
               <div>
                 <label
                   htmlFor="dual-second-input"
-                  className="mb-1 block text-xs text-slate-300"
+                  className="mb-1 block text-xs font-bold text-[#2b4d5f]"
                 >
                   {node.dualNumericTask.secondLabel}
                 </label>
@@ -658,13 +730,13 @@ export function DialogPanel({
                   value={secondVal}
                   onChange={(e) => setSecondVal(e.target.value)}
                   placeholder="Число"
-                  className="font-math h-11 w-full rounded-xl border border-[#4a8ab5]/80 bg-[#051d30] px-3 py-0 text-base leading-normal text-white placeholder:text-slate-400 focus:border-amber-300 focus:outline-none tabular-nums"
+                  className="font-math h-11 w-full rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none tabular-nums"
                 />
               </div>
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить оба значения
             </button>
@@ -675,15 +747,15 @@ export function DialogPanel({
         {node.tableTask && (
           <form
             onSubmit={handleTableForm}
-            className="space-y-3 border-t border-sky-300/20 pt-3"
+            className="space-y-3 border-t border-[#d8b46e]/60 pt-3"
           >
-            <p className="text-xs font-semibold text-sky-200">
+            <p className="text-xs font-extrabold text-[#0e4259]">
               <MathText text={node.tableTask.prompt} />
             </p>
-            <div className="divide-y divide-[#3a7ca5]/30">
+            <div className="divide-y divide-[#d8b46e]/45">
               {node.tableTask.rows.map((row) => (
                 <div key={row.id} className="py-2.5 first:pt-0 last:pb-0">
-                  <div className="mb-2 text-xs font-medium text-slate-200">
+                  <div className="mb-2 text-xs font-bold text-[#264657]">
                     {row.label}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -699,10 +771,10 @@ export function DialogPanel({
                               [row.id]: option,
                             }))
                           }
-                          className={`font-math min-h-[40px] rounded-lg border px-2 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-amber-300 ${
+                          className={`font-math min-h-[40px] rounded-lg border-2 px-2 py-2 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
                             active
-                              ? 'border-amber-300 bg-amber-400 text-slate-950'
-                              : 'border-[#4a8ab5]/60 bg-[#0d3d61]/70 text-slate-100 hover:bg-[#15527f]'
+                              ? 'border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] text-white'
+                              : 'border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] text-[#0d2e3f] hover:brightness-97'
                           }`}
                         >
                           <MathText text={option} />
@@ -715,7 +787,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Составить уравнение
             </button>
@@ -723,7 +795,7 @@ export function DialogPanel({
         )}
       </div>
 
-      {/* Bottom-Right Fast-Forward ">>" Action Button (Skips Typewriter or Advances Single-Path Dialogue) */}
+      {/* Bottom-Right Fast-Forward ">>" Action Button */}
       {(!isFullyRevealed || singleLinearChoice) && (
         <button
           type="button"
@@ -738,7 +810,7 @@ export function DialogPanel({
               ? 'Допечатать текст (Пробел)'
               : singleLinearChoice?.label
           }
-          className="absolute right-3.5 bottom-3 z-20 flex h-9 w-10 items-center justify-center rounded-lg text-[#58a6dc] transition-colors hover:bg-[#124d78]/60 hover:text-[#7ce8ff] focus-visible:outline-2 focus-visible:outline-[#5be3f5]"
+          className="absolute right-3 bottom-2.5 z-20 flex h-8 w-9 items-center justify-center rounded-lg text-[#2c667d] transition-colors hover:bg-[#e5cb94]/70 hover:text-[#a8461c] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
         >
           <svg
             viewBox="0 0 24 16"

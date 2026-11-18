@@ -1,12 +1,16 @@
-import { DISTRICTS, MISTAKE_CATEGORY_META } from './codexData';
+import { DISTRICTS, MISTAKE_CATEGORY_META, SECRET_BRANCH_IDS } from './codexData';
 import { evaluateEnding } from './endings';
 import { STORY_NODES } from './storyData';
 import type {
+  BadgeId,
   DiagnosticItem,
   DistrictId,
   MistakeCategory,
   PlayerState,
+  SpeakerEmotion,
+  SpeakerId,
   StoryChoice,
+  StoryNode,
 } from './types';
 
 export function createInitialPlayerState(): PlayerState {
@@ -22,6 +26,9 @@ export function createInitialPlayerState(): PlayerState {
     stepAttempts: {},
     decisions: {},
     visitedNodes: ['prologue_1'],
+    foundSecrets: [],
+    firstTryNodeIds: [],
+    unlockedBadges: [],
     bossShieldHp: 100,
   };
 }
@@ -53,6 +60,68 @@ function addLaw(laws: number[], lawId?: number): number[] {
 function addDistrict(list: DistrictId[], district?: DistrictId): DistrictId[] {
   if (!district || list.includes(district)) return list;
   return [...list, district];
+}
+
+function addUnique<T extends string>(list: T[], item?: T): T[] {
+  if (!item || list.includes(item)) return list;
+  return [...list, item];
+}
+
+const DISTRICT_EPISODE_MAP: Record<DistrictId, string> = {
+  ep2_tunnel: 'ep2',
+  ep3_archive: 'ep3',
+  ep4_crystals: 'ep4',
+  ep5_city: 'ep5',
+};
+
+function recordFirstTryIfClean(state: PlayerState, nodeId: string): PlayerState {
+  if ((state.stepAttempts[nodeId] ?? 0) > 0) return state;
+  return {
+    ...state,
+    firstTryNodeIds: addUnique(state.firstTryNodeIds ?? [], nodeId),
+  };
+}
+
+export function applyBadgeEvaluation(
+  state: PlayerState,
+  completedEnding = false,
+): { nextState: PlayerState; newlyUnlocked: BadgeId[] } {
+  const current = state.unlockedBadges ?? [];
+  const candidateIds: BadgeId[] = [];
+
+  if ((state.firstTryNodeIds ?? []).length >= 1) {
+    candidateIds.push('first_spark');
+  }
+  if (state.unlockedLaws.includes(1) && (state.mistakesByEpisode.ep1 ?? 0) === 0) {
+    candidateIds.push('flawless_bridge');
+  }
+  const flawlessDistrictsCount = state.completedDistricts.filter(
+    (d) => (state.mistakesByEpisode[DISTRICT_EPISODE_MAP[d]] ?? 0) === 0,
+  ).length;
+  if (flawlessDistrictsCount >= 2) {
+    candidateIds.push('district_ace');
+  }
+  if ((completedEnding || Boolean(state.endingId)) && state.mistakesCount === 0) {
+    candidateIds.push('first_try_virtuoso');
+  }
+  if ((state.foundSecrets ?? []).length >= 1) {
+    candidateIds.push('secret_finder');
+  }
+  if (SECRET_BRANCH_IDS.every((id) => (state.foundSecrets ?? []).includes(id))) {
+    candidateIds.push('all_secrets_master');
+  }
+
+  const newlyUnlocked = candidateIds.filter((id) => !current.includes(id));
+  if (newlyUnlocked.length === 0) {
+    return { nextState: state, newlyUnlocked: [] };
+  }
+  return {
+    nextState: {
+      ...state,
+      unlockedBadges: [...current, ...newlyUnlocked],
+    },
+    newlyUnlocked,
+  };
 }
 
 function recordMistake(
@@ -92,6 +161,7 @@ function recordMistake(
 export interface FeedbackBanner {
   text: string;
   speaker: string;
+  speakerId?: SpeakerId;
   isError: boolean;
   hintLevel?: 1 | 2;
 }
@@ -100,6 +170,7 @@ export interface ActionOutcome {
   nextState: PlayerState;
   feedback?: FeedbackBanner;
   unlockedLaw?: number;
+  unlockedBadges?: BadgeId[];
   completedEnding?: boolean;
 }
 
@@ -132,6 +203,7 @@ export function enterTempleFromCrossroads(state: PlayerState): ActionOutcome {
       feedback: {
         text: 'Купол Храма ещё не снят! Восстанови все четыре района острова на Перекрёстке.',
         speaker: 'Сова Пи',
+        speakerId: 'pi',
         isError: true,
       },
     };
@@ -183,11 +255,26 @@ export function applyChoice(state: PlayerState, choice: StoryChoice): ActionOutc
         ? {
             text: hintText,
             speaker: choice.feedbackSpeaker === 'captain' ? 'Капитан Автоматонов' : 'Сова Пи',
+            speakerId: choice.feedbackSpeaker === 'captain' ? 'captain' : 'pi',
             isError: true,
             hintLevel,
           }
         : undefined,
     };
+  }
+
+  if (choice.secretId) {
+    nextState = {
+      ...nextState,
+      foundSecrets: addUnique(nextState.foundSecrets ?? [], choice.secretId),
+    };
+  }
+
+  const hasChallengeTraps = Boolean(
+    currentNode.choices?.some((c) => c.isCorrect === false),
+  );
+  if (hasChallengeTraps) {
+    nextState = recordFirstTryIfClean(nextState, currentNode.id);
   }
 
   if (typeof choice.integrityDelta === 'number') {
@@ -212,9 +299,12 @@ export function applyChoice(state: PlayerState, choice: StoryChoice): ActionOutc
   if (choice.triggerEnding) {
     const ending = evaluateEnding(nextState);
     nextState.endingId = ending.id;
+    const badgeEval = applyBadgeEvaluation(nextState, true);
     return {
-      nextState,
+      nextState: badgeEval.nextState,
       unlockedLaw: choice.unlockLaw,
+      unlockedBadges:
+        badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
       completedEnding: true,
     };
   }
@@ -224,9 +314,12 @@ export function applyChoice(state: PlayerState, choice: StoryChoice): ActionOutc
     nextState.visitedNodes = [...nextState.visitedNodes, choice.nextNodeId];
   }
 
+  const badgeEval = applyBadgeEvaluation(nextState);
   return {
-    nextState,
+    nextState: badgeEval.nextState,
     unlockedLaw: choice.unlockLaw,
+    unlockedBadges:
+      badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
   };
 }
 
@@ -242,6 +335,7 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
       feedback: {
         text: 'Введи целое число — например, цифрами на клавиатуре.',
         speaker: 'Сова Пи',
+        speakerId: 'pi',
         isError: true,
       },
     };
@@ -249,20 +343,27 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
 
   const task = node.numericTask;
   if (parsed === task.correctValue) {
-    const nextState: PlayerState = {
-      ...state,
-      currentNodeId: task.nextNodeId,
-      unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
-      completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
-      bossShieldHp:
-        typeof task.bossDamage === 'number'
-          ? Math.max(0, state.bossShieldHp - task.bossDamage)
-          : state.bossShieldHp,
-      visitedNodes: [...state.visitedNodes, task.nextNodeId],
-    };
+    let nextState: PlayerState = recordFirstTryIfClean(
+      {
+        ...state,
+        currentNodeId: task.nextNodeId,
+        unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
+        completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
+        bossShieldHp:
+          typeof task.bossDamage === 'number'
+            ? Math.max(0, state.bossShieldHp - task.bossDamage)
+            : state.bossShieldHp,
+        visitedNodes: [...state.visitedNodes, task.nextNodeId],
+      },
+      node.id,
+    );
+    const badgeEval = applyBadgeEvaluation(nextState);
+    nextState = badgeEval.nextState;
     return {
       nextState,
       unlockedLaw: task.unlockLaw,
+      unlockedBadges:
+        badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
     };
   }
 
@@ -283,6 +384,7 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
     feedback: {
       text: wrong.feedback,
       speaker: wrong.speaker === 'archivist' ? 'Хранитель Архива' : 'Сова Пи',
+      speakerId: wrong.speaker === 'archivist' ? 'archivist' : 'pi',
       isError: true,
       hintLevel,
     },
@@ -311,22 +413,30 @@ export function applyDualNumericAnswer(
       feedback: {
         text: 'Заполни оба поля числами, чтобы восстановить реестр обеих полок!',
         speaker: 'Хранитель Архива',
+        speakerId: 'archivist',
         isError: true,
       },
     };
   }
 
   if (first === task.firstCorrect && second === task.secondCorrect) {
-    const nextState: PlayerState = {
-      ...state,
-      currentNodeId: task.nextNodeId,
-      unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
-      completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
-      visitedNodes: [...state.visitedNodes, task.nextNodeId],
-    };
+    let nextState: PlayerState = recordFirstTryIfClean(
+      {
+        ...state,
+        currentNodeId: task.nextNodeId,
+        unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
+        completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
+        visitedNodes: [...state.visitedNodes, task.nextNodeId],
+      },
+      node.id,
+    );
+    const badgeEval = applyBadgeEvaluation(nextState);
+    nextState = badgeEval.nextState;
     return {
       nextState,
       unlockedLaw: task.unlockLaw,
+      unlockedBadges:
+        badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
     };
   }
 
@@ -341,6 +451,7 @@ export function applyDualNumericAnswer(
     feedback: {
       text: wrong.feedback,
       speaker: wrong.speaker === 'archivist' ? 'Хранитель Архива' : 'Сова Пи',
+      speakerId: wrong.speaker === 'archivist' ? 'archivist' : 'pi',
       isError: true,
       hintLevel,
     },
@@ -364,6 +475,7 @@ export function applyScratchpadAnswer(
         feedback: {
           text: `Заполни поле «${field.label}» в черновике.`,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
         },
       };
@@ -382,6 +494,7 @@ export function applyScratchpadAnswer(
         feedback: {
           text: hintLevel === 1 ? task.hintTier1 : task.hintTier2,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
           hintLevel,
         },
@@ -389,8 +502,8 @@ export function applyScratchpadAnswer(
     }
   }
 
-  return {
-    nextState: {
+  const nextState = recordFirstTryIfClean(
+    {
       ...state,
       currentNodeId: task.nextNodeId,
       bossShieldHp:
@@ -399,6 +512,13 @@ export function applyScratchpadAnswer(
           : state.bossShieldHp,
       visitedNodes: [...state.visitedNodes, task.nextNodeId],
     },
+    node.id,
+  );
+  const badgeEval = applyBadgeEvaluation(nextState);
+  return {
+    nextState: badgeEval.nextState,
+    unlockedBadges:
+      badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
   };
 }
 
@@ -419,6 +539,7 @@ export function applyVerificationAnswer(
         feedback: {
           text: `Введи результат проверки для пункта «${field.label}».`,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
         },
       };
@@ -437,6 +558,7 @@ export function applyVerificationAnswer(
         feedback: {
           text: hintLevel === 1 ? task.hintTier1 : task.hintTier2,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
           hintLevel,
         },
@@ -445,22 +567,28 @@ export function applyVerificationAnswer(
   }
 
   // Successful verification gives a small +5 balance recovery (capped at 100)
-  const nextState: PlayerState = {
-    ...state,
-    currentNodeId: task.nextNodeId,
-    balanceIntegrity: Math.min(100, state.balanceIntegrity + 5),
-    unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
-    completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
-    decisions: {
-      ...state.decisions,
-      ...(task.recordDecision ?? {}),
+  const verifiedState = recordFirstTryIfClean(
+    {
+      ...state,
+      currentNodeId: task.nextNodeId,
+      balanceIntegrity: Math.min(100, state.balanceIntegrity + 5),
+      unlockedLaws: addLaw(state.unlockedLaws, task.unlockLaw),
+      completedDistricts: addDistrict(state.completedDistricts, task.completeDistrict),
+      decisions: {
+        ...state.decisions,
+        ...(task.recordDecision ?? {}),
+      },
+      visitedNodes: [...state.visitedNodes, task.nextNodeId],
     },
-    visitedNodes: [...state.visitedNodes, task.nextNodeId],
-  };
+    node.id,
+  );
+  const badgeEval = applyBadgeEvaluation(verifiedState);
 
   return {
-    nextState,
+    nextState: badgeEval.nextState,
     unlockedLaw: task.unlockLaw,
+    unlockedBadges:
+      badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
   };
 }
 
@@ -480,6 +608,7 @@ export function applyTableSubmission(
         feedback: {
           text: `Заполни все строки таблицы: выбери выражение для пункта «${row.label}».`,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
         },
       };
@@ -498,6 +627,7 @@ export function applyTableSubmission(
         feedback: {
           text: hintLevel === 1 ? row.hintTier1 : row.hintTier2,
           speaker: 'Сова Пи',
+          speakerId: 'pi',
           isError: true,
           hintLevel,
         },
@@ -505,12 +635,19 @@ export function applyTableSubmission(
     }
   }
 
-  return {
-    nextState: {
+  const nextState = recordFirstTryIfClean(
+    {
       ...state,
       currentNodeId: task.nextNodeId,
       visitedNodes: [...state.visitedNodes, task.nextNodeId],
     },
+    node.id,
+  );
+  const badgeEval = applyBadgeEvaluation(nextState);
+  return {
+    nextState: badgeEval.nextState,
+    unlockedBadges:
+      badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
   };
 }
 
@@ -529,4 +666,60 @@ export function buildDiagnosticReport(state: PlayerState): DiagnosticItem[] {
         advice: meta.advice,
       };
     });
+}
+
+export function resolveDialogPortraitState(params: {
+  node: StoryNode;
+  feedback: FeedbackBanner | null;
+  completedDistrictsCount: number;
+  totalDistrictsCount: number;
+  hasDraftInput?: boolean;
+}): { speaker: SpeakerId; emotion: SpeakerEmotion } {
+  const { node, feedback, completedDistrictsCount, totalDistrictsCount, hasDraftInput } = params;
+
+  if (feedback) {
+    const activeSpeaker = feedback.speakerId ?? node.speaker;
+    if (feedback.isError) {
+      return {
+        speaker: activeSpeaker,
+        emotion: feedback.hintLevel === 2 ? 'alert' : 'surprised',
+      };
+    }
+    return {
+      speaker: activeSpeaker,
+      emotion: 'encourage',
+    };
+  }
+
+  if (node.isCrossroadsHub) {
+    if (completedDistrictsCount >= totalDistrictsCount) {
+      return { speaker: node.speaker, emotion: 'triumph' };
+    }
+    if (completedDistrictsCount > 0) {
+      return { speaker: node.speaker, emotion: 'encourage' };
+    }
+    return {
+      speaker: node.speaker,
+      emotion: node.emotion ?? node.mood ?? 'curious',
+    };
+  }
+
+  const baseEmotion: SpeakerEmotion =
+    node.emotion ??
+    node.mood ??
+    (node.speaker === 'shadow'
+      ? 'alert'
+      : node.id.includes('outro') || node.id.includes('victory')
+        ? 'triumph'
+        : node.scratchpadTask || node.verificationTask || node.tableTask
+          ? 'thoughtful'
+          : node.numericTask || node.dualNumericTask || node.formulaDisplay
+            ? 'curious'
+            : 'neutral');
+
+  if (hasDraftInput && baseEmotion !== 'alert' && baseEmotion !== 'triumph') {
+    return { speaker: node.speaker, emotion: 'thoughtful' };
+  }
+
+  return { speaker: node.speaker, emotion: baseEmotion };
 }

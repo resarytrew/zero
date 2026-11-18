@@ -14,7 +14,7 @@ export function SceneBackdrop({ scene, alt }: SceneBackdropProps) {
   const hasFailed = Boolean(failedScenes[scene]);
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-[#071b2b]">
+    <div className="fixed inset-0 z-0 overflow-hidden bg-[#0e394e]">
       <AnimatePresence initial={false}>
         <motion.div
           key={scene}
@@ -35,21 +35,19 @@ export function SceneBackdrop({ scene, alt }: SceneBackdropProps) {
               className="h-full w-full object-cover object-center select-none"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0b2a42] via-[#0e3652] to-[#071b2b] p-8">
-              <div className="text-center text-slate-300">
-                <p className="font-display text-2xl text-amber-200">{alt}</p>
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#134a66] via-[#0e3a52] to-[#0a2c3e] p-8">
+              <div className="text-center text-[#fdf3da]">
+                <p className="font-display text-2xl font-bold text-[#f6c959]">
+                  {alt}
+                </p>
               </div>
             </div>
           )}
 
-          {/* Subtle cinematic vignette & readability scrim at bottom-right & top bar */}
+          {/* Subtle warm-teal storybook vignette only along top & bottom edges so artwork stays luminous */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#051523]/75 via-transparent to-[#051523]/40"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#051523]/55"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#082433]/35 via-transparent to-[#082433]/35"
           />
         </motion.div>
       </AnimatePresence>

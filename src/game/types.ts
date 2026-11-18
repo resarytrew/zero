@@ -23,7 +23,16 @@ export type SpeakerId =
   | 'captain'
   | 'shadow';
 
-export type SpeakerMood = 'neutral' | 'curious' | 'encourage' | 'alert' | 'triumph';
+export type SpeakerEmotion =
+  | 'neutral'
+  | 'surprised'
+  | 'thoughtful'
+  | 'curious'
+  | 'encourage'
+  | 'alert'
+  | 'triumph';
+
+export type SpeakerMood = SpeakerEmotion;
 
 export type EndingId =
   | 'master_of_balance'
@@ -31,6 +40,24 @@ export type EndingId =
   | 'tamer_of_chaos'
   | 'chronicler_of_secrets'
   | 'seeker_of_squares';
+
+export type BadgeId =
+  | 'first_spark'
+  | 'flawless_bridge'
+  | 'district_ace'
+  | 'first_try_virtuoso'
+  | 'secret_finder'
+  | 'all_secrets_master';
+
+export type BadgeCategory = 'first_try' | 'secrets';
+
+export interface ExplorerBadge {
+  id: BadgeId;
+  category: BadgeCategory;
+  title: string;
+  description: string;
+  hint: string;
+}
 
 export type SchematicKind =
   | 'none'
@@ -79,6 +106,9 @@ export interface PlayerState {
   stepAttempts: Record<string, number>;
   decisions: PlayerDecisions;
   visitedNodes: string[];
+  foundSecrets: string[];
+  firstTryNodeIds: string[];
+  unlockedBadges: BadgeId[];
   bossShieldHp: number;
   endingId?: EndingId;
 }
@@ -88,6 +118,7 @@ export interface StoryChoice {
   label: string;
   nextNodeId?: string;
   isCorrect?: boolean;
+  secretId?: string;
   mistakeCategory?: MistakeCategory;
   adaptiveFeedback?: string;
   hintTier1?: string;
@@ -200,12 +231,14 @@ export interface StoryNode {
   scene: SceneId;
   speaker: SpeakerId;
   speakerName: string;
+  emotion?: SpeakerEmotion;
   mood?: SpeakerMood;
   text: string[];
   formulaDisplay?: string;
   schematic?: SchematicKind;
   schematicStep?: number;
   isCrossroadsHub?: boolean;
+  isSecretNode?: boolean;
   choices?: StoryChoice[];
   numericTask?: NumericTask;
   dualNumericTask?: DualNumericTask;

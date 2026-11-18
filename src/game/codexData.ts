@@ -1,46 +1,76 @@
 import type {
   CodexLaw,
   DistrictInfo,
+  ExplorerBadge,
   MistakeCategory,
   SceneId,
+  SpeakerEmotion,
   SpeakerId,
 } from './types';
 
 export const SCENE_IMAGES: Record<SceneId, string> = {
-  attic: '/src/assets/images/scene_attic_prologue_1794939454086.jpg',
-  forest: '/src/assets/images/scene_forest_bridge_1794939453432.jpg',
-  crossroads: '/src/assets/images/scene_crossroads_hub_1794939456911.jpg',
-  tunnel: '/src/assets/images/scene_gnome_tunnel_1794939456639.jpg',
-  archive: '/src/assets/images/scene_archive_hall_1794939456977.jpg',
-  crystals: '/src/assets/images/scene_crystal_cavern_1794939457179.jpg',
-  city: '/src/assets/images/scene_clockwork_city_1794939458383.jpg',
-  temple: '/src/assets/images/scene_temple_boss_1794939458968.jpg',
+  attic: '/src/assets/images/story_scene_attic_1795011707846.jpg',
+  forest: '/src/assets/images/story_scene_forest_1795011709021.jpg',
+  crossroads: '/src/assets/images/story_scene_crossroads_1795011709945.jpg',
+  tunnel: '/src/assets/images/story_scene_tunnel_1795011709449.jpg',
+  archive: '/src/assets/images/story_scene_archive_1795011710310.jpg',
+  crystals: '/src/assets/images/story_scene_crystals_1795011710260.jpg',
+  city: '/src/assets/images/story_scene_city_1795011712429.jpg',
+  temple: '/src/assets/images/story_scene_temple_1795011712243.jpg',
 };
 
 export const SPEAKER_PORTRAITS: Partial<Record<SpeakerId, string>> = {
-  alyosha: '/src/assets/images/portrait_alyosha_1795006462545.jpg',
-  pi: '/src/assets/images/portrait_owl_pi_1795006453566.jpg',
-  gnome1: '/src/assets/images/portrait_gnome_miner_1795006448686.jpg',
-  gnome2: '/src/assets/images/portrait_gnome_miner_1795006448686.jpg',
-  archivist: '/src/assets/images/portrait_archivist_1795006449295.jpg',
-  guardian: '/src/assets/images/portrait_crystal_guardian_1795006449685.jpg',
-  captain: '/src/assets/images/portrait_captain_automaton_1795006450062.jpg',
-  shadow: '/src/assets/images/portrait_shadow_brackets_1795006449376.jpg',
+  alyosha: '/src/assets/images/story_alyosha_neutral_1795011713539.jpg',
+  pi: '/src/assets/images/story_pi_neutral_1795011715473.jpg',
+  gnome1: '/src/assets/images/story_gnome_miner_1795011718058.jpg',
+  gnome2: '/src/assets/images/story_gnome_miner_1795011718058.jpg',
+  archivist: '/src/assets/images/story_archivist_1795011719300.jpg',
+  guardian: '/src/assets/images/story_crystal_guardian_1795011810450.jpg',
+  captain: '/src/assets/images/story_captain_automaton_1795011811277.jpg',
+  shadow: '/src/assets/images/story_shadow_brackets_1795011812174.jpg',
 };
+
+export const SPEAKER_EMOTION_PORTRAITS: Partial<
+  Record<SpeakerId, Partial<Record<SpeakerEmotion, string>>>
+> = {
+  alyosha: {
+    surprised: '/src/assets/images/story_alyosha_surprised_1795011713611.jpg',
+    thoughtful: '/src/assets/images/story_alyosha_thoughtful_1795011713101.jpg',
+    curious: '/src/assets/images/story_alyosha_thoughtful_1795011713101.jpg',
+    alert: '/src/assets/images/story_alyosha_surprised_1795011713611.jpg',
+    triumph: '/src/assets/images/story_alyosha_triumph_1795011716280.jpg',
+    encourage: '/src/assets/images/story_alyosha_triumph_1795011716280.jpg',
+  },
+  pi: {
+    surprised: '/src/assets/images/story_pi_surprised_1795011716952.jpg',
+    alert: '/src/assets/images/story_pi_surprised_1795011716952.jpg',
+    thoughtful: '/src/assets/images/story_pi_thoughtful_1795011717942.jpg',
+    curious: '/src/assets/images/story_pi_thoughtful_1795011717942.jpg',
+  },
+};
+
+export function getSpeakerPortrait(
+  speaker: SpeakerId,
+  emotion: SpeakerEmotion = 'neutral',
+): string | undefined {
+  return (
+    SPEAKER_EMOTION_PORTRAITS[speaker]?.[emotion] ?? SPEAKER_PORTRAITS[speaker]
+  );
+}
 
 export const SPEAKER_META: Record<
   SpeakerId,
   { name: string; role: string; accent: string; shortGlyph: string }
 > = {
-  narrator: { name: 'Повествование', role: 'Хроника Острова', accent: '#94a3b8', shortGlyph: 'X' },
-  alyosha: { name: 'Алёша', role: 'Искатель, 5 класс', accent: '#fbbf24', shortGlyph: 'А' },
-  pi: { name: 'Сова Пи', role: 'Хранительница логики', accent: '#38bdf8', shortGlyph: 'π' },
-  gnome1: { name: 'Гном-рудокоп I', role: 'Бригадир запада', accent: '#f59e0b', shortGlyph: 'I' },
-  gnome2: { name: 'Гном-рудокоп II', role: 'Бригадир востока', accent: '#fb923c', shortGlyph: 'II' },
-  archivist: { name: 'Хранитель Архива', role: 'Мастер реестра', accent: '#c084fc', shortGlyph: 'Ах' },
-  guardian: { name: 'Хранитель Пещер', role: 'Кристальный страж', accent: '#34d399', shortGlyph: 'Кр' },
-  captain: { name: 'Капитан Автоматонов', role: 'Глава энергоцеха', accent: '#60a5fa', shortGlyph: 'Ка' },
-  shadow: { name: 'Тень Скобок', role: 'Страж Вируса Хаоса', accent: '#f87171', shortGlyph: '( )' },
+  narrator: { name: 'Повествование', role: 'Хроника Острова', accent: '#d66613', shortGlyph: 'X' },
+  alyosha: { name: 'Алёша', role: 'Искатель, 5 класс', accent: '#f5b83d', shortGlyph: 'А' },
+  pi: { name: 'Сова Пи', role: 'Хранительница логики', accent: '#1e7c96', shortGlyph: 'π' },
+  gnome1: { name: 'Гном-рудокоп I', role: 'Бригадир запада', accent: '#d97706', shortGlyph: 'I' },
+  gnome2: { name: 'Гном-рудокоп II', role: 'Бригадир востока', accent: '#c25e1a', shortGlyph: 'II' },
+  archivist: { name: 'Хранитель Архива', role: 'Мастер реестра', accent: '#9d4322', shortGlyph: 'Ах' },
+  guardian: { name: 'Хранитель Пещер', role: 'Кристальный страж', accent: '#158f74', shortGlyph: 'Кр' },
+  captain: { name: 'Капитан Автоматонов', role: 'Глава энергоцеха', accent: '#276d8c', shortGlyph: 'Ка' },
+  shadow: { name: 'Тень Скобок', role: 'Страж Вируса Хаоса', accent: '#6d35a3', shortGlyph: '( )' },
 };
 
 export const MISTAKE_CATEGORY_META: Record<
@@ -141,7 +171,7 @@ export const CODEX_LAWS: CodexLaw[] = [
   },
 ];
 
-export const TEMPLE_PORTAL_COORDS = { x: 60.5, y: 19.5 };
+export const TEMPLE_PORTAL_COORDS = { x: 31, y: 17 };
 
 export const DISTRICTS: DistrictInfo[] = [
   {
@@ -151,7 +181,7 @@ export const DISTRICTS: DistrictInfo[] = [
     mathTheme: 'ax + bx = c',
     entryNodeId: 'ep2_intro',
     scene: 'tunnel',
-    portalCoords: { x: 26.5, y: 40.5 },
+    portalCoords: { x: 14, y: 38 },
   },
   {
     id: 'ep3_archive',
@@ -160,7 +190,7 @@ export const DISTRICTS: DistrictInfo[] = [
     mathTheme: '3x − 16 = x + 22',
     entryNodeId: 'ep3_intro',
     scene: 'archive',
-    portalCoords: { x: 27, y: 58 },
+    portalCoords: { x: 21.5, y: 61 },
   },
   {
     id: 'ep4_crystals',
@@ -169,7 +199,7 @@ export const DISTRICTS: DistrictInfo[] = [
     mathTheme: '(1/3)x + (1/4)x + 20 = x',
     entryNodeId: 'ep4_intro',
     scene: 'crystals',
-    portalCoords: { x: 64.5, y: 50.5 },
+    portalCoords: { x: 82, y: 61 },
   },
   {
     id: 'ep5_city',
@@ -178,6 +208,58 @@ export const DISTRICTS: DistrictInfo[] = [
     mathTheme: '5x + 10 = 7x − 4',
     entryNodeId: 'ep5_intro',
     scene: 'city',
-    portalCoords: { x: 74, y: 43.5 },
+    portalCoords: { x: 85, y: 37 },
+  },
+];
+
+export const SECRET_BRANCH_IDS = [
+  'secret_attic_engraving',
+  'secret_tunnel_blueprint',
+  'secret_crystal_resonance',
+  'secret_city_ledger',
+] as const;
+
+export const EXPLORER_BADGES: ExplorerBadge[] = [
+  {
+    id: 'first_spark',
+    category: 'first_try',
+    title: 'Искра точности',
+    description: 'Решить первую алгебраическую задачу с первой попытки без единой ошибки.',
+    hint: 'Ответь на любое задание в Кодексе с первого раза.',
+  },
+  {
+    id: 'flawless_bridge',
+    category: 'first_try',
+    title: 'Безупречный мост',
+    description: 'Пройти весь Эпизод 1 в Лесу Первых Рун без ошибок на всех этапах и проверке.',
+    hint: 'Заверши испытание Старого Моста с первой попытки.',
+  },
+  {
+    id: 'district_ace',
+    category: 'first_try',
+    title: 'Мастер без осечек',
+    description: 'Восстановить любые два района Острова за Перекрёстком полностью без ошибок.',
+    hint: 'Пройди два любых района (Тоннель, Архив, Пещеры или Город) с первой попытки.',
+  },
+  {
+    id: 'first_try_virtuoso',
+    category: 'first_try',
+    title: 'Безошибочный логик',
+    description: 'Пройти всю историю от Чердака до победы над Тенью Скобок с 0 ошибок.',
+    hint: 'Сохрани 100% точность решений до самого финала.',
+  },
+  {
+    id: 'secret_finder',
+    category: 'secrets',
+    title: 'Следопыт Острова',
+    description: 'Найти первую скрытую ветку диалога и заглянуть глубже обычного маршрута.',
+    hint: 'Обращай внимание на осмотр предметов и деталей в начале сцен.',
+  },
+  {
+    id: 'all_secrets_master',
+    category: 'secrets',
+    title: 'Хранитель всех тайн',
+    description: 'Обнаружить все 4 секретные ветки диалогов на Чердаке и в районах Острова.',
+    hint: 'Ищи тайные заметки в Прологе, Тоннеле, Кристальных Пещерах и Заводном Городе.',
   },
 ];

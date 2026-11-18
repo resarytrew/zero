@@ -4,7 +4,7 @@
  */
 
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, X } from 'lucide-react';
+import { Award, Sparkles, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CodexModal } from './components/CodexModal';
 import { CrossroadsMapOverlay } from './components/CrossroadsMapOverlay';
@@ -15,7 +15,7 @@ import { PauseModal } from './components/PauseModal';
 import { SceneBackdrop } from './components/SceneBackdrop';
 import { SchematicBoard } from './components/SchematicBoard';
 import { TitleScreen } from './components/TitleScreen';
-import { CODEX_LAWS } from './game/codexData';
+import { CODEX_LAWS, EXPLORER_BADGES } from './game/codexData';
 import { evaluateEnding } from './game/endings';
 import {
   applyChoice,
@@ -31,6 +31,7 @@ import {
 } from './game/engine';
 import { STORY_NODES } from './game/storyData';
 import type {
+  BadgeId,
   DistrictId,
   GameScreenState,
   PlayerState,
@@ -45,7 +46,7 @@ function loadSavedState(): PlayerState | null {
   try {
     const raw = localStorage.getItem(SAVE_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PlayerState;
+    const parsed = JSON.parse(raw) as Partial<PlayerState>;
     if (
       parsed &&
       typeof parsed.currentNodeId === 'string' &&
@@ -53,7 +54,25 @@ function loadSavedState(): PlayerState | null {
       typeof parsed.mistakesByCategory === 'object' &&
       typeof parsed.stepAttempts === 'object'
     ) {
-      return parsed;
+      const base = createInitialPlayerState();
+      return {
+        ...base,
+        ...parsed,
+        completedDistricts: Array.isArray(parsed.completedDistricts)
+          ? parsed.completedDistricts
+          : [],
+        unlockedLaws: Array.isArray(parsed.unlockedLaws) ? parsed.unlockedLaws : [],
+        visitedNodes: Array.isArray(parsed.visitedNodes)
+          ? parsed.visitedNodes
+          : [parsed.currentNodeId],
+        foundSecrets: Array.isArray(parsed.foundSecrets) ? parsed.foundSecrets : [],
+        firstTryNodeIds: Array.isArray(parsed.firstTryNodeIds)
+          ? parsed.firstTryNodeIds
+          : [],
+        unlockedBadges: Array.isArray(parsed.unlockedBadges)
+          ? parsed.unlockedBadges
+          : [],
+      };
     }
     return null;
   } catch {
@@ -88,8 +107,10 @@ export default function App() {
   );
   const [feedback, setFeedback] = useState<FeedbackBanner | null>(null);
   const [codexOpen, setCodexOpen] = useState(false);
+  const [codexTab, setCodexTab] = useState<'laws' | 'badges'>('laws');
   const [mobileModelOpen, setMobileModelOpen] = useState(false);
   const [lawBanner, setLawBanner] = useState<number | null>(null);
+  const [badgeBanner, setBadgeBanner] = useState<BadgeId | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [instantText, setInstantText] = useState<boolean>(() => loadInstantTextPref());
 
@@ -127,6 +148,12 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [lawBanner]);
 
+  useEffect(() => {
+    if (badgeBanner === null) return;
+    const timer = window.setTimeout(() => setBadgeBanner(null), 4800);
+    return () => window.clearTimeout(timer);
+  }, [badgeBanner]);
+
   const handleStartNew = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
@@ -136,8 +163,10 @@ export default function App() {
     setPlayerState(fresh);
     setFeedback(null);
     setCodexOpen(false);
+    setCodexTab('laws');
     setMobileModelOpen(false);
     setLawBanner(null);
+    setBadgeBanner(null);
     try {
       localStorage.removeItem(SAVE_STORAGE_KEY);
       setSavedState(null);
@@ -214,6 +243,10 @@ export default function App() {
     setPlayerState(outcome.nextState);
     setFeedback(outcome.feedback ?? null);
 
+    if (outcome.unlockedBadges && outcome.unlockedBadges.length > 0) {
+      setBadgeBanner(outcome.unlockedBadges[outcome.unlockedBadges.length - 1]);
+    }
+
     if (outcome.feedback?.isError) {
       soundEngine.playError();
     } else if (outcome.completedEnding) {
@@ -223,6 +256,8 @@ export default function App() {
     } else if (outcome.unlockedLaw) {
       soundEngine.playLawUnlock();
       setLawBanner(outcome.unlockedLaw);
+    } else if (outcome.unlockedBadges && outcome.unlockedBadges.length > 0) {
+      soundEngine.playLawUnlock();
     } else if (isBossMove) {
       soundEngine.playBossHit();
     } else {
@@ -298,6 +333,10 @@ export default function App() {
 
   const unlockedLawObj =
     lawBanner !== null ? CODEX_LAWS.find((l) => l.id === lawBanner) : null;
+  const unlockedBadgeObj =
+    badgeBanner !== null
+      ? EXPLORER_BADGES.find((b) => b.id === badgeBanner)
+      : null;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden select-none">
@@ -323,12 +362,19 @@ export default function App() {
 
           <GameUtilityBar
             unlockedLawsCount={playerState.unlockedLaws.length}
+            unlockedBadgesCount={(playerState.unlockedBadges ?? []).length}
             balanceIntegrity={playerState.balanceIntegrity}
             completedDistrictsCount={playerState.completedDistricts.length}
             inCrossroadsOrLater={inCrossroadsOrLater}
             isMuted={isMuted}
             onOpenCodex={() => {
               soundEngine.playClick();
+              setCodexTab('laws');
+              setCodexOpen(true);
+            }}
+            onOpenBadges={() => {
+              soundEngine.playClick();
+              setCodexTab('badges');
               setCodexOpen(true);
             }}
             onOpenCrossroadsHint={handleOpenCrossroadsHint}
@@ -337,38 +383,82 @@ export default function App() {
               soundEngine.playClick();
               setScreenState('paused');
             }}
+            onReturnHome={() => {
+              soundEngine.playClick();
+              setCodexOpen(false);
+              setScreenState('title');
+            }}
           />
 
-          <AnimatePresence>
-            {unlockedLawObj && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                role="status"
-                className="fixed top-15 right-3 left-3 z-40 mx-auto flex w-auto max-w-md items-center justify-between gap-2.5 rounded-lg border border-amber-300/80 bg-[#062238]/97 px-3.5 py-2 text-xs shadow-2xl sm:top-16 sm:right-auto sm:left-1/2 sm:w-max sm:max-w-[calc(100vw-2rem)] sm:-translate-x-1/2 sm:text-sm"
-              >
-                <div className="flex min-w-0 items-center gap-2">
-                  <Sparkles className="h-4 w-4 shrink-0 text-amber-300" />
-                  <span className="truncate text-slate-100">
-                    <strong className="text-amber-200">
-                      Закон №{unlockedLawObj.id}:
-                    </strong>{' '}
-                    {unlockedLawObj.title}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLawBanner(null)}
-                  aria-label="Скрыть уведомление"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-300 hover:bg-[#0d3554] hover:text-white"
+          <div className="pointer-events-none fixed top-15 right-3 left-3 z-40 mx-auto flex flex-col items-center gap-2 sm:top-16 sm:right-auto sm:left-1/2 sm:-translate-x-1/2">
+            <AnimatePresence>
+              {unlockedLawObj && (
+                <motion.div
+                  key={`law-${unlockedLawObj.id}`}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  role="status"
+                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-xl border-2 border-[#e6ba62] bg-[#0d3347]/97 px-3.5 py-2 text-xs text-white shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Sparkles className="h-4 w-4 shrink-0 text-[#f6c959]" />
+                    <span className="truncate font-semibold text-white">
+                      <strong className="text-[#ffd45c]">
+                        Закон №{unlockedLawObj.id}:
+                      </strong>{' '}
+                      {unlockedLawObj.title}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLawBanner(null)}
+                    aria-label="Скрыть уведомление о законе"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#cbe5ec] hover:bg-[#16516e] hover:text-white"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </motion.div>
+              )}
+
+              {unlockedBadgeObj && (
+                <motion.div
+                  key={`badge-${unlockedBadgeObj.id}`}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  role="status"
+                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-xl border-2 border-[#e6ba62] bg-[#fdf3da]/98 px-3.5 py-2 text-xs text-[#152d3c] shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCodexTab('badges');
+                      setCodexOpen(true);
+                      setBadgeBanner(null);
+                    }}
+                    className="flex min-w-0 items-center gap-2 text-left hover:opacity-90"
+                  >
+                    <Award className="h-4 w-4 shrink-0 text-[#c96814]" />
+                    <span className="truncate font-bold text-[#0d3347]">
+                      <strong className="text-[#a8461c]">Значок:</strong>{' '}
+                      {unlockedBadgeObj.title}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBadgeBanner(null)}
+                    aria-label="Скрыть уведомление о значке"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#47687a] hover:bg-[#ead49f] hover:text-[#0d3347]"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <SchematicBoard
             kind={currentNode.schematic}
@@ -402,7 +492,10 @@ export default function App() {
           ending={evaluateEnding(playerState)}
           playerState={playerState}
           onRestart={handleStartNew}
-          onOpenCodex={() => setCodexOpen(true)}
+          onOpenCodex={() => {
+            setCodexTab('laws');
+            setCodexOpen(true);
+          }}
         />
       )}
 
@@ -410,6 +503,9 @@ export default function App() {
         {codexOpen && (
           <CodexModal
             unlockedLaws={playerState.unlockedLaws}
+            unlockedBadges={playerState.unlockedBadges ?? []}
+            foundSecretsCount={(playerState.foundSecrets ?? []).length}
+            initialTab={codexTab}
             onClose={() => setCodexOpen(false)}
           />
         )}

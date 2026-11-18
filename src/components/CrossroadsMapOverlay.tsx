@@ -59,19 +59,18 @@ export function CrossroadsMapOverlay({
                 aria-label={`${district.title} — ${done ? 'Восстановлен' : 'Открыт для прохождения'}`}
                 className="group relative flex flex-col items-center focus-visible:outline-none"
               >
-                {/* Animated subtle beacon ring on pending portals */}
                 {!done && (
                   <span
                     aria-hidden="true"
-                    className="portal-ring absolute top-1/2 left-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/75"
+                    className="portal-ring absolute top-1/2 left-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#f6c959]"
                   />
                 )}
 
                 <span
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border shadow-[0_8px_24px_rgba(2,12,24,0.85)] transition-transform duration-150 group-hover:scale-110 group-focus-visible:ring-2 group-focus-visible:ring-amber-300 ${
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border-2 shadow-[0_8px_20px_rgba(6,24,36,0.55)] transition-transform duration-150 group-hover:scale-110 group-focus-visible:ring-2 group-focus-visible:ring-white ${
                     done
-                      ? 'border-emerald-300/90 bg-[#08382c]/95 text-emerald-300'
-                      : 'border-amber-300/90 bg-[#082c48]/95 text-amber-300 group-hover:border-white'
+                      ? 'border-[#33a88d] bg-[#126b57] text-[#e1fff5]'
+                      : 'border-[#e6ba62] bg-[#0d3347] text-[#f6c959] group-hover:bg-[#d46714] group-hover:text-white'
                   }`}
                 >
                   {done ? (
@@ -82,35 +81,34 @@ export function CrossroadsMapOverlay({
                 </span>
 
                 <span
-                  className={`mt-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg transition-colors ${
+                  className={`mt-1.5 rounded-xl border-[1.5px] px-3 py-1 text-xs font-extrabold whitespace-nowrap shadow-lg transition-colors ${
                     done
-                      ? 'border-emerald-400/50 bg-[#062a24]/92 text-emerald-100'
-                      : 'border-[#4a8ab5]/80 bg-[#062036]/94 text-white group-hover:border-amber-300/80'
+                      ? 'border-[#33a88d] bg-[#105747]/96 text-[#e1fff5]'
+                      : 'border-[#e6ba62] bg-[#0d3347]/95 text-white group-hover:border-[#8e3d05] group-hover:bg-[#d46714]'
                   }`}
                 >
                   {district.title}
                 </span>
               </motion.button>
 
-              {/* Floating Preview Card on Hover/Focus */}
               {isHovered && (
                 <motion.div
                   initial={{ opacity: 0, y: openUpward ? -6 : 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.14 }}
-                  className={`pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-lg border border-[#4a8ab5]/85 bg-[#062036]/97 p-3 text-left shadow-2xl ${
+                  className={`pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-xl border-2 border-[#dfaa48] bg-[#fdf3da] p-3 text-left text-[#152d3c] shadow-2xl ${
                     openUpward ? 'bottom-full mb-2.5' : 'top-full mt-2'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 text-[11px] font-semibold">
-                    <span className={done ? 'text-emerald-300' : 'text-amber-300'}>
+                  <div className="flex items-center justify-between gap-2 text-[11px] font-extrabold">
+                    <span className={done ? 'text-[#127662]' : 'text-[#b45811]'}>
                       {done ? 'Район восстановлен' : 'Доступен портал'}
                     </span>
-                    <span className="font-math text-sky-200 tabular-nums">
+                    <span className="font-math text-[#0d3347] tabular-nums">
                       <MathText text={district.mathTheme} />
                     </span>
                   </div>
-                  <p className="mt-1 text-xs leading-snug text-slate-200">
+                  <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
                     {district.subtitle}
                   </p>
                 </motion.div>
@@ -147,14 +145,14 @@ export function CrossroadsMapOverlay({
             {allDistrictsDone && (
               <span
                 aria-hidden="true"
-                className="portal-ring absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-amber-300"
+                className="portal-ring absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#f6c959]"
               />
             )}
             <span
-              className={`relative flex h-12 w-12 items-center justify-center rounded-full border shadow-[0_8px_28px_rgba(2,12,24,0.9)] transition-transform duration-150 group-hover:scale-110 group-focus-visible:ring-2 group-focus-visible:ring-amber-300 ${
+              className={`relative flex h-12 w-12 items-center justify-center rounded-full border-2 shadow-[0_8px_24px_rgba(6,24,36,0.6)] transition-transform duration-150 group-hover:scale-110 group-focus-visible:ring-2 group-focus-visible:ring-white ${
                 allDistrictsDone
-                  ? 'border-amber-200 bg-amber-500 text-slate-950'
-                  : 'border-slate-400/70 bg-[#082238]/95 text-slate-300'
+                  ? 'border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] text-white'
+                  : 'border-[#e6ba62]/85 bg-[#0d3347]/95 text-[#f6c959]'
               }`}
             >
               {allDistrictsDone ? (
@@ -164,10 +162,10 @@ export function CrossroadsMapOverlay({
               )}
             </span>
             <span
-              className={`mt-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg tabular-nums ${
+              className={`mt-1.5 rounded-xl border-[1.5px] px-3 py-1 text-xs font-extrabold whitespace-nowrap shadow-lg tabular-nums ${
                 allDistrictsDone
-                  ? 'border-amber-300 bg-amber-400 text-slate-950'
-                  : 'border-slate-500/70 bg-[#062036]/94 text-slate-200'
+                  ? 'border-[#8e3d05] bg-[#f08b2d] text-white'
+                  : 'border-[#e6ba62] bg-[#0d3347]/95 text-white'
               }`}
             >
               Храм Баланса · {completedDistricts.length}/4
@@ -179,14 +177,14 @@ export function CrossroadsMapOverlay({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.14 }}
-              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 rounded-lg border border-amber-300/75 bg-[#062036]/97 p-3 text-left shadow-2xl"
+              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 rounded-xl border-2 border-[#dfaa48] bg-[#fdf3da] p-3 text-left text-[#152d3c] shadow-2xl"
             >
-              <div className="text-[11px] font-semibold text-amber-300">
+              <div className="text-[11px] font-extrabold text-[#b45811]">
                 {allDistrictsDone
                   ? 'Финальное испытание открыто!'
                   : `Защитный купол (${completedDistricts.length}/4)`}
               </div>
-              <p className="mt-1 text-xs leading-snug text-slate-200">
+              <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
                 {allDistrictsDone
                   ? 'Все четыре руны равновесия горят. Нажми, чтобы сразиться с Тенью Скобок.'
                   : 'Восстанови все четыре района острова, чтобы снять купол Храма.'}

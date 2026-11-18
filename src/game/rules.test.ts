@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { getSpeakerPortrait, SECRET_BRANCH_IDS } from './codexData';
 import {
+  applyBadgeEvaluation,
   applyChoice,
   applyDualNumericAnswer,
   applyNumericAnswer,
@@ -11,6 +13,7 @@ import {
   canEnterTemple,
   createInitialPlayerState,
   enterTempleFromCrossroads,
+  resolveDialogPortraitState,
   selectDistrictFromCrossroads,
 } from './engine';
 import { evaluateEnding } from './endings';
@@ -154,4 +157,155 @@ test('Episode 6 boss battle, diagnostic report, and branching endings work corre
 
   const verifyOk = applyVerificationAnswer(solveOk.nextState, { down: '45', up: '45' });
   assert.equal(verifyOk.unlockedLaw, 6);
+});
+
+test('Character emotion system assigns emotions to STORY_NODES and switches hologram sprites dynamically', () => {
+  for (const node of Object.values(STORY_NODES)) {
+    assert.ok(node.emotion, `Node ${node.id} must declare an emotion`);
+  }
+
+  // Node emotion -> surprised Owl Pi sprite
+  const prologuePi = resolveDialogPortraitState({
+    node: STORY_NODES.prologue_3,
+    feedback: null,
+    completedDistrictsCount: 0,
+    totalDistrictsCount: 4,
+  });
+  assert.deepEqual(prologuePi, { speaker: 'pi', emotion: 'surprised' });
+  assert.match(getSpeakerPortrait('pi', 'surprised') ?? '', /story_pi_surprised/);
+
+  // Draft input shifts Alyosha or Pi to thoughtful sprite
+  const drafting = resolveDialogPortraitState({
+    node: STORY_NODES.ep1_step1_x,
+    feedback: null,
+    completedDistrictsCount: 0,
+    totalDistrictsCount: 4,
+    hasDraftInput: true,
+  });
+  assert.deepEqual(drafting, { speaker: 'pi', emotion: 'thoughtful' });
+  assert.match(getSpeakerPortrait('pi', 'thoughtful') ?? '', /story_pi_thoughtful/);
+
+  // Hint Tier 1 -> surprised feedback speaker, Hint Tier 2 -> alert feedback speaker
+  const hint1 = resolveDialogPortraitState({
+    node: STORY_NODES.ep1_step2_expr,
+    feedback: {
+      text: 'Hint 1',
+      speaker: 'Сова Пи',
+      speakerId: 'pi',
+      isError: true,
+      hintLevel: 1,
+    },
+    completedDistrictsCount: 0,
+    totalDistrictsCount: 4,
+  });
+  assert.deepEqual(hint1, { speaker: 'pi', emotion: 'surprised' });
+
+  const hint2 = resolveDialogPortraitState({
+    node: STORY_NODES.ep1_step2_expr,
+    feedback: {
+      text: 'Hint 2',
+      speaker: 'Сова Пи',
+      speakerId: 'pi',
+      isError: true,
+      hintLevel: 2,
+    },
+    completedDistrictsCount: 0,
+    totalDistrictsCount: 4,
+  });
+  assert.deepEqual(hint2, { speaker: 'pi', emotion: 'alert' });
+
+  // Alyosha distinct sprites (thoughtful, surprised, triumph) differ from base neutral
+  const alyoshaBase = getSpeakerPortrait('alyosha', 'neutral');
+  const alyoshaThought = getSpeakerPortrait('alyosha', 'thoughtful');
+  const alyoshaSurprised = getSpeakerPortrait('alyosha', 'surprised');
+  const alyoshaTriumph = getSpeakerPortrait('alyosha', 'triumph');
+  assert.equal(new Set([alyoshaBase, alyoshaThought, alyoshaSurprised, alyoshaTriumph]).size, 4);
+
+  // Crossroads completion progresses Owl Pi emotion to triumph at 4/4
+  const crossroadsDone = resolveDialogPortraitState({
+    node: STORY_NODES.crossroads_hub,
+    feedback: null,
+    completedDistrictsCount: 4,
+    totalDistrictsCount: 4,
+  });
+  assert.deepEqual(crossroadsDone, { speaker: 'pi', emotion: 'triumph' });
+});
+
+test('Explorer Badges reward secret dialogue discovery and first-try task mastery', () => {
+  // 1. Secret branches: prologue -> secret_finder, all 4 -> all_secrets_master
+  let state = createInitialPlayerState();
+  const chestChoice = STORY_NODES.prologue_1.choices!.find(
+    (c) => c.id === 'inspect_chest',
+  )!;
+  const secret1 = applyChoice(state, chestChoice);
+  assert.equal(secret1.nextState.currentNodeId, 'prologue_secret_engraving');
+  assert.deepEqual(secret1.nextState.foundSecrets, ['secret_attic_engraving']);
+  assert.deepEqual(secret1.unlockedBadges, ['secret_finder']);
+
+  // Trigger remaining 3 secret branches across Tunnel, Crystal Caves, and Clockwork City
+  const ep2Secret = applyChoice(
+    { ...secret1.nextState, currentNodeId: 'ep2_intro' },
+    STORY_NODES.ep2_intro.choices!.find((c) => c.id === 'ep2_inspect_blueprint')!,
+  );
+  assert.equal(ep2Secret.nextState.currentNodeId, 'ep2_secret_blueprint');
+
+  const ep4Secret = applyChoice(
+    { ...ep2Secret.nextState, currentNodeId: 'ep4_intro' },
+    STORY_NODES.ep4_intro.choices!.find((c) => c.id === 'ep4_inspect_crystal')!,
+  );
+  assert.equal(ep4Secret.nextState.currentNodeId, 'ep4_secret_prism');
+
+  const ep5Secret = applyChoice(
+    { ...ep4Secret.nextState, currentNodeId: 'ep5_intro' },
+    STORY_NODES.ep5_intro.choices!.find((c) => c.id === 'ep5_inspect_ledger')!,
+  );
+  assert.equal(ep5Secret.nextState.currentNodeId, 'ep5_secret_ledger');
+  assert.equal(ep5Secret.nextState.foundSecrets.length, SECRET_BRANCH_IDS.length);
+  assert.deepEqual(ep5Secret.unlockedBadges, ['all_secrets_master']);
+
+  // 2. First-try Episode 1 path awards first_spark and flawless_bridge
+  let cleanEp1 = createInitialPlayerState();
+  cleanEp1.currentNodeId = 'ep1_step1_x';
+  const step1 = applyChoice(
+    cleanEp1,
+    STORY_NODES.ep1_step1_x.choices!.find((c) => c.isCorrect)!,
+  );
+  assert.ok(step1.unlockedBadges?.includes('first_spark'));
+
+  const step2 = applyChoice(
+    step1.nextState,
+    STORY_NODES.ep1_step2_expr.choices!.find((c) => c.isCorrect)!,
+  );
+  const step3 = applyNumericAnswer(step2.nextState, '53');
+  const verifyEp1 = applyVerificationAnswer(step3.nextState, { left: '78' });
+  assert.equal(verifyEp1.unlockedLaw, 1);
+  assert.ok(verifyEp1.unlockedBadges?.includes('flawless_bridge'));
+
+  // 3. Mistakes in Ep 1 block flawless_bridge
+  let flawedEp1 = createInitialPlayerState();
+  flawedEp1.currentNodeId = 'ep1_step3_solve';
+  const errEp1 = applyNumericAnswer(flawedEp1, '103');
+  const fixEp1 = applyNumericAnswer(errEp1.nextState, '53');
+  const verifyFlawed = applyVerificationAnswer(fixEp1.nextState, { left: '78' });
+  assert.equal(verifyFlawed.unlockedLaw, 1);
+  assert.equal(
+    verifyFlawed.nextState.unlockedBadges.includes('flawless_bridge'),
+    false,
+  );
+
+  // 4. Two flawless districts award district_ace; clean ending awards first_try_virtuoso
+  const twoCleanDistricts = applyBadgeEvaluation({
+    ...verifyEp1.nextState,
+    completedDistricts: ['ep2_tunnel', 'ep4_crystals'],
+  });
+  assert.ok(twoCleanDistricts.newlyUnlocked.includes('district_ace'));
+
+  const virtuoso = applyBadgeEvaluation(twoCleanDistricts.nextState, true);
+  assert.ok(virtuoso.newlyUnlocked.includes('first_try_virtuoso'));
+
+  const nonVirtuoso = applyBadgeEvaluation(
+    { ...twoCleanDistricts.nextState, mistakesCount: 1 },
+    true,
+  );
+  assert.equal(nonVirtuoso.newlyUnlocked.includes('first_try_virtuoso'), false);
 });

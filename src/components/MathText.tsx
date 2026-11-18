@@ -93,7 +93,7 @@ export function FormulaBlock({
 }) {
   return (
     <div
-      className={`font-math inline-flex flex-wrap items-center gap-y-1 rounded-md border border-amber-400/35 bg-[#051d30] px-2.5 py-1 text-xs font-semibold text-amber-200 tabular-nums ${className}`}
+      className={`font-math inline-flex flex-wrap items-center gap-y-1 rounded-lg border-[1.5px] border-[#c89643] bg-[#f5e5bd] px-2.5 py-1 text-xs font-bold text-[#103044] shadow-xs tabular-nums ${className}`}
     >
       <MathText text={formula} />
     </div>
