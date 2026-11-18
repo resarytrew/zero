@@ -9,43 +9,43 @@ import type {
 } from './types';
 
 export const SCENE_IMAGES: Record<SceneId, string> = {
-  attic: '/src/assets/images/story_scene_attic_1795011707846.jpg',
-  forest: '/src/assets/images/story_scene_forest_1795011709021.jpg',
-  crossroads: '/src/assets/images/story_scene_crossroads_1795011709945.jpg',
-  tunnel: '/src/assets/images/story_scene_tunnel_1795011709449.jpg',
-  archive: '/src/assets/images/story_scene_archive_1795011710310.jpg',
-  crystals: '/src/assets/images/story_scene_crystals_1795011710260.jpg',
-  city: '/src/assets/images/story_scene_city_1795011712429.jpg',
-  temple: '/src/assets/images/story_scene_temple_1795011712243.jpg',
+  attic: `${import.meta.env.BASE_URL}src/assets/images/story_scene_attic_1795011707846.jpg`,
+  forest: `${import.meta.env.BASE_URL}src/assets/images/story_scene_forest_1795011709021.jpg`,
+  crossroads: `${import.meta.env.BASE_URL}src/assets/images/story_scene_crossroads_1795011709945.jpg`,
+  tunnel: `${import.meta.env.BASE_URL}src/assets/images/story_scene_tunnel_1795011709449.jpg`,
+  archive: `${import.meta.env.BASE_URL}src/assets/images/story_scene_archive_1795011710310.jpg`,
+  crystals: `${import.meta.env.BASE_URL}src/assets/images/story_scene_crystals_1795011710260.jpg`,
+  city: `${import.meta.env.BASE_URL}src/assets/images/story_scene_city_1795011712429.jpg`,
+  temple: `${import.meta.env.BASE_URL}src/assets/images/story_scene_temple_1795011712243.jpg`,
 };
 
 export const SPEAKER_PORTRAITS: Partial<Record<SpeakerId, string>> = {
-  alyosha: '/src/assets/images/story_alyosha_neutral_1795011713539.jpg',
-  pi: '/src/assets/images/story_pi_neutral_1795011715473.jpg',
-  gnome1: '/src/assets/images/story_gnome_miner_1795011718058.jpg',
-  gnome2: '/src/assets/images/story_gnome_miner_1795011718058.jpg',
-  archivist: '/src/assets/images/story_archivist_1795011719300.jpg',
-  guardian: '/src/assets/images/story_crystal_guardian_1795011810450.jpg',
-  captain: '/src/assets/images/story_captain_automaton_1795011811277.jpg',
-  shadow: '/src/assets/images/story_shadow_brackets_1795011812174.jpg',
+  alyosha: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_neutral_1795011713539.jpg`,
+  pi: `${import.meta.env.BASE_URL}src/assets/images/story_pi_neutral_1795011715473.jpg`,
+  gnome1: `${import.meta.env.BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
+  gnome2: `${import.meta.env.BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
+  archivist: `${import.meta.env.BASE_URL}src/assets/images/story_archivist_1795011719300.jpg`,
+  guardian: `${import.meta.env.BASE_URL}src/assets/images/story_crystal_guardian_1795011810450.jpg`,
+  captain: `${import.meta.env.BASE_URL}src/assets/images/story_captain_automaton_1795011811277.jpg`,
+  shadow: `${import.meta.env.BASE_URL}src/assets/images/story_shadow_brackets_1795011812174.jpg`,
 };
 
 export const SPEAKER_EMOTION_PORTRAITS: Partial<
   Record<SpeakerId, Partial<Record<SpeakerEmotion, string>>>
 > = {
   alyosha: {
-    surprised: '/src/assets/images/story_alyosha_surprised_1795011713611.jpg',
-    thoughtful: '/src/assets/images/story_alyosha_thoughtful_1795011713101.jpg',
-    curious: '/src/assets/images/story_alyosha_thoughtful_1795011713101.jpg',
-    alert: '/src/assets/images/story_alyosha_surprised_1795011713611.jpg',
-    triumph: '/src/assets/images/story_alyosha_triumph_1795011716280.jpg',
-    encourage: '/src/assets/images/story_alyosha_triumph_1795011716280.jpg',
+    surprised: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
+    thoughtful: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
+    curious: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
+    alert: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
+    triumph: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
+    encourage: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
   },
   pi: {
-    surprised: '/src/assets/images/story_pi_surprised_1795011716952.jpg',
-    alert: '/src/assets/images/story_pi_surprised_1795011716952.jpg',
-    thoughtful: '/src/assets/images/story_pi_thoughtful_1795011717942.jpg',
-    curious: '/src/assets/images/story_pi_thoughtful_1795011717942.jpg',
+    surprised: `${import.meta.env.BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
+    alert: `${import.meta.env.BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
+    thoughtful: `${import.meta.env.BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
+    curious: `${import.meta.env.BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
   },
 };
 
