@@ -32,7 +32,7 @@ export function SceneBackdrop({ scene, alt }: SceneBackdropProps) {
               onError={() =>
                 setFailedScenes((prev) => ({ ...prev, [scene]: true }))
               }
-              className="h-full w-full object-cover object-center select-none"
+              className="h-full w-full object-cover object-center brightness-[1.03] contrast-[1.02] saturate-[1.06] select-none"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#134a66] via-[#0e3a52] to-[#0a2c3e] p-8">
@@ -44,10 +44,10 @@ export function SceneBackdrop({ scene, alt }: SceneBackdropProps) {
             </div>
           )}
 
-          {/* Subtle warm-teal storybook vignette only along top & bottom edges so artwork stays luminous */}
+          {/* Soft storybook edge vignette that preserves bright luminous scene artwork */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#082433]/35 via-transparent to-[#082433]/35"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_58%,rgba(7,32,46,0.34)_100%)]"
           />
         </motion.div>
       </AnimatePresence>

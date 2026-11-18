@@ -72,11 +72,11 @@ export function SpeakerPortrait({
   const emotionStyle = EMOTION_STYLE[activeEmotion];
   const isPopout = variant === 'popout';
 
-  // Matches the framed rectangular storybook portrait window on the top-right of the parchment dialog
+  // Matches the wide horizontal storybook portrait window tucked into the top-right of the parchment dialog
   const sizeClass = isPopout
     ? compact
-      ? 'h-20 w-24 sm:h-28 sm:w-36 lg:h-30 lg:w-38 rounded-2xl border-[3px]'
-      : 'h-20 w-24 sm:h-32 sm:w-40 lg:h-36 lg:w-44 rounded-2xl border-[3px]'
+      ? 'h-20 w-28 sm:h-28 sm:w-40 lg:h-[118px] lg:w-[178px] rounded-[18px] border-[3px]'
+      : 'h-20 w-28 sm:h-30 sm:w-44 lg:h-[132px] lg:w-[202px] rounded-[18px] border-[3px]'
     : 'h-12 w-12 sm:h-14 sm:w-14 rounded-xl border-2';
 
   return (
@@ -89,7 +89,7 @@ export function SpeakerPortrait({
       data-speaker={speaker}
       data-emotion={activeEmotion}
       data-sprite={portraitSrc ?? 'svg'}
-      className={`relative shrink-0 overflow-hidden bg-[#10384c] ring-1 ring-inset ring-[#fff2cf]/55 shadow-[0_10px_24px_rgba(8,28,42,0.48)] ${sizeClass} ${emotionStyle.border}`}
+      className={`relative shrink-0 overflow-hidden bg-[#10384c] ring-1 ring-inset ring-[#fff5dc]/65 shadow-[0_0_0_1.5px_rgba(148,88,16,0.65),0_12px_26px_rgba(6,24,36,0.52)] ${sizeClass} ${emotionStyle.border}`}
     >
       {portraitSrc && !imgFailed ? (
         <img

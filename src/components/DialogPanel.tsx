@@ -248,14 +248,20 @@ export function DialogPanel({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       aria-label={node.episodeTitle}
-      className={`${positionClasses} flex flex-col overflow-visible rounded-2xl border-[3px] border-[#dfaa48] bg-gradient-to-b from-[#fdf3da] via-[#faecc8] to-[#f4dfb1] text-[#152d3c] ring-1 ring-inset ring-[#fff9ea]/85 shadow-[0_22px_52px_rgba(5,22,34,0.62)]`}
+      className={`${positionClasses} flex flex-col overflow-visible rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_22px_52px_rgba(5,22,34,0.62),inset_0_0_30px_rgba(196,144,58,0.2)]`}
     >
-      {/* Framed Storybook Character Portrait anchored at Top-Right */}
+      {/* Inner concentric storybook page border */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-[6px] rounded-[13px] border border-[#d69c3c]/60"
+      />
+
+      {/* Framed Storybook Character Portrait tucked cleanly at Top-Right */}
       <div
         className={`pointer-events-none absolute z-30 ${
           node.isCrossroadsHub
-            ? '-top-9 right-3 sm:-top-12 sm:right-5'
-            : '-top-9 right-3 sm:-top-14 sm:right-6'
+            ? '-top-7 right-3 sm:-top-8 sm:right-5'
+            : '-top-7 right-3 sm:-top-9 sm:right-5'
         }`}
       >
         <SpeakerPortrait
@@ -268,7 +274,7 @@ export function DialogPanel({
 
       {/* Main Parchment Content */}
       <div
-        className={`quest-scroll flex-1 overflow-y-auto px-4 ${
+        className={`quest-scroll relative z-10 flex-1 overflow-y-auto px-4 ${
           node.isCrossroadsHub
             ? 'space-y-2 pt-3 pb-3 sm:space-y-2.5 sm:px-6 sm:pt-4 sm:pb-4'
             : 'space-y-2.5 pt-3 pb-3.5 sm:space-y-3 sm:px-7 sm:pt-5 sm:pb-5'
@@ -276,87 +282,154 @@ export function DialogPanel({
       >
         {/* Top-Left Speaker Kicker with Gold Diamond Ornament & Episode Subtitle */}
         <div
-          className={
+          className={`border-b border-[#9d8150]/45 pb-2.5 ${
             node.isCrossroadsHub
-              ? 'pr-24 sm:pr-40 lg:pr-42'
-              : 'pr-24 sm:pr-44 lg:pr-48'
-          }
+              ? 'pr-28 sm:pr-44 lg:pr-48'
+              : 'pr-28 sm:pr-48 lg:pr-54'
+          }`}
         >
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden="true"
               className="hidden items-center sm:inline-flex"
             >
-              <span className="h-[2px] w-4 bg-[#df9b36]" />
-              <span className="h-2.5 w-2.5 rotate-45 border-[1.5px] border-[#d98520] bg-[#fdf3da]" />
-              <span className="h-[2px] w-3 bg-[#df9b36]" />
+              <span className="h-[2px] w-4 bg-[#e09226]" />
+              <span className="h-2.5 w-2.5 rotate-45 border-[1.5px] border-[#d98520] bg-[#fff8e6]" />
+              <span className="h-[2px] w-3 bg-[#e09226]" />
             </span>
-            <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-[#0d3347] sm:text-[22px]">
+            <h2 className="font-display text-lg font-extrabold uppercase tracking-[0.02em] text-[#0d3347] sm:text-[24px]">
               {node.speakerName}
             </h2>
           </div>
 
-          <div className="mt-0.5 text-xs font-semibold text-[#47687a] sm:text-[13px]">
+          <div className="mt-0.5 text-xs font-semibold text-[#47687a] sm:text-[13.5px]">
             {node.episodeTitle}
           </div>
 
-          {(showTaskRibbon || node.formulaDisplay || (hasInteractiveModel && onToggleMobileModel)) && (
-            <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              {showTaskRibbon && (
-                <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fad269] to-[#eeb138] px-4 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#113144] shadow-xs">
-                  Задача
-                </span>
-              )}
-              {node.mathTopic && (
-                <span className="text-xs font-bold text-[#355a6e]">
-                  <MathText text={node.mathTopic} />
-                </span>
-              )}
-              {node.formulaDisplay && <FormulaBlock formula={node.formulaDisplay} />}
-              {hasInteractiveModel && onToggleMobileModel && (
-                <button
-                  type="button"
-                  onClick={onToggleMobileModel}
-                  className="flex min-h-[32px] items-center gap-1.5 rounded-lg border border-[#3d768d] bg-[#0e394f] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#15516e] lg:hidden"
-                >
-                  <Scale className="h-3.5 w-3.5 text-[#f6c959]" />
-                  <span>Модель</span>
-                </button>
-              )}
-            </div>
-          )}
+          {(() => {
+            const inlineTaskIdx = node.text.findIndex((p) =>
+              p.startsWith('Задача:'),
+            );
+            const hasInlineTaskRibbon = showTaskRibbon && inlineTaskIdx >= 0;
+
+            return (
+              <>
+                {((!hasInlineTaskRibbon && showTaskRibbon) ||
+                  node.mathTopic ||
+                  node.formulaDisplay ||
+                  (hasInteractiveModel && onToggleMobileModel)) && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2.5">
+                    {!hasInlineTaskRibbon && showTaskRibbon && (
+                      <span className="storybook-ribbon-border inline-flex shadow-xs">
+                        <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fcd974] to-[#eaa72e] px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-[#113144]">
+                          Задача
+                        </span>
+                      </span>
+                    )}
+                    {node.mathTopic && (
+                      <span className="text-xs font-bold text-[#355a6e]">
+                        <MathText text={node.mathTopic} />
+                      </span>
+                    )}
+                    {node.formulaDisplay && <FormulaBlock formula={node.formulaDisplay} />}
+                    {hasInteractiveModel && onToggleMobileModel && (
+                      <button
+                        type="button"
+                        onClick={onToggleMobileModel}
+                        className="flex min-h-[32px] items-center gap-1.5 rounded-full border border-[#3d768d] bg-[#0e394f] px-3 py-1 text-xs font-semibold text-white hover:bg-[#15516e] lg:hidden"
+                      >
+                        <Scale className="h-3.5 w-3.5 text-[#f6c959]" />
+                        <span>Модель</span>
+                      </button>
+                    )}
+                    {!hasInlineTaskRibbon && showTaskRibbon && (
+                      <span
+                        aria-hidden="true"
+                        className="hidden h-[1px] flex-1 bg-[#c59a58]/55 sm:block"
+                      />
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Fixed-Height Narrative Prose Container: Ghost Full Text Sets Final Box Height Immediately */}
-        <div
-          onClick={!isFullyRevealed ? revealAll : undefined}
-          className={`relative pr-1 text-[14.5px] leading-snug font-medium text-[#152d3c] sm:pr-6 sm:text-[16px] sm:leading-relaxed ${
-            !isFullyRevealed ? 'cursor-pointer' : ''
-          }`}
-        >
-          <div
-            aria-hidden="true"
-            className="invisible pointer-events-none select-none space-y-2"
-          >
-            {node.text.map((paragraph, idx) => (
-              <p key={idx} className="text-pretty">
-                <ProseParagraph text={paragraph} />
-              </p>
-            ))}
-          </div>
+        {(() => {
+          const inlineTaskIdx = node.text.findIndex((p) =>
+            p.startsWith('Задача:'),
+          );
+          const hasInlineTaskRibbon = showTaskRibbon && inlineTaskIdx >= 0;
+          const formatParagraph = (text: string, idx: number) =>
+            hasInlineTaskRibbon && idx === inlineTaskIdx
+              ? text.replace(/^Задача:\s*/, '')
+              : text;
 
-          <div className="absolute inset-0 space-y-2">
-            {node.text.map((_, idx) => {
-              const visible = visibleParagraphs[idx] ?? '';
-              if (!visible && idx > 0) return null;
-              return (
-                <p key={idx} className="text-pretty">
-                  <ProseParagraph text={visible} />
-                </p>
-              );
-            })}
-          </div>
-        </div>
+          return (
+            <div
+              onClick={!isFullyRevealed ? revealAll : undefined}
+              className={`relative pr-1 text-[14.5px] leading-snug font-medium text-[#152d3c] sm:pr-4 sm:text-[16px] sm:leading-relaxed ${
+                !isFullyRevealed ? 'cursor-pointer' : ''
+              }`}
+            >
+              <div
+                aria-hidden="true"
+                className="invisible pointer-events-none select-none space-y-2.5"
+              >
+                {node.text.map((paragraph, idx) => (
+                  <Fragment key={idx}>
+                    {hasInlineTaskRibbon && idx === inlineTaskIdx && (
+                      <div className="flex items-center gap-3 pt-0.5">
+                        <span className="storybook-ribbon-border inline-flex">
+                          <span className="storybook-ribbon inline-flex items-center px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider">
+                            Задача
+                          </span>
+                        </span>
+                        <span className="h-[1.5px] flex-1 bg-[#c59a58]/55" />
+                      </div>
+                    )}
+                    <p className="text-pretty">
+                      <ProseParagraph text={formatParagraph(paragraph, idx)} />
+                    </p>
+                  </Fragment>
+                ))}
+              </div>
+
+              <div className="absolute inset-0 space-y-2.5">
+                {node.text.map((_, idx) => {
+                  const rawVisible = visibleParagraphs[idx] ?? '';
+                  const visible = formatParagraph(rawVisible, idx);
+                  const showRibbonHere =
+                    hasInlineTaskRibbon && idx === inlineTaskIdx;
+                  if (!visible && idx > 0 && !showRibbonHere) return null;
+                  return (
+                    <Fragment key={idx}>
+                      {showRibbonHere && (
+                        <div className="flex items-center gap-3 pt-0.5">
+                          <span className="storybook-ribbon-border inline-flex shadow-xs">
+                            <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fcd974] to-[#eaa72e] px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-[#113144]">
+                              Задача
+                            </span>
+                          </span>
+                          <span
+                            aria-hidden="true"
+                            className="h-[1.5px] flex-1 bg-[#c59a58]/60"
+                          />
+                        </div>
+                      )}
+                      {visible && (
+                        <p className="text-pretty">
+                          <ProseParagraph text={visible} />
+                        </p>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Adaptive 2-Tier Scaffolding Feedback Callout */}
         {feedback && (
@@ -466,9 +539,9 @@ export function DialogPanel({
           </>
         )}
 
-        {/* Standard Choices styled to match the warm terracotta / sky-teal arrow buttons */}
+        {/* Standard Choices styled as rounded-full storybook arrow capsules */}
         {node.choices && node.choices.length > 0 && (
-          <div className="space-y-2 border-t border-[#d8b46e]/60 pt-3 pr-6">
+          <div className="space-y-2.5 border-t border-[#c59a58]/55 pt-3.5 pr-4 sm:pr-6">
             {node.choices.map((choice) => {
               const isSecret = Boolean(choice.secretId);
               const secretFound = Boolean(
@@ -482,14 +555,14 @@ export function DialogPanel({
                   key={choice.id}
                   type="button"
                   onClick={() => onChoice(choice)}
-                  className={`group flex min-h-[46px] w-full items-center justify-between gap-3 rounded-xl border-2 px-4 py-2.5 text-left text-sm font-bold shadow-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] ${
+                  className={`group flex min-h-[46px] w-full items-center justify-between gap-3 rounded-full border-2 px-5 py-2.5 text-left text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(8,32,46,0.18)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] sm:text-[15px] ${
                     secretFound
                       ? 'border-[#2f856d] bg-gradient-to-b from-[#d8f5ea] to-[#bcead9] text-[#0c3f31] hover:brightness-97'
                       : isSecret
-                        ? 'border-[#b97719] bg-gradient-to-b from-[#fbe5a8] to-[#f1cd77] text-[#452707] hover:from-[#f08b2d] hover:to-[#d46714] hover:border-[#8e3d05] hover:text-white'
+                        ? 'border-[#b97719] bg-gradient-to-b from-[#fbe5a8] to-[#f1cd77] text-[#452707] hover:from-[#ef932e] hover:to-[#c75b0e] hover:border-[#8b3c07] hover:text-white'
                         : isSingleContinue
-                          ? 'border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] text-white hover:from-[#f69a3d] hover:to-[#df721b]'
-                          : 'border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] text-[#0d2e3f] hover:from-[#f08b2d] hover:to-[#d46714] hover:border-[#8e3d05] hover:text-white'
+                          ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] text-white hover:from-[#f69f3f] hover:to-[#d96915]'
+                          : 'border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] text-[#0c2d3e] hover:from-[#ef932e] hover:to-[#c75b0e] hover:border-[#8b3c07] hover:text-white'
                   }`}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -577,7 +650,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
             >
               Записать шаг черновика
             </button>
@@ -645,7 +718,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl border-2 border-[#0b4f42] bg-gradient-to-b from-[#1e9e84] to-[#127662] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#24b094] hover:to-[#168871] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+              className="min-h-[46px] w-full rounded-full border-2 border-[#0b4f42] bg-gradient-to-b from-[#1e9e84] to-[#127662] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#24b094] hover:to-[#168871] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить проверку
             </button>
@@ -681,7 +754,7 @@ export function DialogPanel({
               )}
               <button
                 type="submit"
-                className="min-h-[44px] shrink-0 rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
+                className="min-h-[46px] shrink-0 rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
               >
                 Проверить
               </button>
@@ -736,7 +809,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
+              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить оба значения
             </button>
@@ -771,10 +844,10 @@ export function DialogPanel({
                               [row.id]: option,
                             }))
                           }
-                          className={`font-math min-h-[40px] rounded-lg border-2 px-2 py-2 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
+                          className={`font-math min-h-[40px] rounded-full border-2 px-2 py-2 text-xs font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] transition-colors focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
                             active
-                              ? 'border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] text-white'
-                              : 'border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] text-[#0d2e3f] hover:brightness-97'
+                              ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] text-white'
+                              : 'border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] text-[#0c2d3e] hover:brightness-97'
                           }`}
                         >
                           <MathText text={option} />
@@ -787,7 +860,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
+              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Составить уравнение
             </button>

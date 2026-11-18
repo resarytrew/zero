@@ -400,12 +400,12 @@ export default function App() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   role="status"
-                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-xl border-2 border-[#e6ba62] bg-[#0d3347]/97 px-3.5 py-2 text-xs text-white shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
+                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/97 px-4 py-2 text-xs text-white ring-1 ring-inset ring-[#fff4d6]/50 shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <Sparkles className="h-4 w-4 shrink-0 text-[#f6c959]" />
+                    <Sparkles className="h-4 w-4 shrink-0 text-[#ffd859]" />
                     <span className="truncate font-semibold text-white">
-                      <strong className="text-[#ffd45c]">
+                      <strong className="text-[#ffd859]">
                         Закон №{unlockedLawObj.id}:
                       </strong>{' '}
                       {unlockedLawObj.title}
@@ -415,7 +415,7 @@ export default function App() {
                     type="button"
                     onClick={() => setLawBanner(null)}
                     aria-label="Скрыть уведомление о законе"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#cbe5ec] hover:bg-[#16516e] hover:text-white"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#cbe5ec] hover:bg-[#16516e] hover:text-white"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -430,7 +430,7 @@ export default function App() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   role="status"
-                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-xl border-2 border-[#e6ba62] bg-[#fdf3da]/98 px-3.5 py-2 text-xs text-[#152d3c] shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
+                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-full border-2 border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_65%,#f2da9f_100%)] px-4 py-2 text-xs text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
                 >
                   <button
                     type="button"
@@ -451,7 +451,7 @@ export default function App() {
                     type="button"
                     onClick={() => setBadgeBanner(null)}
                     aria-label="Скрыть уведомление о значке"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#47687a] hover:bg-[#ead49f] hover:text-[#0d3347]"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#47687a] hover:bg-[#ead49f] hover:text-[#0d3347]"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

@@ -29,9 +29,13 @@ export function TitleScreen({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 mx-4 max-w-xl rounded-2xl border-[3px] border-[#dfaa48] bg-gradient-to-b from-[#fdf3da]/97 via-[#faecc8]/97 to-[#f4dfb1]/97 p-6 text-[#152d3c] ring-1 ring-inset ring-[#fff9ea]/85 shadow-[0_24px_60px_rgba(4,18,28,0.68)] sm:ml-14 sm:p-8 md:ml-20"
+        className="relative z-10 mx-4 max-w-xl rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] p-6 text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/85 shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_24px_60px_rgba(4,18,28,0.68),inset_0_0_30px_rgba(196,144,58,0.2)] sm:ml-14 sm:p-8 md:ml-20"
       >
-        <div className="mb-4 flex items-center gap-4">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-[6px] rounded-[13px] border border-[#d69c3c]/60"
+        />
+        <div className="relative z-10 mb-4 flex items-center gap-4">
           <svg
             viewBox="0 0 72 72"
             className="h-16 w-16 shrink-0 drop-shadow-md"
@@ -78,25 +82,25 @@ export function TitleScreen({
           </div>
         </div>
 
-        <p className="mb-6 max-w-lg text-[15px] leading-relaxed font-medium text-[#214254]">
+        <p className="relative z-10 mb-6 max-w-lg text-[15px] leading-relaxed font-medium text-[#214254]">
           Нелинейный алгебраический квест, где каждое решение, выбранный способ рассуждения и точность уравнений открывают одну из пяти концовок.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="relative z-10 flex flex-wrap items-center gap-3">
           {hasSavedProgress ? (
             <>
               <button
                 type="button"
                 data-start="true"
                 onClick={onContinue}
-                className="min-h-[46px] rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-6 py-3 text-base font-extrabold text-white shadow-md transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
+                className="min-h-[46px] rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-6 py-3 text-base font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_4px_12px_rgba(8,32,46,0.22)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
               >
                 Продолжить путь
               </button>
               <button
                 type="button"
                 onClick={onStartNew}
-                className="min-h-[46px] rounded-xl border-2 border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] px-5 py-3 text-base font-bold text-[#0d2e3f] shadow-sm transition-all hover:brightness-97 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
+                className="min-h-[46px] rounded-full border-2 border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] px-5 py-3 text-base font-bold text-[#0c2d3e] shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(8,32,46,0.16)] transition-all hover:brightness-97 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
               >
                 Начать заново
               </button>
@@ -106,7 +110,7 @@ export function TitleScreen({
               type="button"
               data-start="true"
               onClick={onStartNew}
-              className="min-h-[48px] rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-7 py-3.5 text-base font-extrabold text-white shadow-md transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
+              className="min-h-[48px] rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-7 py-3.5 text-base font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_4px_12px_rgba(8,32,46,0.22)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
             >
               Начать приключение
             </button>

@@ -45,9 +45,13 @@ export function EndingScreen({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 my-auto w-full max-w-3xl rounded-2xl border-[3px] border-[#dfaa48] bg-gradient-to-b from-[#fdf3da] via-[#faecc8] to-[#f4dfb1] p-6 text-[#152d3c] ring-1 ring-inset ring-[#fff9ea]/85 shadow-[0_24px_60px_rgba(4,18,28,0.72)] sm:p-8"
+        className="relative z-10 my-auto w-full max-w-3xl rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] p-6 text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/85 shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_24px_60px_rgba(4,18,28,0.72)] sm:p-8"
       >
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-[#d4b068] pb-5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-[6px] rounded-[13px] border border-[#d69c3c]/60"
+        />
+        <div className="relative z-10 flex flex-wrap items-start justify-between gap-4 border-b-2 border-[#d4b068] pb-5">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-wider text-[#a8461c]">
               {ending.subtitle}
@@ -58,7 +62,7 @@ export function EndingScreen({
           </div>
 
           <div
-            className={`flex items-center gap-2 rounded-xl border-2 px-3.5 py-2 shadow-sm ${TONE_CLASSES[ending.accentTone]}`}
+            className={`flex items-center gap-2 rounded-full border-2 px-4 py-2 shadow-sm ${TONE_CLASSES[ending.accentTone]}`}
           >
             <Award className="h-5 w-5 shrink-0" />
             <span className="font-math text-sm font-extrabold tabular-nums">
@@ -68,7 +72,7 @@ export function EndingScreen({
         </div>
 
         {/* Ending Narrative */}
-        <div className="mt-5 space-y-3 text-[15px] leading-relaxed font-medium text-[#152d3c]">
+        <div className="relative z-10 mt-5 space-y-3 text-[15px] leading-relaxed font-medium text-[#152d3c]">
           {ending.paragraphs.map((p, idx) => (
             <p key={idx}>
               <MathText text={p} />
@@ -77,8 +81,8 @@ export function EndingScreen({
         </div>
 
         {/* Compass Engraving Plaque */}
-        <div className="mt-5 rounded-xl border-2 border-[#72bdd1]/60 bg-[#0d3549] px-4 py-3.5 text-white">
-          <div className="text-xs font-extrabold uppercase tracking-wider text-[#f6c959]">
+        <div className="relative z-10 mt-5 rounded-2xl border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c] to-[#0a3145] px-4 py-3.5 text-white shadow-sm">
+          <div className="text-xs font-extrabold uppercase tracking-wider text-[#ffd859]">
             Гравировка на латунном компасе
           </div>
           <p className="font-serif-book mt-1 text-base italic text-[#fff4d6]">
@@ -156,12 +160,12 @@ export function EndingScreen({
           ))}
         </ul>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="relative z-10 mt-6 flex flex-wrap items-center gap-3">
           <button
             type="button"
             data-start="true"
             onClick={onRestart}
-            className="flex min-h-[44px] items-center gap-2 rounded-xl border-2 border-[#8e3d05] bg-gradient-to-b from-[#f08b2d] to-[#d46714] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition-all hover:from-[#f69a3d] hover:to-[#df721b] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+            className="flex min-h-[46px] items-center gap-2 rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-6 py-3 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
           >
             <RotateCcw className="h-4 w-4" />
             <span>Пройти снова и открыть другую концовку</span>
@@ -170,7 +174,7 @@ export function EndingScreen({
           <button
             type="button"
             onClick={onOpenCodex}
-            className="flex min-h-[44px] items-center gap-2 rounded-xl border-2 border-[#3d768d] bg-gradient-to-b from-[#d1ecf2] to-[#a7d6e2] px-5 py-3 text-sm font-bold text-[#0d2e3f] transition-all hover:brightness-97 focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+            className="flex min-h-[46px] items-center gap-2 rounded-full border-2 border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] px-5 py-3 text-sm font-bold text-[#0c2d3e] shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(8,32,46,0.16)] transition-all hover:brightness-97 focus-visible:outline-2 focus-visible:outline-[#0d3347]"
           >
             <BookOpen className="h-4 w-4 text-[#0e4d66]" />
             <span>Просмотреть все 6 правил и значки</span>

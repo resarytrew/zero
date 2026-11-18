@@ -72,14 +72,14 @@ export function CodexModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border-[3px] border-[#dfaa48] bg-gradient-to-b from-[#fdf3da] to-[#f4dfb1] text-[#152d3c] shadow-[0_24px_60px_rgba(4,18,28,0.75)]"
+        className="relative flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] text-[#152d3c] shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_24px_60px_rgba(4,18,28,0.75)]"
       >
-        {/* Deep Teal Header */}
-        <div className="flex items-center justify-between border-b-2 border-[#dfaa48] bg-[#0d3347] px-5 py-4 text-white">
+        {/* Deep Teal-Gold Header */}
+        <div className="flex items-center justify-between border-b-2 border-[#e5b55c] bg-gradient-to-b from-[#16516d] to-[#0a3145] px-5 py-4 text-[#fff8e6]">
           <div className="flex items-center gap-3">
-            <BookOpen className="h-5 w-5 shrink-0 text-[#f6c959]" />
+            <BookOpen className="h-5 w-5 shrink-0 text-[#ffd859]" />
             <div>
-              <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-white sm:text-xl">
+              <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-[#fff8e6] sm:text-xl">
                 Кодекс Равновесия
               </h2>
               <p className="text-xs font-semibold text-[#cbe5ec] tabular-nums">
@@ -92,7 +92,7 @@ export function CodexModal({
             type="button"
             onClick={onClose}
             aria-label="Закрыть Кодекс"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e6ba62]/80 bg-[#144761] text-white transition-colors hover:bg-[#1c5e80] focus-visible:outline-2 focus-visible:outline-[#f6c959]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#e5b55c] bg-[#14516c] text-[#fff8e6] ring-1 ring-inset ring-[#fff4d6]/45 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#ffd859]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -171,7 +171,7 @@ export function CodexModal({
                       <h3 className="text-base font-extrabold text-[#9c480a]">
                         {law.title}
                       </h3>
-                      <div className="my-2 rounded-lg border border-[#72bdd1]/60 bg-[#0d3549] px-3 py-2 font-math text-xs font-bold text-[#ffd45c] tabular-nums">
+                      <div className="my-2 rounded-xl border-[1.5px] border-[#e5b55c]/85 bg-gradient-to-b from-[#14516c] to-[#0a3145] px-3 py-2 font-math text-xs font-bold text-[#ffd859] tabular-nums">
                         <MathText text={law.formula} />
                       </div>
                       <p className="text-xs leading-relaxed font-medium text-[#1b3a4b]">
@@ -189,11 +189,11 @@ export function CodexModal({
           </div>
         ) : (
           <div className="quest-scroll flex-1 space-y-4 overflow-y-auto p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#72bdd1]/60 bg-[#0d3549] px-4 py-2.5 text-xs text-white">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-[1.5px] border-[#e5b55c]/90 bg-gradient-to-b from-[#14516c] to-[#0a3145] px-4 py-2.5 text-xs text-white">
               <span className="font-medium text-[#e3f4f7]">
                 Выдаются за решения с первой попытки и найденные тайны Острова.
               </span>
-              <span className="font-math font-bold text-[#ffd45c] tabular-nums">
+              <span className="font-math font-bold text-[#ffd859] tabular-nums">
                 Секретных веток: {foundSecretsCount}/{SECRET_BRANCH_IDS.length}
               </span>
             </div>

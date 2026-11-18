@@ -81,10 +81,10 @@ export function CrossroadsMapOverlay({
                 </span>
 
                 <span
-                  className={`mt-1.5 rounded-xl border-[1.5px] px-3 py-1 text-xs font-extrabold whitespace-nowrap shadow-lg transition-colors ${
+                  className={`mt-1.5 rounded-full border-2 px-3.5 py-1 text-xs font-extrabold whitespace-nowrap shadow-[0_6px_16px_rgba(4,16,26,0.52)] ring-1 ring-inset ring-[#fff4d6]/55 transition-colors ${
                     done
-                      ? 'border-[#33a88d] bg-[#105747]/96 text-[#e1fff5]'
-                      : 'border-[#e6ba62] bg-[#0d3347]/95 text-white group-hover:border-[#8e3d05] group-hover:bg-[#d46714]'
+                      ? 'border-[#33a88d] bg-gradient-to-b from-[#146e59]/96 to-[#0b4739]/96 text-[#e1fff5]'
+                      : 'border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-[#fff8e6] group-hover:border-[#8b3c07] group-hover:from-[#ef932e] group-hover:to-[#c75b0e] group-hover:text-white'
                   }`}
                 >
                   {district.title}
@@ -96,7 +96,7 @@ export function CrossroadsMapOverlay({
                   initial={{ opacity: 0, y: openUpward ? -6 : 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.14 }}
-                  className={`pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-xl border-2 border-[#dfaa48] bg-[#fdf3da] p-3 text-left text-[#152d3c] shadow-2xl ${
+                  className={`pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-2xl border-[2.5px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_65%,#f2da9f_100%)] p-3 text-left text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-2xl ${
                     openUpward ? 'bottom-full mb-2.5' : 'top-full mt-2'
                   }`}
                 >
@@ -162,10 +162,10 @@ export function CrossroadsMapOverlay({
               )}
             </span>
             <span
-              className={`mt-1.5 rounded-xl border-[1.5px] px-3 py-1 text-xs font-extrabold whitespace-nowrap shadow-lg tabular-nums ${
+              className={`mt-1.5 rounded-full border-2 px-3.5 py-1 text-xs font-extrabold whitespace-nowrap shadow-[0_6px_16px_rgba(4,16,26,0.55)] ring-1 ring-inset ring-[#fff4d6]/55 tabular-nums ${
                 allDistrictsDone
-                  ? 'border-[#8e3d05] bg-[#f08b2d] text-white'
-                  : 'border-[#e6ba62] bg-[#0d3347]/95 text-white'
+                  ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] to-[#c75b0e] text-white'
+                  : 'border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-[#fff8e6]'
               }`}
             >
               Храм Баланса · {completedDistricts.length}/4
@@ -177,7 +177,7 @@ export function CrossroadsMapOverlay({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.14 }}
-              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 rounded-xl border-2 border-[#dfaa48] bg-[#fdf3da] p-3 text-left text-[#152d3c] shadow-2xl"
+              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 rounded-2xl border-[2.5px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_65%,#f2da9f_100%)] p-3 text-left text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-2xl"
             >
               <div className="text-[11px] font-extrabold text-[#b45811]">
                 {allDistrictsDone
