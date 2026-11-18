@@ -1,0 +1,6 @@
+{
+  "name": "Алёша и Остров Неизвестных",
+  "description": "Образовательный интерактивный нелинейный квест-новелла по алгебре для 5–6 классов с ветвящимися концовками.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
