@@ -99,7 +99,14 @@ export interface TransferCheckResult {
   id: string;
   topic: string;
   attempts: number;
+  solved: boolean;
   solvedFirstTry: boolean;
+  method?: 'algebraic' | 'arithmetic';
+  studentExpression?: string;
+  referenceModel?: string;
+  referenceArithmetic?: string;
+  referenceAnswer?: string;
+  explanation?: string;
 }
 
 export interface PlayerState {
@@ -235,6 +242,32 @@ export interface TableBuilderTask {
   nextNodeId: string;
 }
 
+export interface EquationBuilderTask {
+  /** Prompt above the equation/expression constructor */
+  equationPrompt: string;
+  /** Prompt above the final numeric answer field */
+  answerPrompt: string;
+  unit?: string;
+  /** Valid roots for algebraic equation (supports dual x-designation!) */
+  acceptedRoots: number[];
+  /** Exact final numeric answer asked by the problem */
+  correctAnswer: number;
+  /** Quick-insert math token chips for desktop/mobile convenience */
+  tokenChips?: string[];
+  /** Reference algebraic equation shown only in post-test review */
+  referenceModel: string;
+  /** Reference arithmetic way shown only in post-test review */
+  referenceArithmetic: string;
+  /** Detailed review explanation shown AFTER all transfer tasks finish */
+  reviewExplanation: string;
+  nextNodeId: string;
+  /** Optional detector for specific observed algebraic mistakes in the student's equation */
+  diagnoseWrongEquation?: (
+    root: number | null,
+    normalizedEquation: string,
+  ) => MistakeCategory;
+}
+
 export interface StoryNode {
   id: string;
   episodeId: string;
@@ -252,6 +285,7 @@ export interface StoryNode {
   isCrossroadsHub?: boolean;
   isSecretNode?: boolean;
   isIndependentCheck?: boolean;
+  isTransferReview?: boolean;
   transferCheckTopic?: string;
   choices?: StoryChoice[];
   numericTask?: NumericTask;
@@ -259,6 +293,7 @@ export interface StoryNode {
   scratchpadTask?: ScratchpadTask;
   verificationTask?: VerificationTask;
   tableTask?: TableBuilderTask;
+  equationBuilderTask?: EquationBuilderTask;
 }
 
 export interface CodexLaw {

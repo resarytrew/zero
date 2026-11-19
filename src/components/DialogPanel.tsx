@@ -35,6 +35,15 @@ interface DialogPanelProps {
   onSubmitScratchpad: (values: Record<string, string>) => void;
   onSubmitVerification: (values: Record<string, string>) => void;
   onSubmitTable: (selections: Record<string, string>) => void;
+  onSubmitEquationBuilder?: (
+    mode: 'algebraic' | 'arithmetic',
+    expression: string,
+    answer: string,
+  ) => void;
+  onSkipIndependentCheck?: (
+    mode: 'algebraic' | 'arithmetic',
+    lastExpression: string,
+  ) => void;
   onSelectDistrict: (districtId: DistrictId) => void;
   onEnterTemple: () => void;
   onToggleMobileModel?: () => void;
@@ -74,6 +83,8 @@ export function DialogPanel({
   onSubmitScratchpad,
   onSubmitVerification,
   onSubmitTable,
+  onSubmitEquationBuilder,
+  onSkipIndependentCheck,
   onSelectDistrict,
   onEnterTemple,
   onToggleMobileModel,
@@ -83,6 +94,9 @@ export function DialogPanel({
   const [secondVal, setSecondVal] = useState('');
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [tableSelections, setTableSelections] = useState<Record<string, string>>({});
+  const [builderMode, setBuilderMode] = useState<'algebraic' | 'arithmetic'>('algebraic');
+  const [builderExpr, setBuilderExpr] = useState('');
+  const [builderAns, setBuilderAns] = useState('');
 
   const totalChars = useMemo(
     () => node.text.reduce((sum, p) => sum + p.length, 0),
@@ -107,6 +121,9 @@ export function DialogPanel({
     setSecondVal('');
     setFieldValues({});
     setTableSelections({});
+    setBuilderMode('algebraic');
+    setBuilderExpr('');
+    setBuilderAns('');
     setRevealedChars(shouldInstant ? totalChars : 0);
   }, [node.id, shouldInstant, totalChars]);
 
@@ -148,6 +165,8 @@ export function DialogPanel({
     numericVal.trim().length > 0 ||
     firstVal.trim().length > 0 ||
     secondVal.trim().length > 0 ||
+    builderExpr.trim().length > 0 ||
+    builderAns.trim().length > 0 ||
     Object.values(fieldValues).some((v) => v.trim().length > 0) ||
     Object.values(tableSelections).some((v) => v.trim().length > 0);
 
@@ -191,6 +210,11 @@ export function DialogPanel({
     onSubmitTable(tableSelections);
   };
 
+  const handleEquationBuilderForm = (e: FormEvent) => {
+    e.preventDefault();
+    onSubmitEquationBuilder?.(builderMode, builderExpr, builderAns);
+  };
+
   const visibleParagraphs = useMemo(() => {
     let remaining = revealedChars;
     return node.text.map((p) => {
@@ -212,6 +236,8 @@ export function DialogPanel({
     !node.scratchpadTask &&
     !node.verificationTask &&
     !node.tableTask &&
+    !node.equationBuilderTask &&
+    !node.isTransferReview &&
     node.choices &&
     node.choices.length === 1
       ? node.choices[0]
@@ -234,6 +260,7 @@ export function DialogPanel({
       node.scratchpadTask ||
       node.verificationTask ||
       node.tableTask ||
+      node.equationBuilderTask ||
       node.choices?.some((c) => c.isCorrect === false),
   );
 
@@ -319,7 +346,11 @@ export function DialogPanel({
                               : 'bg-gradient-to-b from-[#fcd974] to-[#eaa72e] text-[#113144]'
                           }`}
                         >
-                          {node.isIndependentCheck ? 'Без подсказок' : 'Задача'}
+                          {node.isIndependentCheck
+                            ? 'Без подсказок'
+                            : node.isTransferReview
+                              ? 'Разбор'
+                              : 'Задача'}
                         </span>
                       </span>
                     )}
@@ -555,6 +586,74 @@ export function DialogPanel({
               </button>
             </div>
           </>
+        )}
+
+        {/* Deferred Post-Test Detailed Review of all 5 Independent Transfer Tasks */}
+        {node.isTransferReview && (
+          <div className="space-y-2.5 border-t border-[#d8b46e]/60 pt-3">
+            {Object.values(playerState.transferCheckResults ?? {}).map((res, idx) => (
+              <div
+                key={res.id}
+                className={`rounded-xl border-2 px-3.5 py-2.5 text-xs ${
+                  res.solvedFirstTry
+                    ? 'border-[#2f856d] bg-[#e2f7ee] text-[#0c3f31]'
+                    : res.solved
+                      ? 'border-[#d49a3a] bg-[#fff8e6] text-[#4b2507]'
+                      : 'border-[#c45b3e] bg-[#fff0eb] text-[#5e1c0e]'
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-extrabold">
+                    {idx + 1}. {res.topic}
+                  </span>
+                  <span className="font-math font-extrabold tabular-nums">
+                    {res.solvedFirstTry
+                      ? 'С 1-й попытки'
+                      : res.solved
+                        ? `Решено за ${res.attempts} поп.`
+                        : 'Не решено'}
+                  </span>
+                </div>
+                {res.studentExpression && (
+                  <div className="mt-1 font-semibold opacity-90">
+                    Твоя запись ({res.method === 'arithmetic' ? 'арифметически' : 'алгебраически'}):{' '}
+                    <span className="font-math font-extrabold">{res.studentExpression}</span>
+                  </div>
+                )}
+                {res.referenceModel && (
+                  <div className="mt-1 space-y-0.5 border-t border-current/15 pt-1 text-[11.5px]">
+                    <div>
+                      <strong>Уравнение:</strong>{' '}
+                      <span className="font-math font-bold">
+                        <MathText text={res.referenceModel} />
+                      </span>
+                      {res.referenceArithmetic && (
+                        <>
+                          {' · '}
+                          <strong>Арифметически:</strong>{' '}
+                          <span className="font-math font-bold">
+                            <MathText text={res.referenceArithmetic} />
+                          </span>
+                        </>
+                      )}
+                      {res.referenceAnswer && (
+                        <>
+                          {' · '}
+                          <strong>Ответ:</strong>{' '}
+                          <span className="font-math font-bold">{res.referenceAnswer}</span>
+                        </>
+                      )}
+                    </div>
+                    {res.explanation && (
+                      <p className="leading-snug opacity-90">
+                        <MathText text={res.explanation} />
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Standard Choices styled as tactile rounded-full storybook arrow capsules */}
@@ -881,6 +980,142 @@ export function DialogPanel({
             >
               Составить уравнение
             </button>
+          </form>
+        )}
+
+        {/* Open Algebraic / Arithmetic Equation Constructor */}
+        {node.equationBuilderTask && (
+          <form
+            onSubmit={handleEquationBuilderForm}
+            className="space-y-3 border-t border-[#d8b46e]/60 pt-3"
+          >
+            <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Способ решения">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={builderMode === 'algebraic'}
+                onClick={() => setBuilderMode('algebraic')}
+                className={`min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-extrabold transition-all ${
+                  builderMode === 'algebraic'
+                    ? 'storybook-btn-primary'
+                    : 'storybook-btn-sky'
+                }`}
+              >
+                Алгебраически (уравнение)
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={builderMode === 'arithmetic'}
+                onClick={() => setBuilderMode('arithmetic')}
+                className={`min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-extrabold transition-all ${
+                  builderMode === 'arithmetic'
+                    ? 'storybook-btn-primary'
+                    : 'storybook-btn-sky'
+                }`}
+              >
+                Арифметически (по действиям)
+              </button>
+            </div>
+
+            <div>
+              <label
+                htmlFor="equation-builder-expr"
+                className="mb-1.5 block text-xs font-extrabold text-[#0e4259]"
+              >
+                {builderMode === 'algebraic'
+                  ? node.equationBuilderTask.equationPrompt
+                  : 'Запиши арифметическое выражение, которым найден ответ:'}
+              </label>
+              <input
+                id="equation-builder-expr"
+                type="text"
+                autoComplete="off"
+                spellCheck={false}
+                value={builderExpr}
+                onChange={(e) => setBuilderExpr(e.target.value)}
+                placeholder={
+                  builderMode === 'algebraic'
+                    ? 'Запиши уравнение с x и знаком ='
+                    : 'Запиши выражение с действиями (+, −, ·, /)'
+                }
+                className="font-math h-11 w-full rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3.5 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:font-sans placeholder:text-xs placeholder:font-semibold placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none"
+              />
+              {node.equationBuilderTask.tokenChips && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {node.equationBuilderTask.tokenChips
+                    .filter((chip) =>
+                      builderMode === 'arithmetic'
+                        ? chip !== 'x' && chip !== '='
+                        : true,
+                    )
+                    .map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setBuilderExpr((prev) => `${prev}${chip}`)}
+                        aria-label={`Вставить символ ${chip}`}
+                        className="font-math flex h-8 min-w-[34px] items-center justify-center rounded-lg border border-[#c89643] bg-[#fff4d8] px-2 text-sm font-extrabold text-[#0d3347] transition-colors hover:bg-[#f6d998]"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  {builderExpr.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setBuilderExpr('')}
+                      className="ml-auto rounded-lg border border-[#c89643]/60 px-2.5 text-[11px] font-bold text-[#6e4a18] hover:bg-[#f6e3b8]"
+                    >
+                      Очистить
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="equation-builder-ans"
+                className="mb-1 block text-xs font-extrabold text-[#0e4259]"
+              >
+                {node.equationBuilderTask.answerPrompt}
+              </label>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <input
+                  id="equation-builder-ans"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={builderAns}
+                  onChange={(e) => setBuilderAns(e.target.value)}
+                  placeholder="Введи число"
+                  className="font-math h-11 min-w-[140px] flex-1 rounded-xl border-2 border-[#c89643] bg-[#fffaf0] px-3.5 py-0 text-base leading-normal font-bold text-[#102d3e] placeholder:text-[#8a7550] focus:border-[#d46714] focus:outline-none tabular-nums"
+                />
+                {node.equationBuilderTask.unit && (
+                  <span className="text-xs font-bold text-[#2b4d5f]">
+                    {node.equationBuilderTask.unit}
+                  </span>
+                )}
+                <button
+                  type="submit"
+                  className="storybook-btn-primary min-h-[44px] rounded-full px-5 py-2 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
+                >
+                  Проверить
+                </button>
+              </div>
+            </div>
+
+            {node.isIndependentCheck &&
+              (playerState.stepAttempts[node.id] ?? 0) >= 1 &&
+              onSkipIndependentCheck && (
+                <button
+                  type="button"
+                  onClick={() => onSkipIndependentCheck(builderMode, builderExpr)}
+                  className="min-h-[40px] w-full rounded-full border border-[#b99555] bg-[#f7e7c0]/80 px-4 py-2 text-xs font-bold text-[#5c3e16] transition-colors hover:bg-[#edd49e] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+                >
+                  Зафиксировать попытку и перейти к следующей задаче
+                </button>
+              )}
           </form>
         )}
       </div>

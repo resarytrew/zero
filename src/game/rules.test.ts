@@ -2,9 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getSpeakerPortrait, SECRET_BRANCH_IDS } from './codexData';
 import {
+  isEquationEquivalentToRoots,
+  parseArithmeticExpression,
+  parseLinearEquation,
+} from './equationParser';
+import {
   applyBadgeEvaluation,
   applyChoice,
   applyDualNumericAnswer,
+  applyEquationBuilderAnswer,
   applyNumericAnswer,
   applyScratchpadAnswer,
   applyTableSubmission,
@@ -15,6 +21,7 @@ import {
   enterTempleFromCrossroads,
   resolveDialogPortraitState,
   selectDistrictFromCrossroads,
+  skipIndependentCheckNode,
 } from './engine';
 import { evaluateEnding } from './endings';
 import { STORY_NODES } from './storyData';
@@ -172,28 +179,53 @@ test('Episode 6 boss battle, transfer check, diagnostic report, and branching en
   assert.equal(verifyOk.unlockedLaw, 6);
   assert.equal(verifyOk.nextState.currentNodeId, 'ep6_transfer_intro');
 
-  // Independent transfer check (3 unseen tasks without character hints)
+  // Independent transfer check (5 unseen tasks with open equation/arithmetic constructor, strictly hint-free)
   const trStart = applyChoice(verifyOk.nextState, STORY_NODES.ep6_transfer_intro.choices![0]);
   assert.equal(trStart.nextState.currentNodeId, 'ep6_transfer_1');
 
-  const tr1Wrong = applyNumericAnswer(trStart.nextState, '10');
-  assert.equal(tr1Wrong.feedback?.isError, true);
-  assert.equal(tr1Wrong.feedback?.hintLevel, undefined);
-  assert.equal(tr1Wrong.feedback?.speaker, 'Самостоятельная проверка');
+  // Right equation + wrong numeric answer -> strictly arithmetic_check (NOT like_terms!) and zero hints
+  const tr1ArithWrong = applyEquationBuilderAnswer(
+    trStart.nextState,
+    'algebraic',
+    '4x + 6x = 50',
+    '10',
+  );
+  assert.equal(tr1ArithWrong.feedback?.isError, true);
+  assert.equal(tr1ArithWrong.feedback?.hintLevel, undefined);
+  assert.equal(tr1ArithWrong.feedback?.speaker, 'Самостоятельная проверка');
+  assert.equal(tr1ArithWrong.feedback?.text.includes('подобн'), false);
+  assert.equal(tr1ArithWrong.nextState.mistakesByCategory.arithmetic_check, 1);
+  assert.equal(tr1ArithWrong.nextState.mistakesByCategory.like_terms ?? 0, 0);
 
-  const tr1Ok = applyNumericAnswer(tr1Wrong.nextState, '5');
+  const tr1Ok = applyEquationBuilderAnswer(tr1ArithWrong.nextState, 'algebraic', '4x + 6x = 50', '5');
   assert.equal(tr1Ok.nextState.currentNodeId, 'ep6_transfer_2');
-  assert.equal(tr1Ok.nextState.transferCheckResults.ep6_transfer_1?.id, 'ep6_transfer_1');
+  assert.equal(tr1Ok.nextState.transferCheckResults.ep6_transfer_1?.solved, true);
   assert.equal(tr1Ok.nextState.transferCheckResults.ep6_transfer_1?.solvedFirstTry, false);
-  assert.equal(tr1Ok.nextState.transferCheckResults.ep6_transfer_1?.attempts, 2);
+  assert.equal(tr1Ok.nextState.transferCheckResults.ep6_transfer_1?.method, 'algebraic');
 
-  const tr2Ok = applyNumericAnswer(tr1Ok.nextState, '24');
+  // Task 2: dual model (1st basket = x -> x - 10 = x/2 + 14) accepted with answer 24!
+  const tr2Ok = applyEquationBuilderAnswer(tr1Ok.nextState, 'algebraic', 'x - 10 = x/2 + 14', '24');
   assert.equal(tr2Ok.nextState.currentNodeId, 'ep6_transfer_3');
   assert.equal(tr2Ok.nextState.transferCheckResults.ep6_transfer_2?.solvedFirstTry, true);
 
-  const tr3Ok = applyNumericAnswer(tr2Ok.nextState, '5');
-  assert.equal(tr3Ok.nextState.currentNodeId, 'ep6_final_stance');
+  // Task 3: justified arithmetic solution accepted!
+  const tr3Ok = applyEquationBuilderAnswer(tr2Ok.nextState, 'arithmetic', '(6 + 4) / (6 - 4)', '5');
+  assert.equal(tr3Ok.nextState.currentNodeId, 'ep6_transfer_4');
+  assert.equal(tr3Ok.nextState.transferCheckResults.ep6_transfer_3?.method, 'arithmetic');
   assert.equal(tr3Ok.nextState.transferCheckResults.ep6_transfer_3?.solvedFirstTry, true);
+
+  // Task 4: brackets equation 2(10 + x) = 3(10 - x), answer 2
+  const tr4Ok = applyEquationBuilderAnswer(tr3Ok.nextState, 'algebraic', '2(10 + x) = 3(10 - x)', '2');
+  assert.equal(tr4Ok.nextState.currentNodeId, 'ep6_transfer_5');
+  assert.equal(tr4Ok.nextState.transferCheckResults.ep6_transfer_4?.solvedFirstTry, true);
+
+  // Task 5: fractional coefficients x/2 + x/6 + 12 = x, answer 36 -> deferred review screen
+  const tr5Ok = applyEquationBuilderAnswer(tr4Ok.nextState, 'algebraic', 'x/2 + x/6 + 12 = x', '36');
+  assert.equal(tr5Ok.nextState.currentNodeId, 'ep6_transfer_review');
+  assert.equal(tr5Ok.nextState.transferCheckResults.ep6_transfer_5?.solvedFirstTry, true);
+
+  const afterReview = applyChoice(tr5Ok.nextState, STORY_NODES.ep6_transfer_review.choices![0]);
+  assert.equal(afterReview.nextState.currentNodeId, 'ep6_final_stance');
 });
 
 test('Character emotion system assigns emotions to STORY_NODES and switches hologram sprites dynamically', () => {
@@ -485,4 +517,60 @@ test('Audit P1: Independent student construction works in Ep2 table, Ep4 fractio
   const ep5AfterTr = applyChoice(ep5TableOk.nextState, ep5TrOk);
   assert.equal(ep5AfterTr.nextState.currentNodeId, 'ep5_step2b_scratchpad');
 });
+
+test('Audit Round 2: Open algebraic & arithmetic parser validates equivalence, rejects trivial/unjustified entries, and diagnoses observed traps', () => {
+  // Equivalent algebraic forms (including Cyrillic х, brackets, fractions, rearranged terms)
+  const eq1 = parseLinearEquation('6х + 4х = 50');
+  assert.equal(eq1.ok, true);
+  if (eq1.ok) assert.equal(isEquationEquivalentToRoots(eq1, [5]), true);
+
+  const eq2 = parseLinearEquation('2(10 + x) = 3(10 − x)');
+  assert.equal(eq2.ok, true);
+  if (eq2.ok) assert.equal(isEquationEquivalentToRoots(eq2, [2]), true);
+
+  const eq3 = parseLinearEquation('1/2x + 1/6x + 12 = x');
+  assert.equal(eq3.ok, true);
+  if (eq3.ok) assert.equal(isEquationEquivalentToRoots(eq3, [36]), true);
+
+  // Trivial "x = 5" is rejected as non-modeling
+  const trivial = parseLinearEquation('x = 5');
+  assert.equal(trivial.ok, true);
+  if (trivial.ok) {
+    assert.equal(trivial.isTrivial, true);
+    assert.equal(isEquationEquivalentToRoots(trivial, [5]), false);
+  }
+
+  // Justified arithmetic expression accepted; bare number rejected
+  const arithOk = parseArithmeticExpression('50 : (4 + 6)');
+  assert.equal(arithOk.ok, true);
+  if (arithOk.ok) assert.equal(arithOk.value, 5);
+
+  const arithBare = parseArithmeticExpression('5');
+  assert.equal(arithBare.ok, false);
+  if (!arithBare.ok) assert.equal(arithBare.reason, 'no_operator');
+
+  // Observed diagnostic on Task 4: un-distributed bracket trap -> brackets_distribution
+  let s4 = createInitialPlayerState();
+  s4.currentNodeId = 'ep6_transfer_4';
+  const bracketTrap = applyEquationBuilderAnswer(s4, 'algebraic', '20 + x = 30 - x', '5');
+  assert.equal(bracketTrap.feedback?.isError, true);
+  assert.equal(bracketTrap.nextState.mistakesByCategory.brackets_distribution, 1);
+  assert.equal(bracketTrap.feedback?.text.includes('скобк'), false);
+
+  // Skip after failed attempt records solved: false and advances cleanly
+  const skipped = skipIndependentCheckNode(bracketTrap.nextState, 'algebraic', '20 + x = 30 - x');
+  assert.equal(skipped.nextState.currentNodeId, 'ep6_transfer_5');
+  assert.equal(skipped.nextState.transferCheckResults.ep6_transfer_4?.solved, false);
+
+  // Ep4 numeric task differentiates fraction trap (4) vs arithmetic slip (46)
+  let ep4State = createInitialPlayerState();
+  ep4State.currentNodeId = 'ep4_step4_algebraic';
+  const ep4Slip = applyNumericAnswer(ep4State, '46');
+  assert.equal(ep4Slip.nextState.mistakesByCategory.arithmetic_check, 1);
+  assert.equal(ep4Slip.nextState.mistakesByCategory.fractions_parts ?? 0, 0);
+
+  const ep4Frac = applyNumericAnswer(ep4Slip.nextState, '4');
+  assert.equal(ep4Frac.nextState.mistakesByCategory.fractions_parts, 1);
+});
+
 

@@ -121,7 +121,7 @@ export function EndingScreen({
             aria-label="Независимая итоговая проверка"
             className="relative z-10 mt-5"
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-extrabold text-[#0d3347]">
                 Независимая проверка переноса навыка (без подсказок)
               </h2>
@@ -129,24 +129,38 @@ export function EndingScreen({
                 С первой попытки: {transferFirstTryCount} / {transferList.length}
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {transferList.map((res) => (
-                <div
-                  key={res.id}
-                  className={`rounded-xl border-2 px-3 py-2 text-xs ${
-                    res.solvedFirstTry
-                      ? 'border-[#2f856d] bg-[#d8f5ea] text-[#0c3f31]'
-                      : 'border-[#d49a3a] bg-[#fff9eb] text-[#5e2d06]'
-                  }`}
-                >
-                  <div className="font-extrabold">{res.topic}</div>
-                  <div className="mt-0.5 font-semibold opacity-90">
-                    {res.solvedFirstTry
-                      ? 'Решено самостоятельно с 1-й попытки'
-                      : `Решено за ${res.attempts} поп.`}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {transferList.map((res) => {
+                const isSolved = res.solved ?? true;
+                return (
+                  <div
+                    key={res.id}
+                    className={`rounded-xl border-2 px-3 py-2 text-xs ${
+                      res.solvedFirstTry
+                        ? 'border-[#2f856d] bg-[#d8f5ea] text-[#0c3f31]'
+                        : isSolved
+                          ? 'border-[#d49a3a] bg-[#fff9eb] text-[#5e2d06]'
+                          : 'border-[#c45b3e] bg-[#fff0eb] text-[#5e1c0e]'
+                    }`}
+                  >
+                    <div className="font-extrabold">{res.topic}</div>
+                    <div className="mt-0.5 font-semibold opacity-90">
+                      {res.solvedFirstTry
+                        ? 'С 1-й попытки'
+                        : isSolved
+                          ? `Решено за ${res.attempts} поп.`
+                          : 'Не решено'}
+                      {res.method &&
+                        ` · ${res.method === 'arithmetic' ? 'арифм.' : 'уравнение'}`}
+                    </div>
+                    {res.studentExpression && (
+                      <div className="font-math mt-0.5 truncate text-[11px] font-bold opacity-85">
+                        {res.studentExpression}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

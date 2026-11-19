@@ -942,7 +942,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
               ? 'Раз 2 трети равны 38, сначала раздели 38 на 2 (найдёшь вторую полку x/3), а потом умножь результат на 3 (найдёшь первую полку x).'
               : 'Шаг 1: найди 38 : 2 — это вторая полка. Шаг 2: умножь полученное число на 3 — это первая полка.',
           speaker: 'pi',
-          category: 'fractions_parts',
+          category: 'arithmetic_check',
         };
       },
     },
@@ -1468,15 +1468,18 @@ export const STORY_NODES: Record<string, StoryNode> = {
       correctValue: 48,
       nextNodeId: 'ep4_verify',
       mistakeCategory: 'fractions_parts',
-      evaluateWrong: (_val, attempt) => ({
-        feedback:
-          attempt === 1
-            ? 'Если 5 долей равны 20 кристаллам, то сколько кристаллов в ОДНОЙ доле (1/12)? А потом умножь на все 12 долей.'
-            : 'Выполни два действия по очереди: сначала раздели 20 на 5 (найдёшь одну долю), затем умножь результат на 12.',
-        speaker: 'pi',
-        integrityDelta: -10,
-        category: 'fractions_parts',
-      }),
+      evaluateWrong: (val, attempt) => {
+        const isFractionTrap = val === 4 || val === 100 || val === 240 || val === 25;
+        return {
+          feedback:
+            attempt === 1
+              ? 'Если 5 долей равны 20 кристаллам, то сколько кристаллов в ОДНОЙ доле (1/12)? А потом умножь на все 12 долей.'
+              : 'Выполни два действия по очереди: сначала раздели 20 на 5 (найдёшь одну долю), затем умножь результат на 12.',
+          speaker: 'pi',
+          integrityDelta: -10,
+          category: isFractionTrap ? 'fractions_parts' : 'arithmetic_check',
+        };
+      },
     },
   },
 
@@ -1503,15 +1506,18 @@ export const STORY_NODES: Record<string, StoryNode> = {
       correctValue: 48,
       nextNodeId: 'ep4_verify',
       mistakeCategory: 'fractions_parts',
-      evaluateWrong: (_val, attempt) => ({
-        feedback:
-          attempt === 1
-            ? 'Посмотри на шкалу слева: 5 зелёных кусочков дают 20 кристаллов. Сколько кристаллов в одном кусочке?'
-            : 'Сначала найди величину одной части (20 : 5), а затем умножь её на количество всех частей (12).',
-        speaker: 'pi',
-        integrityDelta: -10,
-        category: 'fractions_parts',
-      }),
+      evaluateWrong: (val, attempt) => {
+        const isFractionTrap = val === 4 || val === 100 || val === 240 || val === 25;
+        return {
+          feedback:
+            attempt === 1
+              ? 'Посмотри на шкалу слева: 5 зелёных кусочков дают 20 кристаллов. Сколько кристаллов в одном кусочке?'
+              : 'Сначала найди величину одной части (20 : 5), а затем умножь её на количество всех частей (12).',
+          speaker: 'pi',
+          integrityDelta: -10,
+          category: isFractionTrap ? 'fractions_parts' : 'arithmetic_check',
+        };
+      },
     },
   },
 
@@ -2297,20 +2303,20 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep6_transfer_intro',
     episodeId: 'transfer',
     episodeTitle: 'Испытание Печати · Независимая проверка',
-    mathTopic: 'Три новые задачи без подсказок персонажей',
+    mathTopic: 'Пять новых задач без подсказок',
     scene: 'temple',
     speaker: 'narrator',
     speakerName: 'Печать Портала',
     emotion: 'curious',
     schematic: 'none',
     text: [
-      'Тень Скобок рассеялась, но на золотой арке Портала вспыхнули три рунические печати. Голос Храма произнёс: «Кодекс собран, но прежде чем вернуться домой, докажи, что умеешь составлять и решать уравнения полностью самостоятельно».',
-      'Впереди три короткие новые задачи без подсказок Совы Пи и без готовых схем. Составь уравнение на листке или в уме и введи проверенный ответ!',
+      'Тень Скобок рассеялась, но на золотой арке Портала вспыхнули пять рунических печатей. Голос Храма произнёс: «Кодекс собран, но прежде чем вернуться домой, докажи, что умеешь самостоятельно строить математические модели и решать задачи».',
+      'Впереди пять новых задач всех изученных типов — без подсказок Совы Пи. Каждую задачу можно решить алгебраически (составив уравнение с x) или арифметически (записав обоснованное выражение по действиям). Подробный разбор откроется после завершения всех пяти задач.',
     ],
     choices: [
       {
         id: 'start_transfer_check',
-        label: 'Приступить к самостоятельной проверке (3 задачи)',
+        label: 'Приступить к самостоятельной проверке (5 задач)',
         nextNodeId: 'ep6_transfer_1',
         isCorrect: true,
       },
@@ -2320,7 +2326,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
   ep6_transfer_1: {
     id: 'ep6_transfer_1',
     episodeId: 'transfer',
-    episodeTitle: 'Независимая проверка · Задача 1 из 3',
+    episodeTitle: 'Независимая проверка · Задача 1 из 5',
     mathTopic: 'Встречное движение',
     scene: 'temple',
     speaker: 'narrator',
@@ -2332,27 +2338,32 @@ export const STORY_NODES: Record<string, StoryNode> = {
     text: [
       'Задача: Два велосипедиста одновременно выехали навстречу друг другу из двух посёлков, расстояние между которыми 50 км. Скорость первого — 4 км/ч, второго — 6 км/ч. Через сколько часов они встретятся?',
     ],
-    numericTask: {
-      prompt: 'Введи время до встречи (в часах):',
-      unit: 'часов',
-      placeholder: 'Введи число',
-      correctValue: 5,
+    equationBuilderTask: {
+      equationPrompt: 'Запиши уравнение по условию (или переключись на арифметический способ):',
+      answerPrompt: 'Итоговый ответ (время до встречи):',
+      unit: 'ч',
+      acceptedRoots: [5],
+      correctAnswer: 5,
+      tokenChips: ['x', '+', '−', '·', '/', '(', ')', '='],
+      referenceModel: '4x + 6x = 50',
+      referenceArithmetic: '50 / (4 + 6)',
+      reviewExplanation:
+        'За x ч первый проедет 4x км, второй — 6x км. Суммарный путь: 4x + 6x = 50 ⇒ 10x = 50 ⇒ x = 5 ч. Арифметически: скорость сближения 4 + 6 = 10 км/ч, время 50 : 10 = 5 ч.',
       nextNodeId: 'ep6_transfer_2',
-      mistakeCategory: 'like_terms',
-      evaluateWrong: () => ({
-        feedback:
-          'Ответ не сходится с условием. Составь уравнение для общего расстояния 50 км, приведи подобные слагаемые и проверь корень подстановкой.',
-        speaker: 'pi',
-        integrityDelta: -5,
-        category: 'like_terms',
-      }),
+      diagnoseWrongEquation: (root, norm) => {
+        if (root !== null && Math.abs(root - 25) < 1e-3) return 'sign_transfer';
+        if (norm.includes('24x') || (root !== null && Math.abs(root - 50 / 24) < 1e-3)) {
+          return 'like_terms';
+        }
+        return 'expression_translation';
+      },
     },
   },
 
   ep6_transfer_2: {
     id: 'ep6_transfer_2',
     episodeId: 'transfer',
-    episodeTitle: 'Независимая проверка · Задача 2 из 3',
+    episodeTitle: 'Независимая проверка · Задача 2 из 5',
     mathTopic: 'Задачи «было — стало»',
     scene: 'temple',
     speaker: 'narrator',
@@ -2364,27 +2375,32 @@ export const STORY_NODES: Record<string, StoryNode> = {
     text: [
       'Задача: В первой корзине было в 2 раза больше яблок, чем во второй. Когда из первой корзины взяли 10 яблок, а во вторую положили 14, яблок в корзинах стало поровну. Сколько яблок было во ВТОРОЙ корзине изначально?',
     ],
-    numericTask: {
-      prompt: 'Введи начальное число яблок во второй корзине:',
+    equationBuilderTask: {
+      equationPrompt: 'Запиши уравнение (принимаются обе модели — за x можно взять любую корзину) или арифметическое решение:',
+      answerPrompt: 'Итоговый ответ (во второй корзине было):',
       unit: 'яблок',
-      placeholder: 'Введи число',
-      correctValue: 24,
+      // Accepts both x = 2nd basket (root 24) AND x = 1st basket (x - 10 = x/2 + 14 => root 48)
+      acceptedRoots: [24, 48],
+      correctAnswer: 24,
+      tokenChips: ['x', '+', '−', '·', '/', '(', ')', '='],
+      referenceModel: '2x − 10 = x + 14 (или x − 10 = x/2 + 14)',
+      referenceArithmetic: '10 + 14 (или (10 + 14) / (2 − 1))',
+      reviewExplanation:
+        'Если во второй корзине x яблок, то в первой 2x. После перестановки: 2x − 10 = x + 14 ⇒ x = 24. (Если за x взять первую корзину: x − 10 = x/2 + 14 ⇒ x = 48, значит во второй 48 : 2 = 24.) Проверка: 48 − 10 = 38 и 24 + 14 = 38.',
       nextNodeId: 'ep6_transfer_3',
-      mistakeCategory: 'sign_transfer',
-      evaluateWrong: () => ({
-        feedback:
-          'Число не удовлетворяет условию «стало поровну». Проверь составленное уравнение, знаки при переносе слагаемых и подставь свой ответ обратно в текст задачи.',
-        speaker: 'pi',
-        integrityDelta: -5,
-        category: 'sign_transfer',
-      }),
+      diagnoseWrongEquation: (root) => {
+        if (root !== null && (Math.abs(root - 4) < 1e-3 || Math.abs(root - 8) < 1e-3)) {
+          return 'sign_transfer';
+        }
+        return 'expression_translation';
+      },
     },
   },
 
   ep6_transfer_3: {
     id: 'ep6_transfer_3',
     episodeId: 'transfer',
-    episodeTitle: 'Независимая проверка · Задача 3 из 3',
+    episodeTitle: 'Независимая проверка · Задача 3 из 5',
     mathTopic: 'Два способа счёта',
     scene: 'temple',
     speaker: 'narrator',
@@ -2396,21 +2412,127 @@ export const STORY_NODES: Record<string, StoryNode> = {
     text: [
       'Задача: Если разложить конфеты по 4 в каждый пакет, останется 6 лишних конфет. А если раскладывать по 6 конфет в пакет, то для заполнения всех пакетов не хватит 4 конфет. Сколько всего пакетов?',
     ],
-    numericTask: {
-      prompt: 'Введи количество пакетов:',
+    equationBuilderTask: {
+      equationPrompt: 'Запиши уравнение или арифметическое выражение для числа пакетов:',
+      answerPrompt: 'Итоговый ответ (количество пакетов):',
       unit: 'пакетов',
-      placeholder: 'Введи число',
-      correctValue: 5,
-      nextNodeId: 'ep6_final_stance',
-      mistakeCategory: 'expression_translation',
-      evaluateWrong: () => ({
-        feedback:
-          'Результат не сходится с обоими способами раскладки. Вырази число конфет двумя способами через число пакетов, приравняй выражения и проверь ответ.',
-        speaker: 'pi',
-        integrityDelta: -5,
-        category: 'expression_translation',
-      }),
+      acceptedRoots: [5],
+      correctAnswer: 5,
+      tokenChips: ['x', '+', '−', '·', '/', '(', ')', '='],
+      referenceModel: '4x + 6 = 6x − 4',
+      referenceArithmetic: '(6 + 4) / (6 − 4)',
+      reviewExplanation:
+        'Пусть пакетов x. Число конфет двумя способами: 4x + 6 и 6x − 4. Приравниваем: 4x + 6 = 6x − 4 ⇒ 10 = 2x ⇒ x = 5 пакетов. Арифметически: разница на каждый пакет 6 − 4 = 2 конфеты, общая разница 6 + 4 = 10 конфет ⇒ 10 : 2 = 5. Проверка: 4·5 + 6 = 26 и 6·5 − 4 = 26.',
+      nextNodeId: 'ep6_transfer_4',
+      diagnoseWrongEquation: (root) => {
+        if (root !== null && Math.abs(root - 1) < 1e-3) return 'sign_transfer';
+        return 'expression_translation';
+      },
     },
+  },
+
+  ep6_transfer_4: {
+    id: 'ep6_transfer_4',
+    episodeId: 'transfer',
+    episodeTitle: 'Независимая проверка · Задача 4 из 5',
+    mathTopic: 'Уравнение со скобками',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать IV · Раскрытие скобок',
+    emotion: 'thoughtful',
+    isIndependentCheck: true,
+    transferCheckTopic: 'Раскрытие скобок',
+    schematic: 'none',
+    text: [
+      'Задача: Моторная лодка прошла по течению реки за 2 часа то же расстояние, что и против течения за 3 часа. Собственная скорость лодки равна 10 км/ч. Найди скорость течения реки (в км/ч).',
+    ],
+    equationBuilderTask: {
+      equationPrompt: 'Запиши уравнение со скобками (или раскрытую форму) либо арифметическое выражение:',
+      answerPrompt: 'Итоговый ответ (скорость течения):',
+      unit: 'км/ч',
+      acceptedRoots: [2],
+      correctAnswer: 2,
+      tokenChips: ['x', '+', '−', '·', '/', '(', ')', '='],
+      referenceModel: '2(10 + x) = 3(10 − x)',
+      referenceArithmetic: '(3 · 10 − 2 · 10) / (2 + 3)',
+      reviewExplanation:
+        'Скорость по течению (10 + x), против течения (10 − x). Уравнение: 2(10 + x) = 3(10 − x) ⇒ 20 + 2x = 30 − 3x ⇒ 5x = 10 ⇒ x = 2 км/ч. Проверка: 2 · (10 + 2) = 24 км и 3 · (10 − 2) = 24 км.',
+      nextNodeId: 'ep6_transfer_5',
+      diagnoseWrongEquation: (root) => {
+        // Common bracket-distribution traps:
+        // 20 + x = 30 - x (root 5), 20 + x = 30 - 3x (root 2.5), 20 + 2x = 30 - x (root 10/3)
+        if (
+          root !== null &&
+          (Math.abs(root - 5) < 1e-3 ||
+            Math.abs(root - 2.5) < 1e-3 ||
+            Math.abs(root - 10 / 3) < 1e-3)
+        ) {
+          return 'brackets_distribution';
+        }
+        if (root !== null && Math.abs(root - 10) < 1e-3) {
+          return 'sign_transfer';
+        }
+        return 'expression_translation';
+      },
+    },
+  },
+
+  ep6_transfer_5: {
+    id: 'ep6_transfer_5',
+    episodeId: 'transfer',
+    episodeTitle: 'Независимая проверка · Задача 5 из 5',
+    mathTopic: 'Дробные коэффициенты и части целого',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать V · Дробные доли',
+    emotion: 'thoughtful',
+    isIndependentCheck: true,
+    transferCheckTopic: 'Дробные коэффициенты',
+    schematic: 'none',
+    text: [
+      'Задача: Турист прошёл в первый день 1/2 всего маршрута, во второй день — 1/6 всего маршрута, а в третий день — оставшиеся 12 км. Какова длина всего маршрута (в км)?',
+    ],
+    equationBuilderTask: {
+      equationPrompt: 'Запиши уравнение с дробями (например, через x/2 и x/6) или арифметическое выражение:',
+      answerPrompt: 'Итоговый ответ (длина всего маршрута):',
+      unit: 'км',
+      acceptedRoots: [36],
+      correctAnswer: 36,
+      tokenChips: ['x', '+', '−', '·', '/', '(', ')', '='],
+      referenceModel: 'x/2 + x/6 + 12 = x',
+      referenceArithmetic: '12 / (1 − 1/2 − 1/6)',
+      reviewExplanation:
+        'Пусть весь маршрут x км. Тогда x/2 + x/6 + 12 = x. Приводим к знаменателю 6: (3/6 + 1/6)x + 12 = x ⇒ (4/6)x + 12 = x ⇒ (2/6)x = 12 ⇒ (1/3)x = 12 ⇒ x = 36 км. Проверка: 18 + 6 + 12 = 36 км.',
+      nextNodeId: 'ep6_transfer_review',
+      diagnoseWrongEquation: (_root, norm) => {
+        if (norm.includes('/')) return 'fractions_parts';
+        return 'expression_translation';
+      },
+    },
+  },
+
+  ep6_transfer_review: {
+    id: 'ep6_transfer_review',
+    episodeId: 'transfer',
+    episodeTitle: 'Итоговый разбор самостоятельной проверки',
+    mathTopic: 'Анализ всех 5 задач и способов решения',
+    scene: 'temple',
+    speaker: 'pi',
+    speakerName: 'Сова Пи',
+    emotion: 'encourage',
+    isTransferReview: true,
+    schematic: 'none',
+    text: [
+      'Все пять рунических печатей прошли проверку! Теперь можно спокойно разобрать каждое задание, сравнить алгебраический и арифметический способы и сверить свои модели с эталоном.',
+    ],
+    choices: [
+      {
+        id: 'finish_transfer_review',
+        label: 'Перейти к Вратам Портала Домой',
+        nextNodeId: 'ep6_final_stance',
+        isCorrect: true,
+      },
+    ],
   },
 
   ep6_final_stance: {

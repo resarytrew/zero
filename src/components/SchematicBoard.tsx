@@ -39,29 +39,33 @@ export function SchematicBoard({
   // Ep 6 interactive river current tester
   const [riverTestX, setRiverTestX] = useState(2);
 
+  const tunnelMaxHours = step >= 4 ? 24 : 10;
+
   useEffect(() => {
     setTunnelPlaying(false);
-  }, [kind]);
+    setTunnelHours((prev) => Math.min(prev, tunnelMaxHours));
+  }, [kind, tunnelMaxHours]);
 
   useEffect(() => {
     if (!tunnelPlaying) return;
     const id = window.setInterval(() => {
       setTunnelHours((prev) => {
-        if (prev >= 24) {
+        if (prev >= tunnelMaxHours) {
           setTunnelPlaying(false);
-          return 24;
+          return tunnelMaxHours;
         }
         return prev + 1;
       });
     }, 120);
     return () => window.clearInterval(id);
-  }, [tunnelPlaying]);
+  }, [tunnelPlaying, tunnelMaxHours]);
 
   if (kind === 'none' || kind === 'crossroads_map') return null;
 
   const tiltAngle = scaleMode === 'left_only' ? 9 : 0;
-  const g1Dist = Math.min(48, tunnelHours * 2);
-  const g2Dist = Math.min(72, tunnelHours * 3);
+  const clampedTunnelHours = Math.min(tunnelHours, tunnelMaxHours);
+  const g1Dist = Math.min(48, clampedTunnelHours * 2);
+  const g2Dist = Math.min(72, clampedTunnelHours * 3);
   const isEp3FirstShelf = ep3Model === 'first_shelf';
   const shelf1Val = isEp3FirstShelf ? shelfAltTestX - 16 : 3 * shelfTestX - 16;
   const shelf2Val = isEp3FirstShelf ? shelfAltTestX / 3 + 22 : shelfTestX + 22;
@@ -72,7 +76,7 @@ export function SchematicBoard({
 
   const isSolvedState =
     (kind === 'scales_ep1' && scaleMode === 'both_removed') ||
-    (kind === 'tunnel_ep2' && step >= 2 && tunnelHours === 24) ||
+    (kind === 'tunnel_ep2' && step >= 4 && clampedTunnelHours === 24) ||
     (kind === 'archive_table_ep3' && step >= 3 && shelf1Val === shelf2Val) ||
     (kind === 'city_chests_ep5' && step >= 3 && way1Coins === way2Coins) ||
     (kind === 'boss_river_ep6' && step >= 3 && downDist === upDist);
@@ -246,7 +250,9 @@ export function SchematicBoard({
                 <div className="flex justify-between font-math text-xs font-bold tabular-nums">
                   <span className="text-[#ffd859]">Гном I: {g1Dist} м</span>
                   <span className="text-[#54f8dc]">
-                    {tunnelHours === 24 ? 'Встреча! 120 м' : `Время: ${tunnelHours} ч`}
+                    {step >= 4 && clampedTunnelHours === 24
+                      ? 'Встреча! 120 м'
+                      : `Время: ${clampedTunnelHours} ч`}
                   </span>
                   <span className="text-[#a8e6f5]">Гном II: {g2Dist} м</span>
                 </div>
@@ -263,12 +269,17 @@ export function SchematicBoard({
                     {g1Dist + g2Dist} / 120 м
                   </span>
                 </div>
+                {step <= 3 && (
+                  <p className="text-[11px] font-semibold text-[#cbe5ec]">
+                    Пробный отрезок (0–10 ч): посмотри, на сколько метров гномы сближаются каждый час. Время встречи найди по уравнению!
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => {
-                    if (tunnelHours >= 24) setTunnelHours(0);
+                    if (clampedTunnelHours >= tunnelMaxHours) setTunnelHours(0);
                     setTunnelPlaying((p) => !p);
                   }}
                   aria-label={tunnelPlaying ? 'Пауза симуляции' : 'Запустить движение гномов'}
@@ -281,8 +292,8 @@ export function SchematicBoard({
                   type="range"
                   aria-label="Время работы гномов в часах"
                   min={0}
-                  max={24}
-                  value={tunnelHours}
+                  max={tunnelMaxHours}
+                  value={clampedTunnelHours}
                   onChange={(e) => {
                     setTunnelPlaying(false);
                     setTunnelHours(Number(e.target.value));

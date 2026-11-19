@@ -1,4 +1,9 @@
 import { DISTRICTS, MISTAKE_CATEGORY_META, SECRET_BRANCH_IDS } from './codexData';
+import {
+  isEquationEquivalentToRoots,
+  parseArithmeticExpression,
+  parseLinearEquation,
+} from './equationParser';
 import { evaluateEnding } from './endings';
 import { STORY_NODES } from './storyData';
 import type {
@@ -86,9 +91,19 @@ function recordFirstTryIfClean(state: PlayerState, nodeId: string): PlayerState 
 function recordTransferResultIfApplicable(
   state: PlayerState,
   node: StoryNode,
+  details?: {
+    solved?: boolean;
+    method?: 'algebraic' | 'arithmetic';
+    studentExpression?: string;
+    referenceModel?: string;
+    referenceArithmetic?: string;
+    referenceAnswer?: string;
+    explanation?: string;
+  },
 ): PlayerState {
   if (!node.isIndependentCheck) return state;
   const wrongAttempts = state.stepAttempts[node.id] ?? 0;
+  const solved = details?.solved ?? true;
   return {
     ...state,
     transferCheckResults: {
@@ -96,8 +111,15 @@ function recordTransferResultIfApplicable(
       [node.id]: {
         id: node.id,
         topic: node.transferCheckTopic ?? node.episodeTitle,
-        attempts: wrongAttempts + 1,
-        solvedFirstTry: wrongAttempts === 0,
+        attempts: solved ? wrongAttempts + 1 : Math.max(1, wrongAttempts),
+        solved,
+        solvedFirstTry: solved && wrongAttempts === 0,
+        method: details?.method,
+        studentExpression: details?.studentExpression,
+        referenceModel: details?.referenceModel,
+        referenceArithmetic: details?.referenceArithmetic,
+        referenceAnswer: details?.referenceAnswer,
+        explanation: details?.explanation,
       },
     },
   };
@@ -693,6 +715,225 @@ export function applyTableSubmission(
     unlockedBadges:
       badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
   };
+}
+
+export function applyEquationBuilderAnswer(
+  state: PlayerState,
+  mode: 'algebraic' | 'arithmetic',
+  rawExpression: string,
+  rawAnswer: string,
+): ActionOutcome {
+  const node = STORY_NODES[state.currentNodeId];
+  const task = node?.equationBuilderTask;
+  if (!node || !task) return { nextState: state };
+
+  const formatError = (text: string): ActionOutcome => ({
+    nextState: state,
+    feedback: {
+      text,
+      speaker: node.isIndependentCheck ? 'Самостоятельная проверка' : 'Сова Пи',
+      speakerId: node.isIndependentCheck ? undefined : 'pi',
+      isError: true,
+    },
+  });
+
+  const trimmedAns = rawAnswer.trim().replace(',', '.');
+  const parsedAnswer = Number(trimmedAns);
+  if (!trimmedAns || Number.isNaN(parsedAnswer)) {
+    return formatError('Введи числовой ответ в поле итогового результата.');
+  }
+
+  const refAnswerStr = `${task.correctAnswer}${task.unit ? ` ${task.unit}` : ''}`;
+  const answerMatches = Math.abs(parsedAnswer - task.correctAnswer) <= 1e-4;
+
+  if (mode === 'algebraic') {
+    const eq = parseLinearEquation(rawExpression);
+    if (!eq.ok) {
+      const reasonMessages: Record<typeof eq.reason, string> = {
+        empty: 'Запиши уравнение с неизвестной x и знаком равенства =.',
+        missing_equals: 'В уравнении обязательно должен быть знак равенства =.',
+        multiple_equals: 'В уравнении должен быть один знак равенства =.',
+        no_variable:
+          'В алгебраическом способе уравнение должно содержать неизвестную x. Если решаешь по действиям, переключись на «Арифметически».',
+        nonlinear:
+          'Запиши линейное уравнение первой степени (без x² и без деления на x).',
+        div_zero: 'Деление на ноль невозможно — проверь знаменатель.',
+        syntax:
+          'Не удалось прочитать уравнение. Используй числа, x, скобки и знаки +, −, ·, /, =.',
+      };
+      return formatError(reasonMessages[eq.reason]);
+    }
+    if (eq.isTrivial) {
+      return formatError(
+        'Запись вида x = число — это только готовый ответ. Запиши само уравнение по условию задачи или переключись на арифметический способ.',
+      );
+    }
+
+    const modelMatches = isEquationEquivalentToRoots(eq, task.acceptedRoots);
+    if (modelMatches && answerMatches) {
+      let nextState = recordFirstTryIfClean(
+        {
+          ...state,
+          currentNodeId: task.nextNodeId,
+          visitedNodes: [...state.visitedNodes, task.nextNodeId],
+        },
+        node.id,
+      );
+      nextState = recordTransferResultIfApplicable(nextState, node, {
+        solved: true,
+        method: 'algebraic',
+        studentExpression: rawExpression.trim(),
+        referenceModel: task.referenceModel,
+        referenceArithmetic: task.referenceArithmetic,
+        referenceAnswer: refAnswerStr,
+        explanation: task.reviewExplanation,
+      });
+      const badgeEval = applyBadgeEvaluation(nextState);
+      return {
+        nextState: badgeEval.nextState,
+        unlockedBadges:
+          badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
+      };
+    }
+
+    // Observed diagnostic: if equation is valid & equivalent, mistake is strictly arithmetic/substitution;
+    // otherwise inspect the student's actual equation structure.
+    const observedCategory: MistakeCategory = modelMatches
+      ? 'arithmetic_check'
+      : task.diagnoseWrongEquation
+        ? task.diagnoseWrongEquation(eq.root, eq.normalized)
+        : 'expression_translation';
+
+    const tracked = recordMistake(
+      state,
+      node.id,
+      node.episodeId,
+      observedCategory,
+      node.isIndependentCheck ? -5 : -10,
+    );
+
+    return {
+      nextState: tracked.nextState,
+      feedback: {
+        text: node.isIndependentCheck
+          ? 'Ответ неверен. Подробный разбор откроется после завершения всех пяти задач.'
+          : 'Проверь составленное уравнение и вычисление корня.',
+        speaker: node.isIndependentCheck ? 'Самостоятельная проверка' : 'Сова Пи',
+        speakerId: node.isIndependentCheck ? undefined : 'pi',
+        isError: true,
+        hintLevel: node.isIndependentCheck ? undefined : tracked.attemptNumber === 1 ? 1 : 2,
+      },
+    };
+  }
+
+  // Arithmetic justified mode
+  const arith = parseArithmeticExpression(rawExpression);
+  if (!arith.ok) {
+    const reasonMessages: Record<typeof arith.reason, string> = {
+      empty: 'Запиши арифметическое выражение, которым получен ответ.',
+      has_variable:
+        'В арифметическом выражении не должно быть x. Чтобы ввести уравнение, переключись на «Алгебраически».',
+      no_operator:
+        'Запиши вычисление с арифметическим действием (например, +, −, ·, /), а не только готовое число.',
+      div_zero: 'Деление на ноль невозможно — проверь делитель.',
+      syntax:
+        'Не удалось прочитать выражение. Используй числа, скобки и знаки +, −, ·, /.',
+    };
+    return formatError(reasonMessages[arith.reason]);
+  }
+
+  const exprMatches = Math.abs(arith.value - task.correctAnswer) <= 1e-4;
+  if (exprMatches && answerMatches) {
+    let nextState = recordFirstTryIfClean(
+      {
+        ...state,
+        currentNodeId: task.nextNodeId,
+        visitedNodes: [...state.visitedNodes, task.nextNodeId],
+      },
+      node.id,
+    );
+    nextState = recordTransferResultIfApplicable(nextState, node, {
+      solved: true,
+      method: 'arithmetic',
+      studentExpression: rawExpression.trim(),
+      referenceModel: task.referenceModel,
+      referenceArithmetic: task.referenceArithmetic,
+      referenceAnswer: refAnswerStr,
+      explanation: task.reviewExplanation,
+    });
+    const badgeEval = applyBadgeEvaluation(nextState);
+    return {
+      nextState: badgeEval.nextState,
+      unlockedBadges:
+        badgeEval.newlyUnlocked.length > 0 ? badgeEval.newlyUnlocked : undefined,
+    };
+  }
+
+  // Observed diagnostic: if expression equals target but final answer differs -> arithmetic_check;
+  // otherwise arithmetic modeling expression doesn't match the problem -> expression_translation.
+  const observedCategory: MistakeCategory = exprMatches
+    ? 'arithmetic_check'
+    : 'expression_translation';
+
+  const tracked = recordMistake(
+    state,
+    node.id,
+    node.episodeId,
+    observedCategory,
+    node.isIndependentCheck ? -5 : -10,
+  );
+
+  return {
+    nextState: tracked.nextState,
+    feedback: {
+      text: node.isIndependentCheck
+        ? 'Ответ неверен. Подробный разбор откроется после завершения всех пяти задач.'
+        : 'Проверь арифметическое выражение и итоговый результат.',
+      speaker: node.isIndependentCheck ? 'Самостоятельная проверка' : 'Сова Пи',
+      speakerId: node.isIndependentCheck ? undefined : 'pi',
+      isError: true,
+      hintLevel: node.isIndependentCheck ? undefined : tracked.attemptNumber === 1 ? 1 : 2,
+    },
+  };
+}
+
+export function skipIndependentCheckNode(
+  state: PlayerState,
+  mode?: 'algebraic' | 'arithmetic',
+  lastExpression?: string,
+): ActionOutcome {
+  const node = STORY_NODES[state.currentNodeId];
+  if (!node?.isIndependentCheck) return { nextState: state };
+  const eqTask = node.equationBuilderTask;
+  const numTask = node.numericTask;
+  const nextNodeId = eqTask?.nextNodeId ?? numTask?.nextNodeId;
+  if (!nextNodeId) return { nextState: state };
+
+  const refAnswerStr = eqTask
+    ? `${eqTask.correctAnswer}${eqTask.unit ? ` ${eqTask.unit}` : ''}`
+    : numTask
+      ? `${numTask.correctValue}${numTask.unit ? ` ${numTask.unit}` : ''}`
+      : undefined;
+
+  const nextState = recordTransferResultIfApplicable(
+    {
+      ...state,
+      currentNodeId: nextNodeId,
+      visitedNodes: [...state.visitedNodes, nextNodeId],
+    },
+    node,
+    {
+      solved: false,
+      method: mode,
+      studentExpression: lastExpression?.trim() || undefined,
+      referenceModel: eqTask?.referenceModel,
+      referenceArithmetic: eqTask?.referenceArithmetic,
+      referenceAnswer: refAnswerStr,
+      explanation: eqTask?.reviewExplanation,
+    },
+  );
+
+  return { nextState };
 }
 
 export function buildDiagnosticReport(state: PlayerState): DiagnosticItem[] {

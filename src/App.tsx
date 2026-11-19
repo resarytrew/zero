@@ -20,6 +20,7 @@ import { evaluateEnding } from './game/endings';
 import {
   applyChoice,
   applyDualNumericAnswer,
+  applyEquationBuilderAnswer,
   applyNumericAnswer,
   applyScratchpadAnswer,
   applyTableSubmission,
@@ -27,6 +28,7 @@ import {
   createInitialPlayerState,
   enterTempleFromCrossroads,
   selectDistrictFromCrossroads,
+  skipIndependentCheckNode,
   type FeedbackBanner,
 } from './game/engine';
 import { STORY_NODES } from './game/storyData';
@@ -306,6 +308,25 @@ export default function App() {
     applyOutcome(outcome);
   };
 
+  const handleEquationBuilderSubmit = (
+    mode: 'algebraic' | 'arithmetic',
+    expression: string,
+    answer: string,
+  ) => {
+    const outcome = applyEquationBuilderAnswer(playerState, mode, expression, answer);
+    applyOutcome(outcome);
+  };
+
+  const handleSkipIndependentCheck = (
+    mode: 'algebraic' | 'arithmetic',
+    lastExpression: string,
+  ) => {
+    soundEngine.playClick();
+    const outcome = skipIndependentCheckNode(playerState, mode, lastExpression);
+    setPlayerState(outcome.nextState);
+    setFeedback(null);
+  };
+
   const handleSelectDistrict = (districtId: DistrictId) => {
     soundEngine.playClick();
     const outcome = selectDistrictFromCrossroads(playerState, districtId);
@@ -492,6 +513,8 @@ export default function App() {
             onSubmitScratchpad={handleScratchpadSubmit}
             onSubmitVerification={handleVerificationSubmit}
             onSubmitTable={handleTableSubmit}
+            onSubmitEquationBuilder={handleEquationBuilderSubmit}
+            onSkipIndependentCheck={handleSkipIndependentCheck}
             onSelectDistrict={handleSelectDistrict}
             onEnterTemple={handleEnterTemple}
             onToggleMobileModel={() => setMobileModelOpen((o) => !o)}
