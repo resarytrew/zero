@@ -72,6 +72,11 @@ function loadSavedState(): PlayerState | null {
         unlockedBadges: Array.isArray(parsed.unlockedBadges)
           ? parsed.unlockedBadges
           : [],
+        transferCheckResults:
+          parsed.transferCheckResults &&
+          typeof parsed.transferCheckResults === 'object'
+            ? parsed.transferCheckResults
+            : {},
       };
     }
     return null;
@@ -471,6 +476,7 @@ export default function App() {
             step={currentNode.schematicStep}
             formulaDisplay={currentNode.formulaDisplay}
             bossShieldHp={playerState.bossShieldHp}
+            ep3Model={playerState.decisions.ep3ChosenModel}
             mobileOpen={mobileModelOpen}
             onCloseMobile={() => setMobileModelOpen(false)}
           />

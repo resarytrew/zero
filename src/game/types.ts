@@ -89,9 +89,17 @@ export interface PlayerDecisions {
   firstCrossroadsChoice?: DistrictId;
   ep1TriedGuessing?: boolean;
   ep3TriedFirstShelfAsX?: boolean;
+  ep3ChosenModel?: 'first_shelf' | 'second_shelf';
   ep4Method?: 'algebraic' | 'logical';
   ep5VerificationDone?: boolean;
   ep6FinalStance?: 'harmony' | 'courage' | 'precision';
+}
+
+export interface TransferCheckResult {
+  id: string;
+  topic: string;
+  attempts: number;
+  solvedFirstTry: boolean;
 }
 
 export interface PlayerState {
@@ -109,6 +117,7 @@ export interface PlayerState {
   foundSecrets: string[];
   firstTryNodeIds: string[];
   unlockedBadges: BadgeId[];
+  transferCheckResults: Record<string, TransferCheckResult>;
   bossShieldHp: number;
   endingId?: EndingId;
 }
@@ -182,6 +191,9 @@ export interface ScratchpadField {
   label: string;
   correctValue: number;
   placeholder?: string;
+  mistakeCategory?: MistakeCategory;
+  hintTier1?: string;
+  hintTier2?: string;
 }
 
 export interface ScratchpadTask {
@@ -239,6 +251,8 @@ export interface StoryNode {
   schematicStep?: number;
   isCrossroadsHub?: boolean;
   isSecretNode?: boolean;
+  isIndependentCheck?: boolean;
+  transferCheckTopic?: string;
   choices?: StoryChoice[];
   numericTask?: NumericTask;
   dualNumericTask?: DualNumericTask;
@@ -261,6 +275,8 @@ export interface DistrictInfo {
   title: string;
   subtitle: string;
   mathTheme: string;
+  difficulty: 1 | 2 | 3;
+  recommendedHint: string;
   entryNodeId: string;
   scene: SceneId;
   portalCoords: { x: number; y: number };

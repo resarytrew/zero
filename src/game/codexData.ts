@@ -8,44 +8,47 @@ import type {
   SpeakerId,
 } from './types';
 
+const BASE_URL =
+  (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+
 export const SCENE_IMAGES: Record<SceneId, string> = {
-  attic: `${import.meta.env.BASE_URL}src/assets/images/story_scene_attic_1795011707846.jpg`,
-  forest: `${import.meta.env.BASE_URL}src/assets/images/story_scene_forest_1795011709021.jpg`,
-  crossroads: `${import.meta.env.BASE_URL}src/assets/images/story_scene_crossroads_1795011709945.jpg`,
-  tunnel: `${import.meta.env.BASE_URL}src/assets/images/story_scene_tunnel_1795011709449.jpg`,
-  archive: `${import.meta.env.BASE_URL}src/assets/images/story_scene_archive_1795011710310.jpg`,
-  crystals: `${import.meta.env.BASE_URL}src/assets/images/story_scene_crystals_1795011710260.jpg`,
-  city: `${import.meta.env.BASE_URL}src/assets/images/story_scene_city_1795011712429.jpg`,
-  temple: `${import.meta.env.BASE_URL}src/assets/images/story_scene_temple_1795011712243.jpg`,
+  attic: `${BASE_URL}src/assets/images/story_scene_attic_1795011707846.jpg`,
+  forest: `${BASE_URL}src/assets/images/story_scene_forest_1795011709021.jpg`,
+  crossroads: `${BASE_URL}src/assets/images/story_scene_crossroads_1795011709945.jpg`,
+  tunnel: `${BASE_URL}src/assets/images/story_scene_tunnel_1795011709449.jpg`,
+  archive: `${BASE_URL}src/assets/images/story_scene_archive_1795011710310.jpg`,
+  crystals: `${BASE_URL}src/assets/images/story_scene_crystals_1795011710260.jpg`,
+  city: `${BASE_URL}src/assets/images/story_scene_city_1795011712429.jpg`,
+  temple: `${BASE_URL}src/assets/images/story_scene_temple_1795011712243.jpg`,
 };
 
 export const SPEAKER_PORTRAITS: Partial<Record<SpeakerId, string>> = {
-  alyosha: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_neutral_1795011713539.jpg`,
-  pi: `${import.meta.env.BASE_URL}src/assets/images/story_pi_neutral_1795011715473.jpg`,
-  gnome1: `${import.meta.env.BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
-  gnome2: `${import.meta.env.BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
-  archivist: `${import.meta.env.BASE_URL}src/assets/images/story_archivist_1795011719300.jpg`,
-  guardian: `${import.meta.env.BASE_URL}src/assets/images/story_crystal_guardian_1795011810450.jpg`,
-  captain: `${import.meta.env.BASE_URL}src/assets/images/story_captain_automaton_1795011811277.jpg`,
-  shadow: `${import.meta.env.BASE_URL}src/assets/images/story_shadow_brackets_1795011812174.jpg`,
+  alyosha: `${BASE_URL}src/assets/images/story_alyosha_neutral_1795011713539.jpg`,
+  pi: `${BASE_URL}src/assets/images/story_pi_neutral_1795011715473.jpg`,
+  gnome1: `${BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
+  gnome2: `${BASE_URL}src/assets/images/story_gnome_miner_1795011718058.jpg`,
+  archivist: `${BASE_URL}src/assets/images/story_archivist_1795011719300.jpg`,
+  guardian: `${BASE_URL}src/assets/images/story_crystal_guardian_1795011810450.jpg`,
+  captain: `${BASE_URL}src/assets/images/story_captain_automaton_1795011811277.jpg`,
+  shadow: `${BASE_URL}src/assets/images/story_shadow_brackets_1795011812174.jpg`,
 };
 
 export const SPEAKER_EMOTION_PORTRAITS: Partial<
   Record<SpeakerId, Partial<Record<SpeakerEmotion, string>>>
 > = {
   alyosha: {
-    surprised: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
-    thoughtful: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
-    curious: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
-    alert: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
-    triumph: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
-    encourage: `${import.meta.env.BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
+    surprised: `${BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
+    thoughtful: `${BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
+    curious: `${BASE_URL}src/assets/images/story_alyosha_thoughtful_1795011713101.jpg`,
+    alert: `${BASE_URL}src/assets/images/story_alyosha_surprised_1795011713611.jpg`,
+    triumph: `${BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
+    encourage: `${BASE_URL}src/assets/images/story_alyosha_triumph_1795011716280.jpg`,
   },
   pi: {
-    surprised: `${import.meta.env.BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
-    alert: `${import.meta.env.BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
-    thoughtful: `${import.meta.env.BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
-    curious: `${import.meta.env.BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
+    surprised: `${BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
+    alert: `${BASE_URL}src/assets/images/story_pi_surprised_1795011716952.jpg`,
+    thoughtful: `${BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
+    curious: `${BASE_URL}src/assets/images/story_pi_thoughtful_1795011717942.jpg`,
   },
 };
 
@@ -80,7 +83,8 @@ export const MISTAKE_CATEGORY_META: Record<
   unknown_designation: {
     title: 'Выбор неизвестной величины x',
     codexLawId: 1,
-    advice: 'Всегда перечитывай вопрос задачи и принимай за x меньшую или базовую искомую величину.',
+    advice:
+      'За x можно обозначить любую искомую величину — главное верно выразить через неё остальные и помнить, какую именно величину ты нашёл. Выбор меньшей величины часто помогает обойтись без дробей.',
   },
   expression_translation: {
     title: 'Перевод условия в выражение',
@@ -137,10 +141,10 @@ export const CODEX_LAWS: CodexLaw[] = [
     id: 3,
     episodeTitle: 'Эпизод 3 · Архив Забытых Историй',
     title: 'Закон изменений («было — стало»)',
-    formula: '3x − 16 = x + 22  ⇒  3x − x = 22 + 16',
+    formula: '3x − 16 = x + 22   ⇔   y − 16 = y/3 + 22',
     ruleText:
-      'В задачах типа «было — стало» за x удобнее принимать меньшую начальную величину, затем математически записать все произошедшие изменения и приравнять конечные результаты. При переносе слагаемого через знак «=» его знак всегда меняется на противоположный.',
-    summaryShort: 'Меньшее за x и перенос слагаемых',
+      'В задачах типа «было — стало» за x можно обозначить ЛЮБУЮ из неизвестных величин — обе модели верны и приводят к одному ответу! При этом выбор меньшей величины за x часто делает запись проще и позволяет избежать дробей. При переносе слагаемого через знак «=» его знак меняется на противоположный.',
+    summaryShort: 'Выбор модели и перенос слагаемых',
   },
   {
     id: 4,
@@ -179,6 +183,8 @@ export const DISTRICTS: DistrictInfo[] = [
     title: 'Тоннель Двух Гномов',
     subtitle: 'Встречное движение и подобные слагаемые',
     mathTheme: 'ax + bx = c',
+    difficulty: 1,
+    recommendedHint: 'Рекомендуется начать здесь',
     entryNodeId: 'ep2_intro',
     scene: 'tunnel',
     portalCoords: { x: 14, y: 38 },
@@ -187,7 +193,9 @@ export const DISTRICTS: DistrictInfo[] = [
     id: 'ep3_archive',
     title: 'Архив Забытых Историй',
     subtitle: 'Задачи «было — стало» и перенос слагаемых',
-    mathTheme: '3x − 16 = x + 22',
+    mathTheme: 'ax − b = x + c',
+    difficulty: 2,
+    recommendedHint: 'Хорошо после Тоннеля',
     entryNodeId: 'ep3_intro',
     scene: 'archive',
     portalCoords: { x: 21.5, y: 61 },
@@ -196,7 +204,9 @@ export const DISTRICTS: DistrictInfo[] = [
     id: 'ep4_crystals',
     title: 'Кристаллические Пещеры',
     subtitle: 'Нахождение целого по его дробным долям',
-    mathTheme: '(1/3)x + (1/4)x + 20 = x',
+    mathTheme: 'Доли и целое',
+    difficulty: 3,
+    recommendedHint: 'Понадобятся обыкновенные дроби',
     entryNodeId: 'ep4_intro',
     scene: 'crystals',
     portalCoords: { x: 82, y: 61 },
@@ -205,7 +215,9 @@ export const DISTRICTS: DistrictInfo[] = [
     id: 'ep5_city',
     title: 'Заводной Город Автоматонов',
     subtitle: 'Два способа выражения одной величины',
-    mathTheme: '5x + 10 = 7x − 4',
+    mathTheme: 'ax + b = cx − d',
+    difficulty: 2,
+    recommendedHint: 'Хорошо после Архива',
     entryNodeId: 'ep5_intro',
     scene: 'city',
     portalCoords: { x: 85, y: 37 },

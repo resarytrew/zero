@@ -190,7 +190,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep1_step2_expr',
     episodeId: 'ep1',
     episodeTitle: 'Эпизод 1 · Составление уравнения',
-    mathTopic: 'x + 25 = 78',
+    mathTopic: 'Перевод условия в выражение',
     scene: 'forest',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -211,7 +211,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Обрати внимание на смысл фразы «и ещё 25 камней». Это умножение 25 мешков или добавление 25 камней?',
         hintTier2:
-          'Запись 25x означает умножение (25 мешков по x камней). На чаше один мешок (x) и ещё 25 камней — это сложение: x + 25.',
+          'Запись 25x означает умножение (25 мешков по x камней). Когда к одному мешку x добавляют 25 камней россыпью, используется сложение.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -223,7 +223,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Посмотри на левую чашу: 25 камней убрали из мешка или добавили рядом с ним?',
         hintTier2:
-          'Знак минус уменьшает величину. У нас к мешку добавлены 25 камней россыпью, поэтому правильно писать x + 25.',
+          'Знак минус уменьшает величину. У нас к мешку добавлены 25 камней россыпью, значит нужно действие сложения.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -255,7 +255,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     numericTask: {
       prompt: 'Чему равен x в уравнении x + 25 = 78?',
       unit: 'камней',
-      placeholder: 'Например: 53',
+      placeholder: 'Введи число',
       correctValue: 53,
       nextNodeId: 'ep1_verify',
       mistakeCategory: 'arithmetic_check',
@@ -289,7 +289,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         }
         return {
           feedback:
-            'Вычти по разрядам: 70 − 20 = 50, а 8 − 5 = 3. Вместе получается 53!',
+            'Вычти по разрядам: сначала десятки (70 − 20), затем единицы (8 − 5), а потом сложи полученные числа.',
           speaker: 'pi',
           integrityDelta: -10,
           category: 'arithmetic_check',
@@ -302,7 +302,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep1_verify',
     episodeId: 'ep1',
     episodeTitle: 'Эпизод 1 · Самопроверка подстановкой',
-    mathTopic: 'Проверка: 53 + 25 = 78',
+    mathTopic: 'Подстановка найденного корня',
     scene: 'forest',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -322,14 +322,14 @@ export const STORY_NODES: Record<string, StoryNode> = {
           label: 'Левая чаша (53 + 25)',
           prefix: '53 + 25 =',
           correctValue: 78,
-          placeholder: '78',
+          placeholder: '?',
         },
       ],
       expectedSummary: 'Левая чаша = 78, Правая чаша = 78',
       nextNodeId: 'ep1_outro',
       unlockLaw: 1,
-      hintTier1: 'Сложи 53 и 25: должно получиться то же число, что лежит на правой чаше весов.',
-      hintTier2: '53 + 25 = 78. Левая чаша (78) равна правой чаше (78), значит корень x = 53 найден верно!',
+      hintTier1: 'Сложи 53 и 25: результат должен совпасть с количеством камней на правой чаше весов.',
+      hintTier2: 'Складывай по разрядам: десятки (50 + 20) и единицы (3 + 5), затем объедини результат и сравни с правой чашей.',
     },
   },
 
@@ -437,8 +437,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
   ep2_step1_gnome1: {
     id: 'ep2_step1_gnome1',
     episodeId: 'ep2',
-    episodeTitle: 'Эпизод 2 · Выражение пути',
-    mathTopic: 'S = v · t',
+    episodeTitle: 'Эпизод 2 · Сборка модели движения',
+    mathTopic: 'Путь S = v · t и уравнение встречи',
     scene: 'tunnel',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -446,36 +446,51 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematic: 'tunnel_ep2',
     schematicStep: 1,
     text: [
-      '«Пусть гномы работают до встречи x часов. Вспомни формулу пути (можешь подвигать ползунок времени на схеме слева!)».',
-      'Сколько метров прокопает за x часов ПЕРВЫЙ гном (его скорость 2 м/ч)?',
+      '«Пусть гномы работают до встречи x часов. Собери математическую модель сам: вырази путь каждого гнома и составь уравнение для всего тоннеля длиной 120 м».',
     ],
-    choices: [
-      {
-        id: 'ep2_g1_add',
-        label: '2 + x',
-        isCorrect: false,
-        mistakeCategory: 'expression_translation',
-        hintTier1:
-          'Проверь на модели слева: за 1 час гном проходит 2 м, за 2 часа — 4 м, за 3 часа — 6 м. Какое действие связывает скорость 2 и время x?',
-        hintTier2:
-          'Чтобы найти путь S, нужно скорость умножить на время (S = v · t). Поэтому за x часов гном пройдёт 2 · x, то есть 2x метров.',
-        feedbackSpeaker: 'pi',
-        integrityDelta: -10,
-      },
-      {
-        id: 'ep2_g1_ok',
-        label: '2x',
-        nextNodeId: 'ep2_step2_gnome2',
-        isCorrect: true,
-      },
-    ],
+    tableTask: {
+      prompt: 'Выбери верные выражения для пути обоих гномов и итогового уравнения:',
+      nextNodeId: 'ep2_step2_gnome2',
+      rows: [
+        {
+          id: 'gnome1_path',
+          label: 'Путь первого гнома за x часов (скорость 2 м/ч)',
+          options: ['2 + x', '2x', 'x − 2'],
+          correctOption: '2x',
+          hintTier1:
+            'Проверь на модели слева: за 1 час гном проходит 2 м, за 2 часа — 4 м. Какое действие связывает скорость и время?',
+          hintTier2:
+            'По формуле S = v · t путь равен произведению скорости на время. Для скорости 2 и времени x это произведение 2 и x.',
+        },
+        {
+          id: 'gnome2_path',
+          label: 'Путь второго гнома за x часов (скорость 3 м/ч)',
+          options: ['3 + x', '3x', '3 : x'],
+          correctOption: '3x',
+          hintTier1:
+            'Второй гном проходит 3 метра КАЖДЫЙ час. Как записать его путь за x часов?',
+          hintTier2:
+            'Как и для первого гнома, умножаем скорость (3 м/ч) на время (x ч).',
+        },
+        {
+          id: 'tunnel_equation',
+          label: 'Уравнение встречи (вместе прокопали 120 м)',
+          options: ['2x + 3x = 120', '3x − 2x = 120', '2x · 3x = 120'],
+          correctOption: '2x + 3x = 120',
+          hintTier1:
+            'Гномы идут навстречу друг другу с разных концов тоннеля. Их пути складываются, вычитаются или перемножаются?',
+          hintTier2:
+            'В момент встречи сумма пройденных ими отрезков составляет всю длину тоннеля — 120 метров.',
+        },
+      ],
+    },
   },
 
   ep2_step2_gnome2: {
     id: 'ep2_step2_gnome2',
     episodeId: 'ep2',
-    episodeTitle: 'Эпизод 2 · Общее уравнение встречи',
-    mathTopic: '2x + 3x = 120',
+    episodeTitle: 'Эпизод 2 · Приведение подобных слагаемых',
+    mathTopic: 'Упрощение уравнения 2x + 3x = 120',
     scene: 'tunnel',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -484,8 +499,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 2,
     formulaDisplay: '2x + 3x = 120',
     text: [
-      '«Первый гном прокопает 2x метров, а второй (со скоростью 3 м/ч) — 3x метров. В момент встречи вместе они пройдут весь тоннель длиной 120 метров: 2x + 3x = 120».',
-      'Посмотри на левую часть уравнения. Как упростить выражение 2x + 3x?',
+      '«Модель собрана: 2x + 3x = 120! Теперь нужно упростить левую часть».',
+      'Как правильно привести подобные слагаемые в выражении 2x + 3x?',
     ],
     choices: [
       {
@@ -496,7 +511,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Обрати внимание на знак между 2x и 3x! Представь, что x — это ящик породы: сколько будет 2 ящика ПЛЮС 3 ящика?',
         hintTier2:
-          'Ты перемножил числа 2 и 3 вместо сложения! При приведении подобных слагаемых коэффициенты складываются: 2x + 3x = (2 + 3)x = 5x.',
+          'Ты перемножил коэффициенты 2 и 3 вместо сложения! При приведении подобных слагаемых коэффициенты складываются: (2 + 3)x.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -508,7 +523,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Ты верно сложил 2 и 3, но куда же исчезла буква x? Ведь 5 метров — это путь за 1 час, а нам нужно выражение за x часов.',
         hintTier2:
-          'Без неизвестного x мы потеряем время! Складываются коэффициенты, а буквенная часть сохраняется: 2x + 3x = 5x.',
+          'Без неизвестного x мы потеряем время! Складывай коэффициенты перед буквой, а саму букву x обязательно сохраняй рядом.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -525,7 +540,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep2_step4_solve',
     episodeId: 'ep2',
     episodeTitle: 'Эпизод 2 · Час встречи',
-    mathTopic: '5x = 120',
+    mathTopic: 'Решение уравнения 5x = 120',
     scene: 'tunnel',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -534,13 +549,13 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 3,
     formulaDisplay: '5x = 120',
     text: [
-      '«Верно! За каждый час гномы сближаются на 2 + 3 = 5 метров».',
-      'Реши уравнение 5x = 120 и введи в пульт, через сколько часов они встретятся (можешь проверить на симуляторе слева)!',
+      '«Верно! За каждый час гномы сближаются на 5 метров».',
+      'Реши уравнение 5x = 120 и введи, через сколько часов они встретятся (гипотезу можно проверить на симуляторе слева).',
     ],
     numericTask: {
       prompt: 'Чему равен x в уравнении 5x = 120?',
       unit: 'часов',
-      placeholder: 'Например: 24',
+      placeholder: 'Введи число',
       correctValue: 24,
       nextNodeId: 'ep2_verify',
       mistakeCategory: 'arithmetic_check',
@@ -557,7 +572,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           }
           return {
             feedback:
-              'Чтобы найти неизвестный множитель x в уравнении 5x = 120, нужно произведение 120 РАЗДЕЛИТЬ на 5.',
+              'Чтобы найти неизвестный множитель x в уравнении 5x = 120, нужно произведение 120 РАЗДЕЛИТЬ на известный множитель 5.',
             speaker: 'pi',
             integrityDelta: -10,
             category: 'expression_translation',
@@ -566,14 +581,15 @@ export const STORY_NODES: Record<string, StoryNode> = {
         if (attempt === 1) {
           return {
             feedback:
-              'Проверь деление 120 : 5. Подсказка: раздели 100 на 5, а затем оставшиеся 20 на 5.',
+              'Проверь деление 120 : 5. Подсказка: разбей 120 на удобные слагаемые 100 и 20 и раздели каждое на 5.',
             speaker: 'pi',
             integrityDelta: -10,
             category: 'arithmetic_check',
           };
         }
         return {
-          feedback: '100 : 5 = 20, и 20 : 5 = 4. Итого x = 24 часа!',
+          feedback:
+            'Правило деления суммы: раздели отдельно 100 : 5 и отдельно 20 : 5, а затем сложи два получившихся частных.',
           speaker: 'pi',
           integrityDelta: -10,
           category: 'arithmetic_check',
@@ -586,7 +602,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep2_verify',
     episodeId: 'ep2',
     episodeTitle: 'Эпизод 2 · Проверка пути подстановкой',
-    mathTopic: '2·24 + 3·24 = 120',
+    mathTopic: 'Подстановка x = 24 в условие',
     scene: 'tunnel',
     speaker: 'gnome1',
     speakerName: 'Гном-рудокоп I',
@@ -607,7 +623,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '2 · 24 =',
           suffix: 'м',
           correctValue: 48,
-          placeholder: '48',
+          placeholder: '?',
         },
         {
           id: 'g2',
@@ -615,7 +631,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '3 · 24 =',
           suffix: 'м',
           correctValue: 72,
-          placeholder: '72',
+          placeholder: '?',
         },
       ],
       expectedSummary: '48 + 72 = 120 м — гномы встретились ровно в точке стыковки!',
@@ -625,7 +641,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
       hintTier1:
         'Умножь скорости 2 и 3 на найденное время 24 часа. Сумма двух чисел должна дать 120 метров.',
       hintTier2:
-        '2 · 24 = 48 м, а 3 · 24 = 72 м. Проверяем: 48 + 72 = 120 м!',
+        'Разбей 24 на 20 и 4: сначала вычисли 2 · 20 + 2 · 4 для первого гнома, затем 3 · 20 + 3 · 4 для второго и проверь, что их сумма равна 120.',
     },
   },
 
@@ -659,7 +675,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep3_intro',
     episodeId: 'ep3',
     episodeTitle: 'Эпизод 3 · Архив Забытых Историй',
-    mathTopic: 'Задачи «было — стало» · Перенос слагаемых',
+    mathTopic: 'Задачи «было — стало» · Выбор модели',
     scene: 'archive',
     speaker: 'archivist',
     speakerName: 'Хранитель Архива',
@@ -674,23 +690,262 @@ export const STORY_NODES: Record<string, StoryNode> = {
       {
         id: 'ep3_choose_first',
         label: 'Принять за x первую полку (ту, где больше свитков)',
-        isCorrect: false,
-        mistakeCategory: 'unknown_designation',
-        hintTier1:
-          'Подумай: если большая полка — это x, то как записать вторую, которая в 3 раза меньше? Появится ли деление (x : 3)?',
-        hintTier2:
-          'Если первая полка в 3 раза больше, то вторую придётся записывать дробью (x : 3). Гораздо удобнее принять за x МЕНЬШУЮ величину — вторую полку, тогда первая просто 3x!',
-        feedbackSpeaker: 'pi',
-        integrityDelta: -5,
-        recordDecision: { ep3TriedFirstShelfAsX: true },
+        nextNodeId: 'ep3_alt_compare',
+        isCorrect: true,
+        recordDecision: {
+          ep3TriedFirstShelfAsX: true,
+          ep3ChosenModel: 'first_shelf',
+        },
       },
       {
         id: 'ep3_choose_second',
-        label: 'Принять за x меньшую величину — вторую полку',
+        label: 'Принять за x вторую полку (ту, где меньше свитков)',
         nextNodeId: 'ep3_step2_table',
+        isCorrect: true,
+        recordDecision: { ep3ChosenModel: 'second_shelf' },
+      },
+    ],
+  },
+
+  ep3_alt_compare: {
+    id: 'ep3_alt_compare',
+    episodeId: 'ep3',
+    episodeTitle: 'Эпизод 3 · Сравнение двух верных моделей',
+    mathTopic: 'Обе модели математически верны',
+    scene: 'archive',
+    speaker: 'pi',
+    speakerName: 'Сова Пи',
+    emotion: 'encourage',
+    schematic: 'archive_table_ep3',
+    schematicStep: 1,
+    text: [
+      '«Математически это совершенно верный выбор! Любую из неизвестных полок можно обозначить за x — обе модели приведут к одному и тому же ответу».',
+      '«Посмотри на разницу в записи: если первая полка — это x, то вторая будет x/3 (появится дробь). Если же обозначить за x вторую полку, то первая — просто 3x (без дробей). Каким способом хочешь решить эту задачу?»',
+    ],
+    choices: [
+      {
+        id: 'ep3_alt_proceed',
+        label: 'Решить через первую полку за x (с дробью x/3)',
+        nextNodeId: 'ep3_alt_table',
+        isCorrect: true,
+        recordDecision: { ep3ChosenModel: 'first_shelf' },
+      },
+      {
+        id: 'ep3_alt_switch',
+        label: 'Перейти к модели без дробей (вторая полка = x)',
+        nextNodeId: 'ep3_step2_table',
+        isCorrect: true,
+        recordDecision: { ep3ChosenModel: 'second_shelf' },
+      },
+    ],
+  },
+
+  ep3_alt_table: {
+    id: 'ep3_alt_table',
+    episodeId: 'ep3',
+    episodeTitle: 'Эпизод 3 · Таблица «Было — Стало» (1-я полка = x)',
+    mathTopic: 'Составление дробной модели',
+    scene: 'archive',
+    speaker: 'pi',
+    speakerName: 'Сова Пи',
+    emotion: 'curious',
+    schematic: 'archive_table_ep3',
+    schematicStep: 2,
+    text: [
+      '«Смелый выбор! Пусть на первой полке изначально было x свитков».',
+      'Заполни ячейки реестра «Было — Стало» для этой модели, чтобы получить уравнение!',
+    ],
+    tableTask: {
+      prompt: 'Выбери верные выражения, если за x принята ПЕРВАЯ полка:',
+      nextNodeId: 'ep3_alt_transfer',
+      rows: [
+        {
+          id: 'alt_shelf2_before',
+          label: 'Вторая полка БЫЛО (в 3 раза меньше, чем x)',
+          options: ['x − 3', 'x/3', '3x'],
+          correctOption: 'x/3',
+          hintTier1:
+            'На первой полке в 3 раза больше, значит на второй — в 3 раза МЕНЬШЕ. Какое действие отвечает за «в 3 раза меньше»?',
+          hintTier2:
+            '«В 3 раза меньше» записывается делением на 3, то есть в виде дроби x/3.',
+        },
+        {
+          id: 'alt_shelf1_after',
+          label: 'Первая полка СТАЛО (сняли 16 свитков)',
+          options: ['x − 16', 'x + 16', '16 − x'],
+          correctOption: 'x − 16',
+          hintTier1:
+            'На первой полке было x свитков, и 16 сняли. Что из чего нужно вычитать?',
+          hintTier2:
+            'Уменьшение на 16 записывается вычитанием из начального количества x.',
+        },
+        {
+          id: 'alt_shelf2_after',
+          label: 'Вторая полка СТАЛО (добавили 22 свитка)',
+          options: ['x/3 − 22', 'x/3 + 22', '22x/3'],
+          correctOption: 'x/3 + 22',
+          hintTier1:
+            'На вторую полку к x/3 свиткам добавили ещё 22 свитка. Какой знак связывает эти части?',
+          hintTier2:
+            'Добавление 22 свитков записывается знаком сложения рядом с x/3.',
+        },
+      ],
+    },
+  },
+
+  ep3_alt_transfer: {
+    id: 'ep3_alt_transfer',
+    episodeId: 'ep3',
+    episodeTitle: 'Эпизод 3 · Перенос слагаемых (дробная модель)',
+    mathTopic: 'Перенос слагаемых через знак «=»',
+    scene: 'archive',
+    speaker: 'pi',
+    speakerName: 'Сова Пи',
+    emotion: 'alert',
+    schematic: 'archive_table_ep3',
+    schematicStep: 3,
+    formulaDisplay: 'x − 16 = x/3 + 22',
+    text: [
+      '«Свитков стало поровну, значит x − 16 = x/3 + 22. Перенеси слагаемые с x влево, а числа вправо, не забывая менять знак при переходе через «=»!»',
+    ],
+    choices: [
+      {
+        id: 'ep3_alt_tr_wrong1',
+        label: 'x + x/3 = 22 − 16',
+        isCorrect: false,
+        mistakeCategory: 'sign_transfer',
+        hintTier1:
+          'Проверь знаки перенесённых слагаемых: справа стояло +x/3, слева −16. Поменялись ли они на противоположные?',
+        hintTier2:
+          'При переносе через «=» положительное +x/3 становится −x/3, а отрицательное −16 становится +16.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep3_alt_tr_wrong2',
+        label: 'x − x/3 = 22 − 16',
+        isCorrect: false,
+        mistakeCategory: 'sign_transfer',
+        hintTier1:
+          'Слагаемое x/3 перенесено верно! А проверь знак числа 16 после переноса в правую часть.',
+        hintTier2:
+          'Слева было −16. При переходе через знак равенства минус меняется на плюс.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep3_alt_tr_ok',
+        label: 'x − x/3 = 22 + 16',
+        nextNodeId: 'ep3_alt_scratchpad',
         isCorrect: true,
       },
     ],
+  },
+
+  ep3_alt_scratchpad: {
+    id: 'ep3_alt_scratchpad',
+    episodeId: 'ep3',
+    episodeTitle: 'Эпизод 3 · Черновик дробной модели',
+    mathTopic: 'Упрощение x − x/3 = 22 + 16',
+    scene: 'archive',
+    speaker: 'alyosha',
+    speakerName: 'Алёша',
+    emotion: 'thoughtful',
+    schematic: 'archive_table_ep3',
+    schematicStep: 4,
+    formulaDisplay: 'x − x/3 = 22 + 16',
+    text: [
+      '«Представим целый x как 3/3 x и упростим обе стороны уравнения в черновике!»',
+    ],
+    scratchpadTask: {
+      title: 'Черновик уравнения с дробью',
+      equationContext: 'Упрости левую и правую части равенства (3/3)x − (1/3)x = 22 + 16:',
+      fields: [
+        {
+          id: 'num',
+          label: 'Числитель третей слева (3/3 − 1/3)',
+          suffix: '/3 x',
+          correctValue: 2,
+          placeholder: '?',
+          mistakeCategory: 'fractions_parts',
+          hintTier1:
+            'Из целого (3 трети) вычитаем 1 треть. Сколько третей останется?',
+          hintTier2:
+            'При вычитании дробей с одинаковым знаменателем вычитаются числители: 3 − 1, знаменатель 3 сохраняется.',
+        },
+        {
+          id: 'rhs',
+          label: 'Сумма справа (22 + 16)',
+          prefix: '=',
+          correctValue: 38,
+          placeholder: '?',
+          mistakeCategory: 'arithmetic_check',
+          hintTier1: 'Проверь сложение в правой части: 22 + 16.',
+          hintTier2: 'Сложи по разрядам: десятки (20 + 10) и единицы (2 + 6).',
+        },
+      ],
+      nextNodeId: 'ep3_alt_dual_solve',
+      mistakeCategory: 'fractions_parts',
+      hintTier1: 'Из 3/3 x вычти 1/3 x, а справа сложи 22 и 16.',
+      hintTier2: 'Вычти числители 3 − 1 слева и сложи 22 + 16 по разрядам справа.',
+    },
+  },
+
+  ep3_alt_dual_solve: {
+    id: 'ep3_alt_dual_solve',
+    episodeId: 'ep3',
+    episodeTitle: 'Эпизод 3 · Полный ответ реестра',
+    mathTopic: 'Решение (2/3)x = 38',
+    scene: 'archive',
+    speaker: 'archivist',
+    speakerName: 'Хранитель Архива',
+    emotion: 'thoughtful',
+    schematic: 'archive_table_ep3',
+    schematicStep: 4,
+    formulaDisplay: '(2/3)x = 38',
+    text: [
+      '«Отлично: две трети первой полки равны 38 свиткам! Значит, сначала легко найти одну треть (вторую полку), а затем и всю первую полку x».',
+      'Впиши начальное количество свитков на КАЖДОЙ полке!',
+    ],
+    dualNumericTask: {
+      prompt: 'Впиши начальное число свитков для обеих полок:',
+      firstLabel: 'Первая полка (это x)',
+      secondLabel: 'Вторая полка (это x/3)',
+      firstCorrect: 57,
+      secondCorrect: 19,
+      nextNodeId: 'ep3_verify',
+      mistakeCategory: 'fractions_parts',
+      evaluateWrong: (first, second, attempt) => {
+        if (first === 19 && second !== 19) {
+          return {
+            feedback:
+              attempt === 1
+                ? 'Внимание: 38 : 2 — это ОДНА треть (вторая полка), а первая полка в 3 раза больше!'
+                : 'Ты нашёл x/3 (вторую полку), разделив 38 на 2. Чтобы получить первую полку x, умножь это число на 3.',
+            speaker: 'archivist',
+            category: 'unknown_designation',
+          };
+        }
+        if (second === 19 && first !== 57) {
+          return {
+            feedback:
+              attempt === 1
+                ? 'Вторая полка (x/3 = 19) найдена верно! А первая полка состоит из 3 таких долей — пересчитай 19 · 3.'
+                : 'Умножь 19 на 3 по частям: 10 · 3 и 9 · 3, затем сложи два произведения.',
+            speaker: 'archivist',
+            category: 'arithmetic_check',
+          };
+        }
+        return {
+          feedback:
+            attempt === 1
+              ? 'Раз 2 трети равны 38, сначала раздели 38 на 2 (найдёшь вторую полку x/3), а потом умножь результат на 3 (найдёшь первую полку x).'
+              : 'Шаг 1: найди 38 : 2 — это вторая полка. Шаг 2: умножь полученное число на 3 — это первая полка.',
+          speaker: 'pi',
+          category: 'fractions_parts',
+        };
+      },
+    },
   },
 
   ep3_step2_table: {
@@ -705,7 +960,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematic: 'archive_table_ep3',
     schematicStep: 2,
     text: [
-      '«Отличный выбор! Пусть на второй полке изначально было x свитков».',
+      '«Отличный выбор — запись обойдётся без дробей! Пусть на второй полке изначально было x свитков».',
       'Заполни ячейки реестра «Было — Стало», чтобы перевести изменения на язык алгебры и составить уравнение!',
     ],
     tableTask: {
@@ -718,7 +973,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           options: ['x + 3', '3x', 'x − 3'],
           correctOption: '3x',
           hintTier1: 'Обрати внимание на предлог: «В 3 раза больше», а не «НА 3 больше». Какое это действие?',
-          hintTier2: '«В 3 раза больше» — это умножение на 3, то есть 3x.',
+          hintTier2: 'Фраза «в 3 раза больше» всегда означает умножение величины x на 3.',
         },
         {
           id: 'shelf1_after',
@@ -726,7 +981,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           options: ['3x − 16', '3x + 16', '16 − 3x'],
           correctOption: '3x − 16',
           hintTier1: 'На первой полке было 3x свитков. Из них забрали 16 — что из чего нужно вычитать?',
-          hintTier2: 'Если со 1-й полки сняли 16 свитков, из 3x нужно вычесть 16: 3x − 16.',
+          hintTier2: 'Если со 1-й полки сняли 16 свитков, нужно вычесть 16 из исходного количества 3x.',
         },
         {
           id: 'shelf2_after',
@@ -734,7 +989,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           options: ['x − 22', '22x', 'x + 22'],
           correctOption: 'x + 22',
           hintTier1: 'На вторую полку к x свиткам поставили ещё 22 свитка. Какой знак поставим?',
-          hintTier2: 'На вторую полку добавили 22 свитка, значит стало x + 22.',
+          hintTier2: 'Добавление 22 свитков записывается сложением: к x прибавляем 22.',
         },
       ],
     },
@@ -744,7 +999,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep3_step3_transfer',
     episodeId: 'ep3',
     episodeTitle: 'Эпизод 3 · Перенос слагаемых',
-    mathTopic: '3x − 16 = x + 22',
+    mathTopic: 'Перенос слагаемых через знак «=»',
     scene: 'archive',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -777,7 +1032,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Левая часть (3x − x) перенесена верно! А вот проверь правую часть: какой знак был у числа 16 слева?',
         hintTier2:
-          'Ты забыл поменять знак при переносе числа −16 в правую часть! При переходе через «=» минус становится плюсом: 3x − x = 22 + 16.',
+          'Ты забыл поменять знак при переносе числа −16 в правую часть! При переходе через «=» минус становится плюсом.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -794,7 +1049,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep3_step3b_scratchpad',
     episodeId: 'ep3',
     episodeTitle: 'Эпизод 3 · Черновик решения',
-    mathTopic: '3x − x = 22 + 16',
+    mathTopic: 'Приведение подобных слагаемых',
     scene: 'archive',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -815,6 +1070,11 @@ export const STORY_NODES: Record<string, StoryNode> = {
           suffix: 'x',
           correctValue: 2,
           placeholder: '?',
+          mistakeCategory: 'like_terms',
+          hintTier1:
+            'Вспомни: перед одиночным x стоит невидимый коэффициент 1 (3x − 1x). Вычти коэффициенты.',
+          hintTier2:
+            'Вычитаем коэффициенты при одинаковой букве: 3 − 1. Получившееся число запиши перед x.',
         },
         {
           id: 'rhs',
@@ -822,6 +1082,11 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '=',
           correctValue: 38,
           placeholder: '?',
+          mistakeCategory: 'arithmetic_check',
+          hintTier1:
+            'Коэффициент слева верный! Проверь сложение в правой части: 22 + 16.',
+          hintTier2:
+            'Сложи по разрядам: десятки (20 + 10) и единицы (2 + 6), затем объедини результат.',
         },
       ],
       nextNodeId: 'ep3_step4_dual_solve',
@@ -829,7 +1094,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
       hintTier1:
         'Вспомни: перед одиночным x стоит коэффициент 1 (3x − 1x). Справа просто сложи 22 и 16.',
       hintTier2:
-        '3x − x = (3 − 1)x = 2x, а справа 22 + 16 = 38. В итоге уравнение упрощается до 2x = 38.',
+        'Слева вычти коэффициенты (3 − 1), а справа сложи 22 + 16 по разрядам.',
     },
   },
 
@@ -837,7 +1102,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep3_step4_dual_solve',
     episodeId: 'ep3',
     episodeTitle: 'Эпизод 3 · Полный ответ реестра',
-    mathTopic: '2x = 38',
+    mathTopic: 'Нахождение обеих величин из 2x = 38',
     scene: 'archive',
     speaker: 'archivist',
     speakerName: 'Хранитель Архива',
@@ -862,8 +1127,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
           return {
             feedback:
               attempt === 1
-                ? 'Проверь, какую полку мы обозначили за x! x = 19 — это вторая (меньшая) полка, а не первая.'
-                : 'Ты вписал 19 вместо первой полки! Вторая полка равна x = 19, а первая была в 3 раза больше: 3 · 19 = 57.',
+                ? 'Проверь, какую полку мы обозначили за x! Корень 38 : 2 — это вторая (меньшая) полка, а не первая.'
+                : 'Полки перепутаны местами: вторая полка равна x, а первая была в 3 раза больше (нужно умножить x на 3).',
             speaker: 'archivist',
             category: 'unknown_designation',
           };
@@ -873,7 +1138,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
             feedback:
               attempt === 1
                 ? 'Вторая полка (x = 19) найдена верно! По условию на первой было в 3 раза больше свитков — пересчитай 3 · 19.'
-                : 'Умножь 19 на 3 аккуратно: 10 · 3 = 30, 9 · 3 = 27. Вместе 57!',
+                : 'Умножь 19 на 3 по частям: сначала 10 · 3, затем 9 · 3, и сложи два произведения.',
             speaker: 'archivist',
             category: 'arithmetic_check',
           };
@@ -882,7 +1147,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           feedback:
             attempt === 1
               ? 'Сначала найди x из 2x = 38 (раздели 38 на 2), это будет вторая полка. А затем умножь на 3 для первой.'
-              : 'x = 38 : 2 = 19 (вторая полка), а первая полка: 3 · 19 = 57.',
+              : 'Шаг 1: раздели 38 на 2 (разбей как 20 : 2 + 18 : 2) — это вторая полка. Шаг 2: умножь полученный x на 3 — это первая полка.',
           speaker: 'pi',
           category: 'arithmetic_check',
         };
@@ -894,7 +1159,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep3_verify',
     episodeId: 'ep3',
     episodeTitle: 'Эпизод 3 · Самопроверка реестра',
-    mathTopic: '57 − 16 = 19 + 22',
+    mathTopic: 'Проверка условия «стало поровну»',
     scene: 'archive',
     speaker: 'archivist',
     speakerName: 'Хранитель Архива',
@@ -903,7 +1168,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 5,
     formulaDisplay: '57 и 19 свитков',
     text: [
-      '«Прежде чем я отопру потайную дверь, проверь себя подстановкой: действительно ли на обеих полках после перестановки станет поровну?»',
+      '«Оба способа ведут к одному ответу: 57 и 19 свитков! Перед тем как я отопру дверь, проверь себя подстановкой: действительно ли после перестановки на полках станет поровну?»',
     ],
     verificationTask: {
       title: 'Проверка условия «стало поровну»',
@@ -914,14 +1179,14 @@ export const STORY_NODES: Record<string, StoryNode> = {
           label: 'Первая полка (57 − 16)',
           prefix: '57 − 16 =',
           correctValue: 41,
-          placeholder: '41',
+          placeholder: '?',
         },
         {
           id: 's2',
           label: 'Вторая полка (19 + 22)',
           prefix: '19 + 22 =',
           correctValue: 41,
-          placeholder: '41',
+          placeholder: '?',
         },
       ],
       expectedSummary: '41 = 41 — симметрия хранилища восстановлена!',
@@ -930,7 +1195,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
       completeDistrict: 'ep3_archive',
       hintTier1:
         'Выполни действия для каждой полки: из 57 вычти 16, а к 19 прибавь 22. Должны получиться одинаковые числа!',
-      hintTier2: '57 − 16 = 41 и 19 + 22 = 41. Поскольку 41 = 41, задача решена безупречно!',
+      hintTier2:
+        'Считай по разрядам: для первой полки (50 − 10) и (7 − 6); для второй (19 + 20) и ещё + 2. Сравни оба результата.',
     },
   },
 
@@ -947,7 +1213,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     formulaDisplay: '57 − 16 = 41  и  19 + 22 = 41',
     text: [
       'Проверка сходится идеально: 41 = 41! Полки Архива с тихим гулом выравниваются, а парящие свитки складываются в аккуратные ряды.',
-      'В Кодексе загорелась Запись №3: «В задачах "было — стало" за x бери меньшую величину, а при переносе слагаемого через знак равенства всегда меняй его знак на противоположный».',
+      'В Кодексе загорелась Запись №3: «За x можно обозначить любую искомую величину — обе модели верны, но выбор меньшей величины часто избавляет от дробей. При переносе слагаемого через знак «=» его знак меняется на противоположный».',
     ],
     choices: [
       {
@@ -1021,7 +1287,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep4_step1_parts',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Сборка долей',
-    mathTopic: '(1/3)x + (1/4)x + 20 = x',
+    mathTopic: 'Составление уравнения из долей и целого',
     scene: 'crystals',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -1041,7 +1307,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Посмотри: 1/3 и 1/4 — это части от чего? Если к дроби 1/3 просто прибавить 20, разве она зависит от общего числа кристаллов x?',
         hintTier2:
-          '1/3 и 1/4 — это доли ОТ ВСЕЙ коллекции x, поэтому их нужно умножить на x: (1/3)x + (1/4)x + 20 = x.',
+          '1/3 и 1/4 — это доли ОТ ВСЕЙ коллекции x, поэтому каждую дробь нужно умножить на неизвестное целое x.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -1058,7 +1324,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep4_step2_lcm',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Общий знаменатель',
-    mathTopic: 'Сложение дробей (1/3)x и (1/4)x',
+    mathTopic: 'Приведение дробей к общему знаменателю',
     scene: 'crystals',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -1067,20 +1333,20 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 3,
     formulaDisplay: '(1/3)x + (1/4)x + 20 = x',
     text: [
-      '«Чтобы сложить дроби (1/3)x и (1/4)x, приведём их к наименьшему общему знаменателю (можешь поэкспериментировать со шкалой долей слева!)».',
+      '«Чтобы сложить дроби (1/3)x и (1/4)x, приведём их к наименьшему общему знаменателю».',
       'Какое наименьшее натуральное число делится без остатка и на 3, и на 4?',
     ],
     numericTask: {
       prompt: 'Введи наименьший общий знаменатель для 3 и 4:',
-      placeholder: 'Например: 12',
+      placeholder: 'Введи число',
       correctValue: 12,
-      nextNodeId: 'ep4_step3_branch',
+      nextNodeId: 'ep4_step2b_fractions',
       mistakeCategory: 'fractions_parts',
       evaluateWrong: (_val, attempt) => ({
         feedback:
           attempt === 1
             ? 'Подумай, какое самое маленькое число встречается в таблицах умножения и на 3, и на 4.'
-            : 'Так как 3 и 4 не имеют общих делителей кроме 1, их наименьший общий знаменатель равен 3 · 4 = 12.',
+            : 'У чисел 3 и 4 нет общих делителей кроме 1, поэтому их наименьший общий знаменатель находится умножением 3 на 4.',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'fractions_parts',
@@ -1088,33 +1354,90 @@ export const STORY_NODES: Record<string, StoryNode> = {
     },
   },
 
+  ep4_step2b_fractions: {
+    id: 'ep4_step2b_fractions',
+    episodeId: 'ep4',
+    episodeTitle: 'Эпизод 4 · Перевод долей в двенадцатые',
+    mathTopic: 'Вычисление числителей при знаменателе 12',
+    scene: 'crystals',
+    speaker: 'alyosha',
+    speakerName: 'Алёша',
+    emotion: 'thoughtful',
+    schematic: 'crystals_ep4',
+    schematicStep: 3,
+    formulaDisplay: '(1/3)x + (1/4)x + 20 = x',
+    text: [
+      '«Общий знаменатель — 12! Теперь переведём каждую долю в двенадцатые самостоятельно, чтобы узнать, какая часть коллекции досталась зелёным кристаллам».',
+    ],
+    scratchpadTask: {
+      title: 'Черновик приведения дробей',
+      equationContext: 'Вырази доли синих, красных и оставшихся зелёных кристаллов со знаменателем 12:',
+      fields: [
+        {
+          id: 'blue12',
+          label: 'Синие: 1/3 = ?/12',
+          suffix: '/12',
+          correctValue: 4,
+          placeholder: '?',
+          mistakeCategory: 'fractions_parts',
+          hintTier1: 'Во сколько раз 12 больше 3? На столько же умножь числитель 1.',
+          hintTier2: 'Раздели 12 на 3 — получишь дополнительный множитель для числителя дроби 1/3.',
+        },
+        {
+          id: 'red12',
+          label: 'Красные: 1/4 = ?/12',
+          suffix: '/12',
+          correctValue: 3,
+          placeholder: '?',
+          mistakeCategory: 'fractions_parts',
+          hintTier1: 'Во сколько раз 12 больше 4? Умножь числитель 1 на это число.',
+          hintTier2: 'Раздели 12 на 4 — получишь числитель для доли красных кристаллов.',
+        },
+        {
+          id: 'green12',
+          label: 'Зелёные: 12/12 − синие − красные',
+          suffix: '/12',
+          correctValue: 5,
+          placeholder: '?',
+          mistakeCategory: 'fractions_parts',
+          hintTier1: 'Сложи числители синих и красных долей, а затем вычти эту сумму из всего целого (12).',
+          hintTier2: 'Всё целое — это 12 двенадцатых. Вычти из 12 сумму найденных числителей синих и красных.',
+        },
+      ],
+      nextNodeId: 'ep4_step3_branch',
+      mistakeCategory: 'fractions_parts',
+      hintTier1: 'Переведи 1/3 и 1/4 к знаменателю 12, а затем вычти их сумму из 12/12.',
+      hintTier2: 'Найди дополнительные множители 12 : 3 и 12 : 4, затем вычти их сумму из 12.',
+    },
+  },
+
   ep4_step3_branch: {
     id: 'ep4_step3_branch',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Выбор пути рассуждения',
-    mathTopic: '(7/12)x + 20 = x',
+    mathTopic: 'Уравнение (7/12)x + 20 = x и доля (5/12)x = 20',
     scene: 'crystals',
     speaker: 'pi',
     speakerName: 'Сова Пи',
     emotion: 'surprised',
     schematic: 'crystals_ep4',
     schematicStep: 4,
-    formulaDisplay: '(7/12)x + 20 = x',
+    formulaDisplay: '(5/12)x = 20',
     text: [
-      '«Прекрасно! (4/12)x + (3/12)x = (7/12)x. Получаем уравнение: (7/12)x + 20 = x».',
-      'К этому шагу можно подойти двумя разными способами. Какой путь объяснения тебе ближе — этот выбор отразится на твоём стиле Мастера!',
+      '«Ты сам вывел все доли: 4/12 синих, 3/12 красных и ровно 5/12 зелёных! Значит (5/12)x = 20».',
+      'Как тебе удобнее осмыслить этот финальный шаг — этот выбор отразится на твоём стиле Мастера!',
     ],
     choices: [
       {
         id: 'ep4_path_algebra',
-        label: 'Алгебраический путь: представить x как (12/12)x и перенести (7/12)x',
+        label: 'Алгебраический путь: записать x как (12/12)x и решить уравнение (5/12)x = 20',
         nextNodeId: 'ep4_step4_algebraic',
         isCorrect: true,
         recordDecision: { ep4Method: 'algebraic' },
       },
       {
         id: 'ep4_path_logic',
-        label: 'Логический путь: узнать, какая доля от целого осталась на зелёные кристаллы',
+        label: 'Логический путь: найти размер одной доли (1/12) и умножить на 12 частей',
         nextNodeId: 'ep4_step4_logical',
         isCorrect: true,
         recordDecision: { ep4Method: 'logical' },
@@ -1126,22 +1449,22 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep4_step4_algebraic',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Алгебраическое преобразование',
-    mathTopic: '(5/12)x = 20',
+    mathTopic: 'Нахождение целого по уравнению (5/12)x = 20',
     scene: 'crystals',
     speaker: 'alyosha',
     speakerName: 'Алёша',
     emotion: 'thoughtful',
     schematic: 'crystals_ep4',
     schematicStep: 4,
-    formulaDisplay: '20 = (12/12)x − (7/12)x  ⇒  (5/12)x = 20',
+    formulaDisplay: '(5/12)x = 20',
     text: [
-      '«Запишем x как (12/12)x и вычтем (7/12)x: остаётся (5/12)x = 20».',
-      'Сколько всего кристаллов в пещере? Найди целое x (вспомни: 5 двенадцатых — это 20)!',
+      '«Мы получили уравнение (5/12)x = 20: чтобы найти x, нужно 20 разделить на дробь 5/12 (то есть разделить на 5 и умножить на 12)».',
+      'Сколько всего кристаллов в пещере? Найди целое x!',
     ],
     numericTask: {
       prompt: 'Введи общее количество кристаллов x:',
       unit: 'кристаллов',
-      placeholder: 'Например: 48',
+      placeholder: 'Введи число',
       correctValue: 48,
       nextNodeId: 'ep4_verify',
       mistakeCategory: 'fractions_parts',
@@ -1149,7 +1472,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         feedback:
           attempt === 1
             ? 'Если 5 долей равны 20 кристаллам, то сколько кристаллов в ОДНОЙ доле (1/12)? А потом умножь на все 12 долей.'
-            : '20 : 5 = 4 кристалла в одной доле (1/12). Всего долей 12, значит 4 · 12 = 48!',
+            : 'Выполни два действия по очереди: сначала раздели 20 на 5 (найдёшь одну долю), затем умножь результат на 12.',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'fractions_parts',
@@ -1161,22 +1484,22 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep4_step4_logical',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Логика долей',
-    mathTopic: '(5/12)x = 20',
+    mathTopic: 'Восстановление целого из 5/12 = 20',
     scene: 'crystals',
     speaker: 'pi',
     speakerName: 'Сова Пи',
     emotion: 'encourage',
     schematic: 'crystals_ep4',
     schematicStep: 4,
-    formulaDisplay: '1 − 7/12 = 5/12 (доля зелёных = 20 шт.)',
+    formulaDisplay: '5 долей из 12 = 20 кристаллов',
     text: [
-      '«Мудрый взгляд! Синие и красные вместе занимают 7/12 коллекции. Значит, зелёным достаётся 1 − 7/12 = 5/12 всей коллекции — и их ровно 20 штук!»',
+      '«Мудрый взгляд! На схеме слева видно: 5 зелёных кусочков — это 20 кристаллов».',
       'Раз 5 долей — это 20 кристаллов, сколько всего кристаллов во всех 12 долях?',
     ],
     numericTask: {
       prompt: 'Введи общее количество кристаллов x:',
       unit: 'кристаллов',
-      placeholder: 'Например: 48',
+      placeholder: 'Введи число',
       correctValue: 48,
       nextNodeId: 'ep4_verify',
       mistakeCategory: 'fractions_parts',
@@ -1184,7 +1507,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         feedback:
           attempt === 1
             ? 'Посмотри на шкалу слева: 5 зелёных кусочков дают 20 кристаллов. Сколько кристаллов в одном кусочке?'
-            : 'Одна часть: 20 : 5 = 4. Во всей коллекции 12 таких частей: 4 · 12 = 48!',
+            : 'Сначала найди величину одной части (20 : 5), а затем умножь её на количество всех частей (12).',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'fractions_parts',
@@ -1196,7 +1519,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep4_verify',
     episodeId: 'ep4',
     episodeTitle: 'Эпизод 4 · Проверка кристаллов по цветам',
-    mathTopic: '16 + 12 + 20 = 48',
+    mathTopic: 'Подстановка x = 48 в условие',
     scene: 'crystals',
     speaker: 'guardian',
     speakerName: 'Хранитель Пещер',
@@ -1216,14 +1539,14 @@ export const STORY_NODES: Record<string, StoryNode> = {
           label: 'Синие (⅓ от 48)',
           prefix: '48 : 3 =',
           correctValue: 16,
-          placeholder: '16',
+          placeholder: '?',
         },
         {
           id: 'red',
           label: 'Красные (¼ от 48)',
           prefix: '48 : 4 =',
           correctValue: 12,
-          placeholder: '12',
+          placeholder: '?',
         },
       ],
       expectedSummary: '16 + 12 + 20 = 48 — вся коллекция сошлась!',
@@ -1231,7 +1554,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
       unlockLaw: 4,
       completeDistrict: 'ep4_crystals',
       hintTier1: 'Раздели 48 на 3 (для синих) и 48 на 4 (для красных). С зелёными (20) в сумме должно выйти 48.',
-      hintTier2: 'Синих: 48 : 3 = 16, красных: 48 : 4 = 12. Проверяем: 16 + 12 + 20 = 48!',
+      hintTier2: 'Разбей 48 на удобные части: для деления на 3 это 30 + 18, а для деления на 4 это 40 + 8.',
     },
   },
 
@@ -1321,8 +1644,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
   ep5_step1_way1: {
     id: 'ep5_step1_way1',
     episodeId: 'ep5',
-    episodeTitle: 'Эпизод 5 · Первый и второй способы счёта',
-    mathTopic: '5x + 10 = 7x − 4',
+    episodeTitle: 'Эпизод 5 · Сборка двух способов счёта',
+    mathTopic: 'Выражение одной величины двумя способами',
     scene: 'city',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -1330,25 +1653,80 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematic: 'city_chests_ep5',
     schematicStep: 2,
     text: [
-      '«По первому способу: в x сундуках по 5 монет (5x) да ещё 10 лишних рядом — всего (5x + 10) монет».',
-      'А как записать общее число монет ВТОРЫМ способом: по 7 монет в x сундуках, но 4 монет НЕ ХВАТАЕТ?',
+      '«Пусть у автоматонов x сундуков. Запиши общее число энергомонет обоими способами из условия — с избытком и с нехваткой!»',
+    ],
+    tableTask: {
+      prompt: 'Выбери оба выражения для общего числа энергомонет:',
+      nextNodeId: 'ep5_step2_transfer',
+      rows: [
+        {
+          id: 'way1',
+          label: 'Способ 1 (по 5 монет в x сундуков и 10 монет лишних)',
+          options: ['5x − 10', '5x + 10', '10x + 5'],
+          correctOption: '5x + 10',
+          hintTier1:
+            'В x сундуках лежит 5x монет, а ещё 10 лежат рядом сверх того. Прибавляем или вычитаем 10?',
+          hintTier2:
+            'Избыток означает, что монет больше, чем 5x, на 10 штук — значит прибавляем 10 к 5x.',
+        },
+        {
+          id: 'way2',
+          label: 'Способ 2 (по 7 монет в x сундуков, но 4 монет не хватает)',
+          options: ['7x + 4', '7x − 4', '4x − 7'],
+          correctOption: '7x − 4',
+          hintTier1:
+            '7x — это столько монет, сколько нужно для ПОЛНОГО заполнения всех сундуков. Если 4 монет не хватает, их больше 7x или меньше 7x?',
+          hintTier2:
+            'Нехватка означает, что до полного комплекта 7x недостаёт 4 монет — нужно вычесть 4.',
+        },
+      ],
+    },
+  },
+
+  ep5_step2_transfer: {
+    id: 'ep5_step2_transfer',
+    episodeId: 'ep5',
+    episodeTitle: 'Эпизод 5 · Перенос слагаемых',
+    mathTopic: 'Перенос слагаемых через знак «=»',
+    scene: 'city',
+    speaker: 'alyosha',
+    speakerName: 'Алёша',
+    emotion: 'thoughtful',
+    schematic: 'city_chests_ep5',
+    schematicStep: 3,
+    formulaDisplay: '5x + 10 = 7x − 4',
+    text: [
+      '«Оба выражения описывают одну и ту же груду монет, значит 5x + 10 = 7x − 4. Чтобы коэффициент при x остался положительным, перенесём слагаемые с x вправо, а обычные числа — влево!»',
+      'Какая строка получится после правильного переноса слагаемых?',
     ],
     choices: [
       {
-        id: 'ep5_way2_wrong',
-        label: '7x + 4',
+        id: 'ep5_tr_wrong1',
+        label: '10 − 4 = 7x − 5x',
         isCorrect: false,
-        mistakeCategory: 'expression_translation',
+        mistakeCategory: 'sign_transfer',
         hintTier1:
-          'Подумай: 7x — это столько монет, сколько нужно для ПОЛНОГО заполнения всех сундуков. Если 4 монет не хватает, их больше 7x или меньше 7x?',
+          'Слагаемые с x перенесены верно! Проверь знак числа −4 после переноса через «=» в левую часть.',
         hintTier2:
-          'Ошиб-ка! У нас дефицит! Четырёх монет НЕ ХВАТАЕТ до полного комплекта — их нужно вычесть: 7x − 4.',
+          'Справа стояло −4. При переносе через знак равенства минус меняется на противоположный знак.',
         feedbackSpeaker: 'captain',
         integrityDelta: -10,
       },
       {
-        id: 'ep5_way2_ok',
-        label: '7x − 4',
+        id: 'ep5_tr_wrong2',
+        label: '10 + 4 = 7x + 5x',
+        isCorrect: false,
+        mistakeCategory: 'sign_transfer',
+        hintTier1:
+          'Числа слева перенесены верно! А проверь знак у 5x, которое перешло в правую часть.',
+        hintTier2:
+          'Слева было +5x. При переносе через знак равенства вправо оно должно поменять знак на минус.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep5_tr_ok',
+        label: '10 + 4 = 7x − 5x',
         nextNodeId: 'ep5_step2b_scratchpad',
         isCorrect: true,
       },
@@ -1359,16 +1737,16 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep5_step2b_scratchpad',
     episodeId: 'ep5',
     episodeTitle: 'Эпизод 5 · Черновик уравнения',
-    mathTopic: '5x + 10 = 7x − 4',
+    mathTopic: 'Приведение подобных слагаемых',
     scene: 'city',
     speaker: 'alyosha',
     speakerName: 'Алёша',
     emotion: 'thoughtful',
     schematic: 'city_chests_ep5',
     schematicStep: 3,
-    formulaDisplay: '5x + 10 = 7x − 4',
+    formulaDisplay: '10 + 4 = 7x − 5x',
     text: [
-      '«Приравниваем оба выражения: 5x + 10 = 7x − 4. Перенесём x вправо (чтобы не получить минус), а числа влево: 10 + 4 = 7x − 5x».',
+      '«Отлично! Упростим обе части равенства в черновике».',
     ],
     scratchpadTask: {
       title: 'Пошаговый черновик уравнения',
@@ -1379,6 +1757,9 @@ export const STORY_NODES: Record<string, StoryNode> = {
           label: 'Число слева (10 + 4)',
           correctValue: 14,
           placeholder: '?',
+          mistakeCategory: 'arithmetic_check',
+          hintTier1: 'Проверь сложение в левой части: сколько будет 10 + 4?',
+          hintTier2: 'Прибавь к одному десятку (10) ещё 4 единицы.',
         },
         {
           id: 'rhs_coef',
@@ -1387,12 +1768,15 @@ export const STORY_NODES: Record<string, StoryNode> = {
           suffix: 'x',
           correctValue: 2,
           placeholder: '?',
+          mistakeCategory: 'like_terms',
+          hintTier1: 'Вычти коэффициенты перед одинаковой буквой x: 7 − 5.',
+          hintTier2: 'При приведении подобных слагаемых вычитаем только числа перед x: 7 − 5.',
         },
       ],
       nextNodeId: 'ep5_step3_solve_chests',
       mistakeCategory: 'like_terms',
       hintTier1: 'Сложи 10 и 4 для левой части, а справа вычти 5x из 7x.',
-      hintTier2: '10 + 4 = 14, а 7x − 5x = 2x. Получаем простое уравнение 14 = 2x.',
+      hintTier2: 'Слева вычисли сумму 10 + 4, а справа разность коэффициентов 7 − 5.',
     },
   },
 
@@ -1400,7 +1784,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep5_step3_solve_chests',
     episodeId: 'ep5',
     episodeTitle: 'Эпизод 5 · Поиск числа сундуков',
-    mathTopic: '14 = 2x',
+    mathTopic: 'Решение уравнения 14 = 2x',
     scene: 'city',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -1409,21 +1793,21 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 3,
     formulaDisplay: '14 = 2x',
     text: [
-      '«Можешь проверить на счётчике сундуков слева, при каком x оба способа дают одинаковое число монет!»',
+      '«Найди x из уравнения 14 = 2x, а затем можешь проверить гипотезу на счётчике сундуков слева!»',
       'Сколько же сундуков у автоматонов?',
     ],
     numericTask: {
       prompt: 'Введи количество сундуков x:',
       unit: 'сундуков',
-      placeholder: 'Например: 7',
+      placeholder: 'Введи число',
       correctValue: 7,
       nextNodeId: 'ep5_step4_coins',
       mistakeCategory: 'arithmetic_check',
       evaluateWrong: (_val, attempt) => ({
         feedback:
           attempt === 1
-            ? 'Посмотри на уравнение 2x = 14. Раздели 14 на 2.'
-            : '14 : 2 = 7. У автоматонов ровно 7 сундуков!',
+            ? 'Посмотри на уравнение 2x = 14. Какое число при умножении на 2 даёт 14?'
+            : 'Чтобы найти неизвестный множитель x в 2x = 14, раздели произведение 14 на известный множитель 2.',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'arithmetic_check',
@@ -1435,7 +1819,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep5_step4_coins',
     episodeId: 'ep5',
     episodeTitle: 'Эпизод 5 · Подсчёт энергомонет',
-    mathTopic: '5 · 7 + 10 = ?',
+    mathTopic: 'Подстановка x = 7 в первое выражение',
     scene: 'city',
     speaker: 'captain',
     speakerName: 'Капитан Автоматонов',
@@ -1450,7 +1834,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     numericTask: {
       prompt: 'Сколько всего энергомонет у автоматонов?',
       unit: 'монет',
-      placeholder: 'Например: 45',
+      placeholder: 'Введи число',
       correctValue: 45,
       nextNodeId: 'ep5_step5_verify',
       mistakeCategory: 'arithmetic_check',
@@ -1458,7 +1842,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         feedback:
           attempt === 1
             ? 'Помни о порядке действий: сначала умножь 5 на 7, а затем прибавь 10.'
-            : '5 · 7 = 35, и 35 + 10 = 45 монет!',
+            : 'Выполни по шагам: найди произведение 5 · 7 по таблице умножения, а к полученному числу прибавь один десяток.',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'arithmetic_check',
@@ -1470,7 +1854,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep5_step5_verify',
     episodeId: 'ep5',
     episodeTitle: 'Эпизод 5 · Проверка вторым способом',
-    mathTopic: '7 · 7 − 4 = 45',
+    mathTopic: 'Перекрёстная проверка',
     scene: 'city',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -1505,7 +1889,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep5_verify_calc',
     episodeId: 'ep5',
     episodeTitle: 'Эпизод 5 · Самопроверка подстановкой',
-    mathTopic: '7 · 7 − 4 = 45',
+    mathTopic: 'Подстановка x = 7 во второй способ',
     scene: 'city',
     speaker: 'captain',
     speakerName: 'Капитан Автоматонов',
@@ -1526,7 +1910,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '7 · 7 − 4 =',
           suffix: 'монет',
           correctValue: 45,
-          placeholder: '45',
+          placeholder: '?',
         },
       ],
       expectedSummary: '45 = 45 — оба способа дали одинаковый результат!',
@@ -1535,7 +1919,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
       completeDistrict: 'ep5_city',
       recordDecision: { ep5VerificationDone: true },
       hintTier1: 'Сначала умножь 7 на 7, а затем вычти 4 недостающие монеты.',
-      hintTier2: '7 · 7 = 49, и 49 − 4 = 45 монет. Оба способа сошлись!',
+      hintTier2: 'Найди квадрат семи (7 · 7) по таблице умножения и вычти 4. Сравни результат с первым способом.',
     },
   },
 
@@ -1600,7 +1984,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     speakerName: 'Сова Пи',
     emotion: 'alert',
     schematic: 'boss_river_ep6',
-    schematicStep: 2,
+    schematicStep: 1,
     text: [
       'Задача: Катер прошёл участок Реки Времени по течению за 3 часа, а обратно против течения — за 5 часов. Собственная скорость катера равна 12 км/ч. Найди скорость течения x км/ч.',
       'Как записать скорость катера ПО течению и ПРОТИВ течения?',
@@ -1614,16 +1998,66 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Подумай: когда ты плывёшь ПО течению, река тебя ускоряет или тормозит? А когда ПРОТИВ течения?',
         hintTier2:
-          'Наоборот! ПО течению река подталкивает катер (12 + x), а ПРОТИВ течения тормозит (12 − x).',
+          'Наоборот! ПО течению скорость течения прибавляется к скорости катера, а ПРОТИВ течения — вычитается.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
       {
         id: 'ep6_spd_ok',
         label: 'По течению: (12 + x), против течения: (12 − x)',
-        nextNodeId: 'ep6_phase2_equation',
+        nextNodeId: 'ep6_phase1b_assemble',
         isCorrect: true,
         bossDamage: 25,
+      },
+    ],
+  },
+
+  ep6_phase1b_assemble: {
+    id: 'ep6_phase1b_assemble',
+    episodeId: 'ep6',
+    episodeTitle: 'Эпизод 6 · Составление уравнения пути',
+    mathTopic: 'Равенство расстояний S = v · t',
+    scene: 'temple',
+    speaker: 'alyosha',
+    speakerName: 'Алёша',
+    emotion: 'thoughtful',
+    schematic: 'boss_river_ep6',
+    schematicStep: 2,
+    text: [
+      '«Скорости готовы: (12 + x) по течению и (12 − x) против течения. Катер прошёл ОДИН И ТОТ ЖЕ участок реки: по течению за 3 часа, обратно за 5 часов».',
+      'Собери уравнение, приравняв расстояние по течению к расстоянию против течения!',
+    ],
+    choices: [
+      {
+        id: 'ep6_eq_swap',
+        label: '3(12 − x) = 5(12 + x)',
+        isCorrect: false,
+        mistakeCategory: 'expression_translation',
+        hintTier1:
+          'Проверь, сколько часов катер шёл ПО течению (быстрее), а сколько ПРОТИВ течения (медленнее).',
+        hintTier2:
+          'По течению катер плывёт быстрее, значит тратит меньше времени (3 ч на скорость 12 + x), а против течения — 5 ч на скорость 12 − x.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep6_eq_add',
+        label: '3 + (12 + x) = 5 + (12 − x)',
+        isCorrect: false,
+        mistakeCategory: 'expression_translation',
+        hintTier1:
+          'Вспомни формулу пути: чтобы найти расстояние, время к скорости прибавляют или умножают на скорость?',
+        hintTier2:
+          'По формуле S = t · v время нужно УМНОЖАТЬ на выражение скорости в скобках.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep6_eq_ok',
+        label: '3(12 + x) = 5(12 − x)',
+        nextNodeId: 'ep6_phase2_equation',
+        isCorrect: true,
+        bossDamage: 15,
       },
     ],
   },
@@ -1631,8 +2065,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
   ep6_phase2_equation: {
     id: 'ep6_phase2_equation',
     episodeId: 'ep6',
-    episodeTitle: 'Эпизод 6 · Фаза 2: Уравнение со скобками',
-    mathTopic: '3(12 + x) = 5(12 − x)',
+    episodeTitle: 'Эпизод 6 · Фаза 2: Раскрытие скобок',
+    mathTopic: 'Распределительный закон умножения',
     scene: 'temple',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -1641,8 +2075,8 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 3,
     formulaDisplay: '3(12 + x) = 5(12 − x)',
     text: [
-      '«За 3 часа по течению катер прошёл 3(12 + x) км, а за 5 часов обратно — 5(12 − x) км. Участок реки один и тот же, поэтому расстояния равны: 3(12 + x) = 5(12 − x)!»',
-      'Тень Скобок сжимает выражение! Примени распределительный закон умножения — как правильно раскрыть скобки?',
+      '«Уравнение собрано: 3(12 + x) = 5(12 − x)! Тень Скобок сжимает выражение!»',
+      'Примени распределительный закон умножения — как правильно раскрыть скобки?',
     ],
     choices: [
       {
@@ -1653,7 +2087,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Посмотри на иксы внутри скобок: ты умножил 3 и 5 на число 12, а умножились ли сами x?',
         hintTier2:
-          'Тень Скобок смеётся: множитель перед скобкой умножается на КАЖДОЕ слагаемое внутри! 3 · x = 3x и 5 · x = 5x.',
+          'Тень Скобок смеётся: множитель перед скобкой умножается на КАЖДОЕ слагаемое внутри — и на 12, и на x!',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
@@ -1665,16 +2099,67 @@ export const STORY_NODES: Record<string, StoryNode> = {
         hintTier1:
           'Почти всё верно, но внимательно проверь знак внутри второй скобки: 5(12 − x).',
         hintTier2:
-          'В правой скобке стоял знак МИНУС! Пять умножить на минус икс будет МИНУС 5x: 36 + 3x = 60 − 5x.',
+          'В правой скобке стоял знак МИНУС! При умножении положительного 5 на вычитаемый x знак минус сохраняется.',
         feedbackSpeaker: 'pi',
         integrityDelta: -10,
       },
       {
         id: 'ep6_strike_ok',
         label: '36 + 3x = 60 − 5x',
+        nextNodeId: 'ep6_phase3_transfer',
+        isCorrect: true,
+        bossDamage: 35,
+      },
+    ],
+  },
+
+  ep6_phase3_transfer: {
+    id: 'ep6_phase3_transfer',
+    episodeId: 'ep6',
+    episodeTitle: 'Эпизод 6 · Фаза 3: Перенос слагаемых',
+    mathTopic: 'Перенос слагаемых через знак «=»',
+    scene: 'temple',
+    speaker: 'pi',
+    speakerName: 'Сова Пи',
+    emotion: 'alert',
+    schematic: 'boss_river_ep6',
+    schematicStep: 4,
+    formulaDisplay: '36 + 3x = 60 − 5x',
+    text: [
+      '«Щит Тени Скобок треснул! Теперь перенеси слагаемые с x в левую часть, а обычные числа — в правую».',
+      'Выбери верную строку после переноса:',
+    ],
+    choices: [
+      {
+        id: 'ep6_tr_wrong1',
+        label: '3x − 5x = 60 − 36',
+        isCorrect: false,
+        mistakeCategory: 'sign_transfer',
+        hintTier1:
+          'Число 36 перенесено верно! А посмотри на −5x справа: поменялся ли его знак при переходе влево?',
+        hintTier2:
+          'При переносе −5x через знак равенства минус обязательно меняется на плюс.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep6_tr_wrong2',
+        label: '3x + 5x = 60 + 36',
+        isCorrect: false,
+        mistakeCategory: 'sign_transfer',
+        hintTier1:
+          'Левая часть (3x + 5x) верна! А какой знак был у числа 36 слева до переноса?',
+        hintTier2:
+          'Число +36 переходит из левой части в правую с противоположным знаком — со знаком минус.',
+        feedbackSpeaker: 'pi',
+        integrityDelta: -10,
+      },
+      {
+        id: 'ep6_tr_ok',
+        label: '3x + 5x = 60 − 36',
         nextNodeId: 'ep6_phase3b_scratchpad',
         isCorrect: true,
-        bossDamage: 50,
+        bossDamage: 10,
       },
     ],
   },
@@ -1683,7 +2168,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep6_phase3b_scratchpad',
     episodeId: 'ep6',
     episodeTitle: 'Эпизод 6 · Черновик решающего удара',
-    mathTopic: '3x + 5x = 60 − 36',
+    mathTopic: 'Приведение подобных слагаемых',
     scene: 'temple',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -1692,7 +2177,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 4,
     formulaDisplay: '3x + 5x = 60 − 36',
     text: [
-      '«Щит Тени Скобок треснул! Переносим иксы влево, числа вправо со сменой знака: 3x + 5x = 60 − 36. Заполни черновик упрощения!»',
+      '«Верный перенос! Заполни черновик упрощения уравнения перед финальным выстрелом!»',
     ],
     scratchpadTask: {
       title: 'Финальный черновик уравнения',
@@ -1704,6 +2189,9 @@ export const STORY_NODES: Record<string, StoryNode> = {
           suffix: 'x',
           correctValue: 8,
           placeholder: '?',
+          mistakeCategory: 'like_terms',
+          hintTier1: 'Сложи коэффициенты 3 и 5 перед буквой x.',
+          hintTier2: 'При приведении подобных слагаемых складываем коэффициенты 3 + 5, сохраняя x.',
         },
         {
           id: 'rhs',
@@ -1711,20 +2199,23 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '=',
           correctValue: 24,
           placeholder: '?',
+          mistakeCategory: 'arithmetic_check',
+          hintTier1: 'Коэффициент слева верный! Пересчитай вычитание 60 − 36.',
+          hintTier2: 'Вычитай по частям: сначала 60 − 30, а из полученного результата вычти ещё 6.',
         },
       ],
       nextNodeId: 'ep6_phase4_solve',
       mistakeCategory: 'like_terms',
       hintTier1: 'Сложи коэффициенты 3 и 5 слева, а справа вычти 36 из 60.',
-      hintTier2: '3x + 5x = 8x, а 60 − 36 = 24. Получаем 8x = 24!',
+      hintTier2: 'Слева найди сумму 3 + 5, а справа выполни (60 − 30) − 6.',
     },
   },
 
   ep6_phase4_solve: {
     id: 'ep6_phase4_solve',
     episodeId: 'ep6',
-    episodeTitle: 'Эпизод 6 · Фаза 3: Скорость течения',
-    mathTopic: '8x = 24',
+    episodeTitle: 'Эпизод 6 · Фаза 4: Скорость течения',
+    mathTopic: 'Решение уравнения 8x = 24',
     scene: 'temple',
     speaker: 'pi',
     speakerName: 'Сова Пи',
@@ -1738,16 +2229,16 @@ export const STORY_NODES: Record<string, StoryNode> = {
     numericTask: {
       prompt: 'Чему равна скорость течения x?',
       unit: 'км/ч',
-      placeholder: 'Например: 3',
+      placeholder: 'Введи число',
       correctValue: 3,
       nextNodeId: 'ep6_verify',
-      bossDamage: 25,
+      bossDamage: 15,
       mistakeCategory: 'arithmetic_check',
       evaluateWrong: (_val, attempt) => ({
         feedback:
           attempt === 1
             ? 'Посмотри на уравнение 8x = 24. На сколько нужно умножить 8, чтобы получить 24?'
-            : 'Реши 8x = 24 делением: 24 : 8 = 3 км/ч!',
+            : 'Найди неизвестный множитель делением: раздели произведение 24 на известный множитель 8.',
         speaker: 'pi',
         integrityDelta: -10,
         category: 'arithmetic_check',
@@ -1759,7 +2250,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     id: 'ep6_verify',
     episodeId: 'ep6',
     episodeTitle: 'Эпизод 6 · Проверка шлюза подстановкой',
-    mathTopic: '3(12+3) = 5(12−3)',
+    mathTopic: 'Подстановка x = 3 в условие задачи',
     scene: 'temple',
     speaker: 'alyosha',
     speakerName: 'Алёша',
@@ -1768,7 +2259,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
     schematicStep: 5,
     formulaDisplay: 'x = 3 км/ч',
     text: [
-      '«Последняя проверка перед открытием Портала! Подставь скорость течения 3 км/ч и проверь, что путь туда (3 · (12 + 3)) равен пути обратно (5 · (12 − 3))!»',
+      '«Щит Тени Скобок разрушен! Проверим подстановкой, что при скорости течения 3 км/ч путь туда (3 · (12 + 3)) равен пути обратно (5 · (12 − 3))!»',
     ],
     verificationTask: {
       title: 'Проверка Реки Времени',
@@ -1780,7 +2271,7 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '3 · 15 =',
           suffix: 'км',
           correctValue: 45,
-          placeholder: '45',
+          placeholder: '?',
         },
         {
           id: 'up',
@@ -1788,16 +2279,137 @@ export const STORY_NODES: Record<string, StoryNode> = {
           prefix: '5 · 9 =',
           suffix: 'км',
           correctValue: 45,
-          placeholder: '45',
+          placeholder: '?',
         },
       ],
       expectedSummary: '45 км = 45 км — шлюз синхронизирован, Тень Скобок повержена!',
-      nextNodeId: 'ep6_final_stance',
+      nextNodeId: 'ep6_transfer_intro',
       unlockLaw: 6,
       hintTier1:
         'По течению скорость 12 + 3 = 15 км/ч (за 3 часа), против течения — 12 − 3 = 9 км/ч (за 5 часов).',
       hintTier2:
-        '3 · 15 = 45 км и 5 · 9 = 45 км. Расстояния совпали!',
+        'Вычисли два произведения отдельно: 3 · 10 + 3 · 5 для пути по течению и 5 · 9 по таблице умножения для обратного пути.',
+    },
+  },
+
+  // ==================== НЕЗАВИСИМАЯ ПРОВЕРКА ПЕРЕНОСА НАВЫКА ====================
+  ep6_transfer_intro: {
+    id: 'ep6_transfer_intro',
+    episodeId: 'transfer',
+    episodeTitle: 'Испытание Печати · Независимая проверка',
+    mathTopic: 'Три новые задачи без подсказок персонажей',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать Портала',
+    emotion: 'curious',
+    schematic: 'none',
+    text: [
+      'Тень Скобок рассеялась, но на золотой арке Портала вспыхнули три рунические печати. Голос Храма произнёс: «Кодекс собран, но прежде чем вернуться домой, докажи, что умеешь составлять и решать уравнения полностью самостоятельно».',
+      'Впереди три короткие новые задачи без подсказок Совы Пи и без готовых схем. Составь уравнение на листке или в уме и введи проверенный ответ!',
+    ],
+    choices: [
+      {
+        id: 'start_transfer_check',
+        label: 'Приступить к самостоятельной проверке (3 задачи)',
+        nextNodeId: 'ep6_transfer_1',
+        isCorrect: true,
+      },
+    ],
+  },
+
+  ep6_transfer_1: {
+    id: 'ep6_transfer_1',
+    episodeId: 'transfer',
+    episodeTitle: 'Независимая проверка · Задача 1 из 3',
+    mathTopic: 'Встречное движение',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать I · Встречное движение',
+    emotion: 'thoughtful',
+    isIndependentCheck: true,
+    transferCheckTopic: 'Встречное движение',
+    schematic: 'none',
+    text: [
+      'Задача: Два велосипедиста одновременно выехали навстречу друг другу из двух посёлков, расстояние между которыми 50 км. Скорость первого — 4 км/ч, второго — 6 км/ч. Через сколько часов они встретятся?',
+    ],
+    numericTask: {
+      prompt: 'Введи время до встречи (в часах):',
+      unit: 'часов',
+      placeholder: 'Введи число',
+      correctValue: 5,
+      nextNodeId: 'ep6_transfer_2',
+      mistakeCategory: 'like_terms',
+      evaluateWrong: () => ({
+        feedback:
+          'Ответ не сходится с условием. Составь уравнение для общего расстояния 50 км, приведи подобные слагаемые и проверь корень подстановкой.',
+        speaker: 'pi',
+        integrityDelta: -5,
+        category: 'like_terms',
+      }),
+    },
+  },
+
+  ep6_transfer_2: {
+    id: 'ep6_transfer_2',
+    episodeId: 'transfer',
+    episodeTitle: 'Независимая проверка · Задача 2 из 3',
+    mathTopic: 'Задачи «было — стало»',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать II · Было — стало',
+    emotion: 'thoughtful',
+    isIndependentCheck: true,
+    transferCheckTopic: 'Задачи «было — стало»',
+    schematic: 'none',
+    text: [
+      'Задача: В первой корзине было в 2 раза больше яблок, чем во второй. Когда из первой корзины взяли 10 яблок, а во вторую положили 14, яблок в корзинах стало поровну. Сколько яблок было во ВТОРОЙ корзине изначально?',
+    ],
+    numericTask: {
+      prompt: 'Введи начальное число яблок во второй корзине:',
+      unit: 'яблок',
+      placeholder: 'Введи число',
+      correctValue: 24,
+      nextNodeId: 'ep6_transfer_3',
+      mistakeCategory: 'sign_transfer',
+      evaluateWrong: () => ({
+        feedback:
+          'Число не удовлетворяет условию «стало поровну». Проверь составленное уравнение, знаки при переносе слагаемых и подставь свой ответ обратно в текст задачи.',
+        speaker: 'pi',
+        integrityDelta: -5,
+        category: 'sign_transfer',
+      }),
+    },
+  },
+
+  ep6_transfer_3: {
+    id: 'ep6_transfer_3',
+    episodeId: 'transfer',
+    episodeTitle: 'Независимая проверка · Задача 3 из 3',
+    mathTopic: 'Два способа счёта',
+    scene: 'temple',
+    speaker: 'narrator',
+    speakerName: 'Печать III · Двойной счёт',
+    emotion: 'thoughtful',
+    isIndependentCheck: true,
+    transferCheckTopic: 'Двойной счёт',
+    schematic: 'none',
+    text: [
+      'Задача: Если разложить конфеты по 4 в каждый пакет, останется 6 лишних конфет. А если раскладывать по 6 конфет в пакет, то для заполнения всех пакетов не хватит 4 конфет. Сколько всего пакетов?',
+    ],
+    numericTask: {
+      prompt: 'Введи количество пакетов:',
+      unit: 'пакетов',
+      placeholder: 'Введи число',
+      correctValue: 5,
+      nextNodeId: 'ep6_final_stance',
+      mistakeCategory: 'expression_translation',
+      evaluateWrong: () => ({
+        feedback:
+          'Результат не сходится с обоими способами раскладки. Вырази число конфет двумя способами через число пакетов, приравняй выражения и проверь ответ.',
+        speaker: 'pi',
+        integrityDelta: -5,
+        category: 'expression_translation',
+      }),
     },
   },
 

@@ -10,6 +10,7 @@ interface SchematicBoardProps {
   step?: number;
   formulaDisplay?: string;
   bossShieldHp?: number;
+  ep3Model?: 'first_shelf' | 'second_shelf';
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
 }
@@ -19,6 +20,7 @@ export function SchematicBoard({
   step = 1,
   formulaDisplay,
   bossShieldHp = 100,
+  ep3Model = 'second_shelf',
   mobileOpen = false,
   onCloseMobile,
 }: SchematicBoardProps) {
@@ -27,8 +29,9 @@ export function SchematicBoard({
   // Ep 2 interactive tunnel time slider
   const [tunnelHours, setTunnelHours] = useState(0);
   const [tunnelPlaying, setTunnelPlaying] = useState(false);
-  // Ep 3 interactive shelf tester
+  // Ep 3 interactive shelf tester (2nd shelf = x OR 1st shelf = x in multiples of 3)
   const [shelfTestX, setShelfTestX] = useState(16);
+  const [shelfAltTestX, setShelfAltTestX] = useState(48);
   // Ep 4 interactive 12-part crystal bar
   const [crystalPaint, setCrystalPaint] = useState<'empty' | 'parts'>('empty');
   // Ep 5 interactive chest count stepper
@@ -59,8 +62,9 @@ export function SchematicBoard({
   const tiltAngle = scaleMode === 'left_only' ? 9 : 0;
   const g1Dist = Math.min(48, tunnelHours * 2);
   const g2Dist = Math.min(72, tunnelHours * 3);
-  const shelf1Val = 3 * shelfTestX - 16;
-  const shelf2Val = shelfTestX + 22;
+  const isEp3FirstShelf = ep3Model === 'first_shelf';
+  const shelf1Val = isEp3FirstShelf ? shelfAltTestX - 16 : 3 * shelfTestX - 16;
+  const shelf2Val = isEp3FirstShelf ? shelfAltTestX / 3 + 22 : shelfTestX + 22;
   const way1Coins = 5 * chestTestX + 10;
   const way2Coins = 7 * chestTestX - 4;
   const downDist = 3 * (12 + riverTestX);
@@ -68,10 +72,10 @@ export function SchematicBoard({
 
   const isSolvedState =
     (kind === 'scales_ep1' && scaleMode === 'both_removed') ||
-    (kind === 'tunnel_ep2' && tunnelHours === 24) ||
-    (kind === 'archive_table_ep3' && shelf1Val === shelf2Val) ||
-    (kind === 'city_chests_ep5' && way1Coins === way2Coins) ||
-    (kind === 'boss_river_ep6' && downDist === upDist);
+    (kind === 'tunnel_ep2' && step >= 2 && tunnelHours === 24) ||
+    (kind === 'archive_table_ep3' && step >= 3 && shelf1Val === shelf2Val) ||
+    (kind === 'city_chests_ep5' && step >= 3 && way1Coins === way2Coins) ||
+    (kind === 'boss_river_ep6' && step >= 3 && downDist === upDist);
 
   const positionClasses = mobileOpen
     ? 'pointer-events-auto fixed inset-x-3 top-16 z-50 lg:left-[78px] lg:right-auto lg:top-auto lg:bottom-5 lg:z-20 lg:w-[435px]'
@@ -174,7 +178,7 @@ export function SchematicBoard({
                     <line x1="55" y1="26" x2="84" y2="56" stroke="#a6d5e0" strokeWidth="1.5" />
                     <path d="M22 56 Q55 68 88 56 Z" fill="#c77a1c" />
                     <text x="55" y="79" textAnchor="middle" fill="#ffd95e" fontSize="11" fontWeight="700" fontFamily="JetBrains Mono">
-                      {scaleMode === 'initial' ? (step >= 2 ? 'x + 25' : 'мешок + 25') : 'x'}
+                      {scaleMode === 'initial' ? (step >= 3 ? 'x + 25' : 'мешок и 25') : 'x'}
                     </text>
 
                     <line x1="225" y1="26" x2="196" y2="56" stroke="#a6d5e0" strokeWidth="1.5" />
@@ -291,185 +295,282 @@ export function SchematicBoard({
 
           {kind === 'archive_table_ep3' && (
             <div className="space-y-3">
-              <div className="overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/40 text-xs sm:text-[14px]">
-                <table className="w-full border-collapse text-center font-math">
-                  <thead className="border-b border-[#a3dae8]/75 text-[#fff8e6]">
-                    <tr>
-                      <th className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold">
-                        Полка
-                      </th>
-                      <th className="border-r border-[#a3dae8]/45 px-3 py-2 font-bold">
-                        Было
-                      </th>
-                      <th className="px-3 py-2 font-bold">
-                        Стало (x = {shelfTestX})
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#a3dae8]/60 text-[#f3fafc] tabular-nums">
-                    <tr>
-                      <td className="border-r border-[#a3dae8]/45 bg-[#967b31]/75 px-3 py-2 text-left font-bold text-[#ffd859]">
-                        1-я полка
-                      </td>
-                      <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-semibold">
-                        3x
-                      </td>
-                      <td className="px-3 py-2 font-semibold">
-                        3x − 16 ={' '}
-                        <span className="font-extrabold text-[#ffd859]">{shelf1Val}</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold text-[#ffe69d]">
-                        2-я полка
-                      </td>
-                      <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-semibold">
-                        x
-                      </td>
-                      <td className="px-3 py-2 font-semibold">
-                        x + 22 ={' '}
-                        <span className="font-extrabold text-[#ffd859]">{shelf2Val}</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-[13px]">
-                <span className="font-semibold text-[#e6f3f6]">Подбор x по полкам:</span>
-                <div className="flex items-center gap-2.5 font-math">
-                  <div className="flex items-center overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0b354b]/90 shadow-inner">
-                    <button
-                      type="button"
-                      onClick={() => setShelfTestX((v) => Math.max(10, v - 1))}
-                      aria-label="Уменьшить x"
-                      className="flex h-11 w-11 items-center justify-center border-r border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] active:bg-[#0e394e] lg:h-7 lg:w-8"
-                    >
-                      −
-                    </button>
-                    <span className="w-10 text-center text-base font-extrabold text-[#ffd859] tabular-nums">
-                      {shelfTestX}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShelfTestX((v) => Math.min(25, v + 1))}
-                      aria-label="Увеличить x"
-                      className="flex h-11 w-11 items-center justify-center border-l border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] active:bg-[#0e394e] lg:h-7 lg:w-8"
-                    >
-                      +
-                    </button>
+              {step <= 2 ? (
+                <div className="space-y-2">
+                  <div className="overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/40 text-xs sm:text-[13.5px]">
+                    <table className="w-full border-collapse text-center font-math">
+                      <thead className="border-b border-[#a3dae8]/75 text-[#fff8e6]">
+                        <tr>
+                          <th className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold">
+                            Полка
+                          </th>
+                          <th className="border-r border-[#a3dae8]/45 px-3 py-2 font-bold">
+                            Было
+                          </th>
+                          <th className="px-3 py-2 font-bold">Изменение</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#a3dae8]/60 text-[#f3fafc]">
+                        <tr>
+                          <td className="border-r border-[#a3dae8]/45 bg-[#967b31]/75 px-3 py-2 text-left font-bold text-[#ffd859]">
+                            1-я полка
+                          </td>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-sans text-xs font-semibold">
+                            {step === 2 && isEp3FirstShelf ? 'x' : 'в 3 раза больше'}
+                          </td>
+                          <td className="px-3 py-2 font-sans text-xs font-semibold text-[#ffd859]">
+                            сняли 16
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold text-[#ffe69d]">
+                            2-я полка
+                          </td>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-sans text-xs font-semibold">
+                            {step === 2 && !isEp3FirstShelf ? 'x' : 'в 3 раза меньше'}
+                          </td>
+                          <td className="px-3 py-2 font-sans text-xs font-semibold text-[#a8e6f5]">
+                            добавили 22
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
-                  <span
-                    className={`flex items-center gap-1 font-sans font-semibold ${
-                      shelf1Val === shelf2Val ? 'text-[#4ef2ca]' : 'text-[#d8eef2]'
-                    }`}
-                  >
-                    {shelf1Val === shelf2Val ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" />
-                        <span>Поровну!</span>
-                      </>
-                    ) : (
-                      <>
-                        <X className="h-3.5 w-3.5 text-[#a6d5e0]" />
-                        <span>Не равны</span>
-                      </>
-                    )}
-                  </span>
+                  <p className="text-[11.5px] font-semibold text-[#cbe5ec]">
+                    {step === 1
+                      ? 'Итог по условию: после перестановки на обеих полках стало поровну. Выбери модель справа!'
+                      : 'Переведи строки условия в алгебраические выражения в реестре справа.'}
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/40 text-xs sm:text-[14px]">
+                    <table className="w-full border-collapse text-center font-math">
+                      <thead className="border-b border-[#a3dae8]/75 text-[#fff8e6]">
+                        <tr>
+                          <th className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold">
+                            Полка
+                          </th>
+                          <th className="border-r border-[#a3dae8]/45 px-3 py-2 font-bold">
+                            Было
+                          </th>
+                          <th className="px-3 py-2 font-bold">
+                            Стало (x = {isEp3FirstShelf ? shelfAltTestX : shelfTestX})
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#a3dae8]/60 text-[#f3fafc] tabular-nums">
+                        <tr>
+                          <td className="border-r border-[#a3dae8]/45 bg-[#967b31]/75 px-3 py-2 text-left font-bold text-[#ffd859]">
+                            1-я полка
+                          </td>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-semibold">
+                            {isEp3FirstShelf ? 'x' : '3x'}
+                          </td>
+                          <td className="px-3 py-2 font-semibold">
+                            {isEp3FirstShelf ? 'x − 16' : '3x − 16'} ={' '}
+                            <span className="font-extrabold text-[#ffd859]">{shelf1Val}</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 text-left font-bold text-[#ffe69d]">
+                            2-я полка
+                          </td>
+                          <td className="border-r border-[#a3dae8]/45 px-3 py-2 font-semibold">
+                            {isEp3FirstShelf ? 'x/3' : 'x'}
+                          </td>
+                          <td className="px-3 py-2 font-semibold">
+                            {isEp3FirstShelf ? 'x/3 + 22' : 'x + 22'} ={' '}
+                            <span className="font-extrabold text-[#ffd859]">{shelf2Val}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-[13px]">
+                    <span className="font-semibold text-[#e6f3f6]">
+                      Проверка гипотезы x:
+                    </span>
+                    <div className="flex items-center gap-2.5 font-math">
+                      <div className="flex items-center overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0b354b]/90 shadow-inner">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            isEp3FirstShelf
+                              ? setShelfAltTestX((v) => Math.max(36, v - 3))
+                              : setShelfTestX((v) => Math.max(10, v - 1))
+                          }
+                          aria-label="Уменьшить x"
+                          className="flex h-11 w-11 items-center justify-center border-r border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] active:bg-[#0e394e] lg:h-7 lg:w-8"
+                        >
+                          −
+                        </button>
+                        <span className="w-10 text-center text-base font-extrabold text-[#ffd859] tabular-nums">
+                          {isEp3FirstShelf ? shelfAltTestX : shelfTestX}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            isEp3FirstShelf
+                              ? setShelfAltTestX((v) => Math.min(72, v + 3))
+                              : setShelfTestX((v) => Math.min(25, v + 1))
+                          }
+                          aria-label="Увеличить x"
+                          className="flex h-11 w-11 items-center justify-center border-l border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] active:bg-[#0e394e] lg:h-7 lg:w-8"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span
+                        className={`flex items-center gap-1 font-sans font-semibold ${
+                          shelf1Val === shelf2Val ? 'text-[#4ef2ca]' : 'text-[#d8eef2]'
+                        }`}
+                      >
+                        {shelf1Val === shelf2Val ? (
+                          <>
+                            <Check className="h-3.5 w-3.5" />
+                            <span>Поровну!</span>
+                          </>
+                        ) : (
+                          <>
+                            <X className="h-3.5 w-3.5 text-[#a6d5e0]" />
+                            <span>Не равны</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
           {kind === 'crystals_ep4' && (
             <div className="space-y-3">
-              <div className="grid grid-cols-12 gap-1 rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/55 p-2.5">
-                {Array.from({ length: 12 }).map((_, idx) => {
-                  let cls = 'bg-[#0e394f] border-[#5fa2b8]';
-                  if (crystalPaint === 'parts') {
-                    if (idx < 4) cls = 'bg-[#2a9fd6] border-[#96e3ff]';
-                    else if (idx < 7) cls = 'bg-[#e26a3c] border-[#ffbe9d]';
-                    else cls = 'bg-[#19b58f] border-[#8effde]';
-                  }
-                  return (
-                    <div
-                      key={idx}
-                      className={`h-6 rounded border transition-colors ${cls}`}
-                      title={`Доля ${idx + 1}/12`}
-                    />
-                  );
-                })}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCrystalPaint((m) => (m === 'empty' ? 'parts' : 'empty'))
-                  }
-                  className="min-h-[44px] rounded-full border border-[#e5b55c]/85 bg-[#12455e] px-3.5 py-1.5 font-bold text-white hover:bg-[#195a7a] lg:min-h-[34px]"
-                >
-                  {crystalPaint === 'empty'
-                    ? 'Разбить целое на 12 долей'
-                    : 'Сбросить доли'}
-                </button>
-                <span className="font-math text-[11px] font-bold text-[#ffd859] tabular-nums">
-                  {crystalPaint === 'parts'
-                    ? '4/12 син. + 3/12 ор. + 5/12 зел. (=20)'
-                    : '12 равных долей = 1 целое (x)'}
-                </span>
-              </div>
+              {step <= 3 ? (
+                <div className="space-y-2 rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/55 p-3">
+                  <div className="flex h-7 w-full overflow-hidden rounded-lg border border-[#a3dae8]/70 font-math text-[11px] font-bold">
+                    <div className="flex w-1/3 items-center justify-center bg-[#2a9fd6] text-white">
+                      ⅓ син.
+                    </div>
+                    <div className="flex w-1/4 items-center justify-center border-x border-[#08293a] bg-[#e26a3c] text-white">
+                      ¼ кр.
+                    </div>
+                    <div className="flex flex-1 items-center justify-center bg-[#19b58f] text-[#052920]">
+                      20 зел.
+                    </div>
+                  </div>
+                  <p className="text-[11.5px] font-semibold text-[#cbe5ec]">
+                    Всё целое — коллекция кристаллов x. Найди общий знаменатель и вычисли доли справа!
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-12 gap-1 rounded-xl border-[1.5px] border-[#a3dae8]/85 bg-[#08293a]/55 p-2.5">
+                    {Array.from({ length: 12 }).map((_, idx) => {
+                      let cls = 'bg-[#0e394f] border-[#5fa2b8]';
+                      if (crystalPaint === 'parts') {
+                        if (idx < 4) cls = 'bg-[#2a9fd6] border-[#96e3ff]';
+                        else if (idx < 7) cls = 'bg-[#e26a3c] border-[#ffbe9d]';
+                        else cls = 'bg-[#19b58f] border-[#8effde]';
+                      }
+                      return (
+                        <div
+                          key={idx}
+                          className={`h-6 rounded border transition-colors ${cls}`}
+                          title={`Доля ${idx + 1}/12`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCrystalPaint((m) => (m === 'empty' ? 'parts' : 'empty'))
+                      }
+                      className="min-h-[44px] rounded-full border border-[#e5b55c]/85 bg-[#12455e] px-3.5 py-1.5 font-bold text-white hover:bg-[#195a7a] lg:min-h-[34px]"
+                    >
+                      {crystalPaint === 'empty'
+                        ? 'Разбить целое на 12 долей'
+                        : 'Сбросить доли'}
+                    </button>
+                    <span className="font-math text-[11px] font-bold text-[#ffd859] tabular-nums">
+                      {crystalPaint === 'parts'
+                        ? '4/12 син. + 3/12 кр. + 5/12 зел. (=20)'
+                        : '12 равных долей = 1 целое (x)'}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
           {kind === 'city_chests_ep5' && (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2 font-math text-xs tabular-nums">
-                <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/50 p-2.5 text-[#fff4d6]">
-                  <div className="text-[11px] font-bold text-[#ffd859]">
-                    Способ 1 (5x + 10)
+              {step <= 2 ? (
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/50 p-2.5 text-[#fff4d6]">
+                    <div className="text-[11px] font-bold text-[#ffd859]">Способ 1</div>
+                    <div className="mt-0.5 font-semibold">По 5 в сундук · 10 лишних</div>
                   </div>
-                  <div className="mt-0.5 text-sm font-extrabold">{way1Coins} монет</div>
-                </div>
-                <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0d3b52]/75 p-2.5 text-[#e6f7fa]">
-                  <div className="text-[11px] font-bold text-[#a8e6f5]">
-                    Способ 2 (7x − 4)
+                  <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0d3b52]/75 p-2.5 text-[#e6f7fa]">
+                    <div className="text-[11px] font-bold text-[#a8e6f5]">Способ 2</div>
+                    <div className="mt-0.5 font-semibold">По 7 в сундук · 4 не хватает</div>
                   </div>
-                  <div className="mt-0.5 text-sm font-extrabold">{way2Coins} монет</div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-xs sm:text-[13px]">
-                <span className="font-semibold text-[#e6f3f6]">Проверка сундуков x:</span>
-                <div className="flex items-center gap-2.5 font-math">
-                  <div className="flex items-center overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0b354b]/90 shadow-inner">
-                    <button
-                      type="button"
-                      onClick={() => setChestTestX((v) => Math.max(3, v - 1))}
-                      aria-label="Уменьшить x"
-                      className="flex h-11 w-11 items-center justify-center border-r border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] lg:h-7 lg:w-8"
-                    >
-                      −
-                    </button>
-                    <span className="w-9 text-center text-base font-extrabold text-[#ffd859] tabular-nums">
-                      {chestTestX}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setChestTestX((v) => Math.min(10, v + 1))}
-                      aria-label="Увеличить x"
-                      className="flex h-11 w-11 items-center justify-center border-l border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] lg:h-7 lg:w-8"
-                    >
-                      +
-                    </button>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-2 font-math text-xs tabular-nums">
+                    <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/50 p-2.5 text-[#fff4d6]">
+                      <div className="text-[11px] font-bold text-[#ffd859]">
+                        Способ 1 (5x + 10)
+                      </div>
+                      <div className="mt-0.5 text-sm font-extrabold">{way1Coins} монет</div>
+                    </div>
+                    <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0d3b52]/75 p-2.5 text-[#e6f7fa]">
+                      <div className="text-[11px] font-bold text-[#a8e6f5]">
+                        Способ 2 (7x − 4)
+                      </div>
+                      <div className="mt-0.5 text-sm font-extrabold">{way2Coins} монет</div>
+                    </div>
                   </div>
-                  <span
-                    className={`font-sans font-semibold ${
-                      way1Coins === way2Coins ? 'text-[#54f8dc]' : 'text-[#e6f3f6]'
-                    }`}
-                  >
-                    {way1Coins === way2Coins ? 'Совпало!' : 'Разные'}
-                  </span>
-                </div>
-              </div>
+                  <div className="flex items-center justify-between text-xs sm:text-[13px]">
+                    <span className="font-semibold text-[#e6f3f6]">Проверка гипотезы x:</span>
+                    <div className="flex items-center gap-2.5 font-math">
+                      <div className="flex items-center overflow-hidden rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#0b354b]/90 shadow-inner">
+                        <button
+                          type="button"
+                          onClick={() => setChestTestX((v) => Math.max(3, v - 1))}
+                          aria-label="Уменьшить x"
+                          className="flex h-11 w-11 items-center justify-center border-r border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] lg:h-7 lg:w-8"
+                        >
+                          −
+                        </button>
+                        <span className="w-9 text-center text-base font-extrabold text-[#ffd859] tabular-nums">
+                          {chestTestX}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setChestTestX((v) => Math.min(10, v + 1))}
+                          aria-label="Увеличить x"
+                          className="flex h-11 w-11 items-center justify-center border-l border-[#a3dae8]/45 bg-[#12455e] text-base font-bold text-white hover:bg-[#195d7d] lg:h-7 lg:w-8"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span
+                        className={`font-sans font-semibold ${
+                          way1Coins === way2Coins ? 'text-[#54f8dc]' : 'text-[#e6f3f6]'
+                        }`}
+                      >
+                        {way1Coins === way2Coins ? 'Совпало!' : 'Разные'}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -490,40 +591,55 @@ export function SchematicBoard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 font-math text-xs tabular-nums">
-                <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#08293a]/75 p-2.5">
-                  <div className="text-[11px] font-bold text-[#a8e6f5]">
-                    По течению 3(12+x)
+              {step <= 2 ? (
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#08293a]/75 p-2.5">
+                    <div className="text-[11px] font-bold text-[#a8e6f5]">По течению</div>
+                    <div className="mt-0.5 font-semibold text-white">3 ч · катер 12 км/ч</div>
                   </div>
-                  <div className="font-extrabold text-white">{downDist} км</div>
-                </div>
-                <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/40 p-2.5">
-                  <div className="text-[11px] font-bold text-[#ffd859]">
-                    Против 5(12−x)
+                  <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/40 p-2.5">
+                    <div className="text-[11px] font-bold text-[#ffd859]">Против течения</div>
+                    <div className="mt-0.5 font-semibold text-white">5 ч · тот же путь</div>
                   </div>
-                  <div className="font-extrabold text-white">{upDist} км</div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-2 font-math text-xs tabular-nums">
+                    <div className="rounded-xl border-[1.5px] border-[#a3dae8]/80 bg-[#08293a]/75 p-2.5">
+                      <div className="text-[11px] font-bold text-[#a8e6f5]">
+                        По течению 3(12+x)
+                      </div>
+                      <div className="font-extrabold text-white">{downDist} км</div>
+                    </div>
+                    <div className="rounded-xl border-[1.5px] border-[#e5b55c]/80 bg-[#967b31]/40 p-2.5">
+                      <div className="text-[11px] font-bold text-[#ffd859]">
+                        Против 5(12−x)
+                      </div>
+                      <div className="font-extrabold text-white">{upDist} км</div>
+                    </div>
+                  </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="font-semibold text-[#e6f3f6]">Тест течения x (км/ч):</span>
-                <div className="flex items-center gap-1 font-math">
-                  {[1, 2, 3, 4, 5].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setRiverTestX(val)}
-                      className={`h-10 w-10 rounded-full border text-xs font-extrabold transition-colors lg:h-7 lg:w-7 ${
-                        riverTestX === val
-                          ? 'border-[#b46d14] bg-[#ffd859] text-[#102d3e]'
-                          : 'border-[#a3dae8]/70 bg-[#12455e] text-white hover:bg-[#195d7d]'
-                      }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="font-semibold text-[#e6f3f6]">Проверка гипотезы x (км/ч):</span>
+                    <div className="flex items-center gap-1 font-math">
+                      {[1, 2, 3, 4, 5].map((val) => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setRiverTestX(val)}
+                          className={`h-10 w-10 rounded-full border text-xs font-extrabold transition-colors lg:h-7 lg:w-7 ${
+                            riverTestX === val
+                              ? 'border-[#b46d14] bg-[#ffd859] text-[#102d3e]'
+                              : 'border-[#a3dae8]/70 bg-[#12455e] text-white hover:bg-[#195d7d]'
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </StorybookTealCard>

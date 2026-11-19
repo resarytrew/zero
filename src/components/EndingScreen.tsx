@@ -28,6 +28,8 @@ export function EndingScreen({
   onOpenCodex,
 }: EndingScreenProps) {
   const diagnostics = buildDiagnosticReport(playerState);
+  const transferList = Object.values(playerState.transferCheckResults ?? {});
+  const transferFirstTryCount = transferList.filter((r) => r.solvedFirstTry).length;
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-y-auto bg-[#0e394e] p-4 sm:p-8">
@@ -113,8 +115,44 @@ export function EndingScreen({
           </div>
         </div>
 
+        {/* Independent Transfer Check Summary */}
+        {transferList.length > 0 && (
+          <section
+            aria-label="Независимая итоговая проверка"
+            className="relative z-10 mt-5"
+          >
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-extrabold text-[#0d3347]">
+                Независимая проверка переноса навыка (без подсказок)
+              </h2>
+              <span className="font-math text-xs font-extrabold text-[#127662] tabular-nums">
+                С первой попытки: {transferFirstTryCount} / {transferList.length}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {transferList.map((res) => (
+                <div
+                  key={res.id}
+                  className={`rounded-xl border-2 px-3 py-2 text-xs ${
+                    res.solvedFirstTry
+                      ? 'border-[#2f856d] bg-[#d8f5ea] text-[#0c3f31]'
+                      : 'border-[#d49a3a] bg-[#fff9eb] text-[#5e2d06]'
+                  }`}
+                >
+                  <div className="font-extrabold">{res.topic}</div>
+                  <div className="mt-0.5 font-semibold opacity-90">
+                    {res.solvedFirstTry
+                      ? 'Решено самостоятельно с 1-й попытки'
+                      : `Решено за ${res.attempts} поп.`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Diagnostic Map of Difficulties */}
-        <section aria-label="Карта типичных затруднений" className="mt-5">
+        <section aria-label="Карта типичных затруднений" className="relative z-10 mt-5">
           <div className="mb-2.5 flex items-center justify-between gap-2">
             <h2 className="text-sm font-extrabold text-[#0d3347]">
               Карта типичных затруднений и план повторения

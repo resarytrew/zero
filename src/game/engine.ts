@@ -29,6 +29,7 @@ export function createInitialPlayerState(): PlayerState {
     foundSecrets: [],
     firstTryNodeIds: [],
     unlockedBadges: [],
+    transferCheckResults: {},
     bossShieldHp: 100,
   };
 }
@@ -79,6 +80,26 @@ function recordFirstTryIfClean(state: PlayerState, nodeId: string): PlayerState 
   return {
     ...state,
     firstTryNodeIds: addUnique(state.firstTryNodeIds ?? [], nodeId),
+  };
+}
+
+function recordTransferResultIfApplicable(
+  state: PlayerState,
+  node: StoryNode,
+): PlayerState {
+  if (!node.isIndependentCheck) return state;
+  const wrongAttempts = state.stepAttempts[node.id] ?? 0;
+  return {
+    ...state,
+    transferCheckResults: {
+      ...(state.transferCheckResults ?? {}),
+      [node.id]: {
+        id: node.id,
+        topic: node.transferCheckTopic ?? node.episodeTitle,
+        attempts: wrongAttempts + 1,
+        solvedFirstTry: wrongAttempts === 0,
+      },
+    },
   };
 }
 
@@ -254,10 +275,18 @@ export function applyChoice(state: PlayerState, choice: StoryChoice): ActionOutc
       feedback: hintText
         ? {
             text: hintText,
-            speaker: choice.feedbackSpeaker === 'captain' ? 'Капитан Автоматонов' : 'Сова Пи',
-            speakerId: choice.feedbackSpeaker === 'captain' ? 'captain' : 'pi',
+            speaker: currentNode.isIndependentCheck
+              ? 'Самостоятельная проверка'
+              : choice.feedbackSpeaker === 'captain'
+                ? 'Капитан Автоматонов'
+                : 'Сова Пи',
+            speakerId: currentNode.isIndependentCheck
+              ? undefined
+              : choice.feedbackSpeaker === 'captain'
+                ? 'captain'
+                : 'pi',
             isError: true,
-            hintLevel,
+            hintLevel: currentNode.isIndependentCheck ? undefined : hintLevel,
           }
         : undefined,
     };
@@ -275,6 +304,7 @@ export function applyChoice(state: PlayerState, choice: StoryChoice): ActionOutc
   );
   if (hasChallengeTraps) {
     nextState = recordFirstTryIfClean(nextState, currentNode.id);
+    nextState = recordTransferResultIfApplicable(nextState, currentNode);
   }
 
   if (typeof choice.integrityDelta === 'number') {
@@ -357,6 +387,7 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
       },
       node.id,
     );
+    nextState = recordTransferResultIfApplicable(nextState, node);
     const badgeEval = applyBadgeEvaluation(nextState);
     nextState = badgeEval.nextState;
     return {
@@ -375,7 +406,7 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
     node.id,
     node.episodeId,
     category,
-    wrong.integrityDelta ?? -10,
+    wrong.integrityDelta ?? (node.isIndependentCheck ? -5 : -10),
   );
   const hintLevel: 1 | 2 = attemptNumber === 1 ? 1 : 2;
 
@@ -383,10 +414,18 @@ export function applyNumericAnswer(state: PlayerState, rawInput: string): Action
     nextState: tracked.nextState,
     feedback: {
       text: wrong.feedback,
-      speaker: wrong.speaker === 'archivist' ? 'Хранитель Архива' : 'Сова Пи',
-      speakerId: wrong.speaker === 'archivist' ? 'archivist' : 'pi',
+      speaker: node.isIndependentCheck
+        ? 'Самостоятельная проверка'
+        : wrong.speaker === 'archivist'
+          ? 'Хранитель Архива'
+          : 'Сова Пи',
+      speakerId: node.isIndependentCheck
+        ? undefined
+        : wrong.speaker === 'archivist'
+          ? 'archivist'
+          : 'pi',
       isError: true,
-      hintLevel,
+      hintLevel: node.isIndependentCheck ? undefined : hintLevel,
     },
   };
 }
@@ -481,18 +520,23 @@ export function applyScratchpadAnswer(
       };
     }
     if (num !== field.correctValue) {
+      const category = field.mistakeCategory ?? task.mistakeCategory;
       const tracked = recordMistake(
         state,
         node.id,
         node.episodeId,
-        task.mistakeCategory,
+        category,
         -10,
       );
       const hintLevel: 1 | 2 = tracked.attemptNumber === 1 ? 1 : 2;
+      const hintText =
+        hintLevel === 1
+          ? (field.hintTier1 ?? task.hintTier1)
+          : (field.hintTier2 ?? task.hintTier2);
       return {
         nextState: tracked.nextState,
         feedback: {
-          text: hintLevel === 1 ? task.hintTier1 : task.hintTier2,
+          text: hintText,
           speaker: 'Сова Пи',
           speakerId: 'pi',
           isError: true,

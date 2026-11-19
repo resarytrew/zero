@@ -97,7 +97,7 @@ export function CrossroadsMapOverlay({
                   initial={{ opacity: 0, y: openUpward ? -6 : 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.14 }}
-                  className={`pointer-events-none absolute z-30 w-64 p-4 text-left text-[#152d3c] ${
+                  className={`pointer-events-none absolute z-30 w-72 p-4 text-left text-[#152d3c] ${
                     district.portalCoords.x < 25
                       ? 'left-0'
                       : district.portalCoords.x > 75
@@ -118,6 +118,17 @@ export function CrossroadsMapOverlay({
                     <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
                       {district.subtitle}
                     </p>
+                    <div className="mt-2 space-y-0.5 border-t border-[#d8b46e]/55 pt-1.5 text-[11px]">
+                      <div className="font-extrabold text-[#9c480a]">
+                        Сложность: {'★'.repeat(district.difficulty)}
+                        {'☆'.repeat(3 - district.difficulty)}
+                      </div>
+                      {!done && (
+                        <div className="leading-snug font-semibold text-[#355a6e]">
+                          {district.recommendedHint}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               )}

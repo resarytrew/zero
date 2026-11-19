@@ -312,8 +312,14 @@ export function DialogPanel({
                   <div className="mt-2 flex flex-wrap items-center gap-2.5">
                     {!hasInlineTaskRibbon && showTaskRibbon && (
                       <span className="storybook-ribbon-border inline-flex shadow-xs">
-                        <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fcd974] to-[#eaa72e] px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-[#113144]">
-                          Задача
+                        <span
+                          className={`storybook-ribbon inline-flex items-center px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider ${
+                            node.isIndependentCheck
+                              ? 'bg-gradient-to-b from-[#175b78] to-[#0d3a4f] text-[#ffd859]'
+                              : 'bg-gradient-to-b from-[#fcd974] to-[#eaa72e] text-[#113144]'
+                          }`}
+                        >
+                          {node.isIndependentCheck ? 'Без подсказок' : 'Задача'}
                         </span>
                       </span>
                     )}
@@ -401,8 +407,14 @@ export function DialogPanel({
                       {showRibbonHere && (
                         <div className="flex items-center gap-3 pt-0.5">
                           <span className="storybook-ribbon-border inline-flex shadow-xs">
-                            <span className="storybook-ribbon inline-flex items-center bg-gradient-to-b from-[#fcd974] to-[#eaa72e] px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-[#113144]">
-                              Задача
+                            <span
+                              className={`storybook-ribbon inline-flex items-center px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider ${
+                                node.isIndependentCheck
+                                  ? 'bg-gradient-to-b from-[#175b78] to-[#0d3a4f] text-[#ffd859]'
+                                  : 'bg-gradient-to-b from-[#fcd974] to-[#eaa72e] text-[#113144]'
+                              }`}
+                            >
+                              {node.isIndependentCheck ? 'Без подсказок' : 'Задача'}
                             </span>
                           </span>
                           <span
@@ -500,7 +512,20 @@ export function DialogPanel({
                         {done ? 'Восстановлен' : <MathText text={district.mathTheme} />}
                       </span>
                     </div>
-                    <div className="text-xs opacity-85">{district.subtitle}</div>
+                    <div className="flex items-center justify-between gap-2 text-xs opacity-85">
+                      <span>{district.subtitle}</span>
+                      {!done && (
+                        <span className="shrink-0 font-bold text-[#9c480a]">
+                          {'★'.repeat(district.difficulty)}
+                          {'☆'.repeat(3 - district.difficulty)}
+                        </span>
+                      )}
+                    </div>
+                    {!done && (
+                      <div className="text-[11px] font-bold opacity-80">
+                        {district.recommendedHint}
+                      </div>
+                    )}
                   </button>
                 );
               })}
