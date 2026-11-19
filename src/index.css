@@ -71,10 +71,10 @@
   border-radius: 9999px;
 }
 
-/* Storybook chamfered ribbon tag ("ЗАДАЧА") with outer gold-amber border */
+/* Storybook chamfered ribbon tag ("ЗАДАЧА") with crisp amber-gold outer border */
 .storybook-ribbon-border {
   clip-path: polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%);
-  background: #cf7d18;
+  background: linear-gradient(180deg, #d88318 0%, #a95909 100%);
   padding: 1.5px;
 }
 
@@ -82,24 +82,135 @@
   clip-path: polygon(9.5px 0%, calc(100% - 9.5px) 0%, 100% 50%, calc(100% - 9.5px) 100%, 9.5px 100%, 0% 50%);
 }
 
-/* Luminous deep cerulean-teal HUD capsule with golden double rim */
-.storybook-teal-plaque {
-  background: linear-gradient(180deg, rgba(23, 87, 115, 0.94) 0%, rgba(15, 63, 86, 0.96) 55%, rgba(10, 43, 61, 0.97) 100%);
-  border: 1.5px solid #efd18a;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 245, 214, 0.25),
-    0 6px 18px rgba(4, 16, 26, 0.48),
-    0 0 12px rgba(246, 201, 89, 0.14);
+/* Subtle organic parchment grain texture (lightweight inline SVG noise) */
+.parchment-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
 
-/* Warm sunlit parchment card with subtle radial paper glow */
-.storybook-parchment {
-  background:
-    radial-gradient(circle at 46% 38%, rgba(255, 251, 238, 0.92) 0%, rgba(252, 239, 204, 0.95) 62%, rgba(242, 218, 166, 0.98) 100%);
-  border: 3px solid #e2ad4d;
+/* Luminous deep cerulean-teal HUD capsule with golden double rim */
+.storybook-teal-plaque {
+  background: linear-gradient(180deg, rgba(24, 90, 118, 0.96) 0%, rgba(15, 63, 86, 0.97) 56%, rgba(9, 41, 58, 0.98) 100%);
+  border: 2px solid #ecd084;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 250, 234, 0.85),
-    0 22px 52px rgba(5, 22, 34, 0.62);
+    0 0 0 1.5px rgba(7, 30, 42, 0.85),
+    inset 0 1px 0 rgba(255, 248, 224, 0.55),
+    inset 0 0 0 1px rgba(255, 245, 214, 0.25),
+    0 8px 20px rgba(4, 16, 26, 0.52);
+}
+
+/* Delicate tapered ink divider line matching the storybook manuscript look */
+.storybook-ink-divider {
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    rgba(168, 120, 48, 0.72) 0%,
+    rgba(196, 148, 72, 0.45) 68%,
+    rgba(196, 148, 72, 0) 100%
+  );
+}
+
+/* Tactile storybook choice & action button surfaces */
+.storybook-btn-primary {
+  border: 2px solid #7d3305;
+  background: linear-gradient(180deg, #f39a34 0%, #df7318 54%, #c4540a 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 237, 194, 0.65),
+    inset 0 -2px 0 rgba(132, 48, 4, 0.35),
+    0 3px 0 #7a3105,
+    0 6px 14px rgba(8, 28, 40, 0.22);
+}
+
+.storybook-btn-primary:hover {
+  background: linear-gradient(180deg, #f8a744 0%, #ea7e1f 54%, #cf5d10 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 244, 214, 0.75),
+    inset 0 -2px 0 rgba(132, 48, 4, 0.35),
+    0 3px 0 #7a3105,
+    0 8px 18px rgba(196, 84, 10, 0.32);
+}
+
+.storybook-btn-primary:active {
+  transform: translateY(2px) scale(0.992);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 237, 194, 0.5),
+    0 1px 0 #7a3105,
+    0 2px 6px rgba(8, 28, 40, 0.22);
+}
+
+.storybook-btn-sky {
+  border: 2px solid #2e6d82;
+  background: linear-gradient(180deg, #d7f1f7 0%, #b1dde8 55%, #93cad9 100%);
+  color: #0b2d3e;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -2px 0 rgba(36, 98, 118, 0.22),
+    0 3px 0 #23586b,
+    0 5px 12px rgba(8, 28, 40, 0.16);
+}
+
+.storybook-btn-sky:hover,
+.storybook-btn-sky:focus-visible {
+  border-color: #7d3305;
+  background: linear-gradient(180deg, #f39a34 0%, #df7318 54%, #c4540a 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 237, 194, 0.65),
+    inset 0 -2px 0 rgba(132, 48, 4, 0.35),
+    0 3px 0 #7a3105,
+    0 8px 16px rgba(196, 84, 10, 0.28);
+}
+
+.storybook-btn-sky:active {
+  transform: translateY(2px) scale(0.992);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 237, 194, 0.5),
+    0 1px 0 #7a3105,
+    0 2px 6px rgba(8, 28, 40, 0.2);
+}
+
+.storybook-btn-secret {
+  border: 2px solid #a86612;
+  background: linear-gradient(180deg, #fdf0be 0%, #f5d684 56%, #e7ba53 100%);
+  color: #462605;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 252, 235, 0.8),
+    0 3px 0 #8d530b,
+    0 5px 12px rgba(8, 28, 40, 0.16);
+}
+
+.storybook-btn-secret:hover,
+.storybook-btn-secret:focus-visible {
+  border-color: #7d3305;
+  background: linear-gradient(180deg, #f39a34 0%, #df7318 54%, #c4540a 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 237, 194, 0.65),
+    0 3px 0 #7a3105,
+    0 8px 16px rgba(196, 84, 10, 0.28);
+}
+
+.storybook-btn-secret:active {
+  transform: translateY(2px) scale(0.992);
+}
+
+.storybook-btn-emerald {
+  border: 2px solid #0d5948;
+  background: linear-gradient(180deg, #25b092 0%, #168c74 56%, #0f6f5b 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1.5px 0 rgba(204, 255, 242, 0.55),
+    0 3px 0 #0a473a,
+    0 6px 14px rgba(8, 28, 40, 0.2);
+}
+
+.storybook-btn-emerald:hover {
+  background: linear-gradient(180deg, #2cc0a0 0%, #1a9b81 56%, #137d67 100%);
+}
+
+.storybook-btn-emerald:active {
+  transform: translateY(2px) scale(0.992);
 }
 
 @keyframes portalGlow {

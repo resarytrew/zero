@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { DISTRICTS, TEMPLE_PORTAL_COORDS } from '../game/codexData';
 import type { DistrictId } from '../game/types';
 import { MathText } from './MathText';
+import { ParchmentBackdrop } from './StorybookFrames';
 
 interface CrossroadsMapOverlayProps {
   completedDistricts: DistrictId[];
@@ -81,10 +82,10 @@ export function CrossroadsMapOverlay({
                 </span>
 
                 <span
-                  className={`mt-1.5 rounded-full border-2 px-3.5 py-1 text-xs font-extrabold whitespace-nowrap shadow-[0_6px_16px_rgba(4,16,26,0.52)] ring-1 ring-inset ring-[#fff4d6]/55 transition-colors ${
+                  className={`mt-1.5 rounded-full px-3.5 py-1 text-xs font-extrabold whitespace-nowrap transition-all ${
                     done
-                      ? 'border-[#33a88d] bg-gradient-to-b from-[#146e59]/96 to-[#0b4739]/96 text-[#e1fff5]'
-                      : 'border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-[#fff8e6] group-hover:border-[#8b3c07] group-hover:from-[#ef932e] group-hover:to-[#c75b0e] group-hover:text-white'
+                      ? 'border-2 border-[#42c2a3] bg-gradient-to-b from-[#146e59]/96 to-[#0b4739]/96 text-[#e1fff5] shadow-[0_6px_16px_rgba(4,16,26,0.52)] ring-1 ring-inset ring-[#b8ffea]/45'
+                      : 'storybook-teal-plaque text-[#fff8e6] group-hover:border-[#7d3305] group-hover:bg-none group-hover:bg-[#d86b14] group-hover:text-white'
                   }`}
                 >
                   {district.title}
@@ -96,21 +97,28 @@ export function CrossroadsMapOverlay({
                   initial={{ opacity: 0, y: openUpward ? -6 : 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.14 }}
-                  className={`pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-2xl border-[2.5px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_65%,#f2da9f_100%)] p-3 text-left text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-2xl ${
-                    openUpward ? 'bottom-full mb-2.5' : 'top-full mt-2'
-                  }`}
+                  className={`pointer-events-none absolute z-30 w-64 p-4 text-left text-[#152d3c] ${
+                    district.portalCoords.x < 25
+                      ? 'left-0'
+                      : district.portalCoords.x > 75
+                        ? 'right-0'
+                        : 'left-1/2 -translate-x-1/2'
+                  } ${openUpward ? 'bottom-full mb-2.5' : 'top-full mt-2'}`}
                 >
-                  <div className="flex items-center justify-between gap-2 text-[11px] font-extrabold">
-                    <span className={done ? 'text-[#127662]' : 'text-[#b45811]'}>
-                      {done ? 'Район восстановлен' : 'Доступен портал'}
-                    </span>
-                    <span className="font-math text-[#0d3347] tabular-nums">
-                      <MathText text={district.mathTheme} />
-                    </span>
+                  <ParchmentBackdrop notch={10} innerLine={false} />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-extrabold">
+                      <span className={done ? 'text-[#127662]' : 'text-[#b45811]'}>
+                        {done ? 'Район восстановлен' : 'Доступен портал'}
+                      </span>
+                      <span className="font-math text-[#0d3347] tabular-nums">
+                        <MathText text={district.mathTheme} />
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
+                      {district.subtitle}
+                    </p>
                   </div>
-                  <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
-                    {district.subtitle}
-                  </p>
                 </motion.div>
               )}
             </div>
@@ -162,10 +170,10 @@ export function CrossroadsMapOverlay({
               )}
             </span>
             <span
-              className={`mt-1.5 rounded-full border-2 px-3.5 py-1 text-xs font-extrabold whitespace-nowrap shadow-[0_6px_16px_rgba(4,16,26,0.55)] ring-1 ring-inset ring-[#fff4d6]/55 tabular-nums ${
+              className={`mt-1.5 rounded-full px-3.5 py-1 text-xs font-extrabold whitespace-nowrap tabular-nums ${
                 allDistrictsDone
-                  ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] to-[#c75b0e] text-white'
-                  : 'border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-[#fff8e6]'
+                  ? 'storybook-btn-primary'
+                  : 'storybook-teal-plaque text-[#fff8e6]'
               }`}
             >
               Храм Баланса · {completedDistricts.length}/4
@@ -177,18 +185,21 @@ export function CrossroadsMapOverlay({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.14 }}
-              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 rounded-2xl border-[2.5px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_65%,#f2da9f_100%)] p-3 text-left text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-2xl"
+              className="pointer-events-none absolute top-full left-1/2 z-30 mt-2 w-64 -translate-x-1/2 p-4 text-left text-[#152d3c]"
             >
-              <div className="text-[11px] font-extrabold text-[#b45811]">
-                {allDistrictsDone
-                  ? 'Финальное испытание открыто!'
-                  : `Защитный купол (${completedDistricts.length}/4)`}
+              <ParchmentBackdrop notch={10} innerLine={false} />
+              <div className="relative z-10">
+                <div className="text-[11px] font-extrabold text-[#b45811]">
+                  {allDistrictsDone
+                    ? 'Финальное испытание открыто!'
+                    : `Защитный купол (${completedDistricts.length}/4)`}
+                </div>
+                <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
+                  {allDistrictsDone
+                    ? 'Все четыре руны равновесия горят. Нажми, чтобы сразиться с Тенью Скобок.'
+                    : 'Восстанови все четыре района острова, чтобы снять купол Храма.'}
+                </p>
               </div>
-              <p className="mt-1 text-xs leading-snug font-semibold text-[#2b4d5f]">
-                {allDistrictsDone
-                  ? 'Все четыре руны равновесия горят. Нажми, чтобы сразиться с Тенью Скобок.'
-                  : 'Восстанови все четыре района острова, чтобы снять купол Храма.'}
-              </p>
             </motion.div>
           )}
         </div>

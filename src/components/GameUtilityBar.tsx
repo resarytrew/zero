@@ -9,10 +9,13 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 
 interface GameUtilityBarProps {
   unlockedLawsCount: number;
   unlockedBadgesCount?: number;
+  hasUnseenBadge?: boolean;
   balanceIntegrity: number;
   completedDistrictsCount: number;
   inCrossroadsOrLater: boolean;
@@ -28,6 +31,7 @@ interface GameUtilityBarProps {
 export function GameUtilityBar({
   unlockedLawsCount,
   unlockedBadgesCount = 0,
+  hasUnseenBadge = false,
   balanceIntegrity,
   completedDistrictsCount,
   inCrossroadsOrLater,
@@ -39,12 +43,22 @@ export function GameUtilityBar({
   onPause,
   onReturnHome,
 }: GameUtilityBarProps) {
+  const prevBalanceRef = useRef(balanceIntegrity);
+  const [balancePulseKey, setBalancePulseKey] = useState(0);
+
+  useEffect(() => {
+    if (prevBalanceRef.current !== balanceIntegrity) {
+      prevBalanceRef.current = balanceIntegrity;
+      setBalancePulseKey((k) => k + 1);
+    }
+  }, [balanceIntegrity]);
+
   return (
     <>
       {/* Left Vertical Storybook Navigation Rail (Desktop/Tablet) */}
       <aside
         aria-label="Боковая панель навигации"
-        className="pointer-events-auto fixed top-0 bottom-0 left-0 z-30 hidden w-[58px] flex-col items-center justify-between border-r-2 border-[#e5b55c]/80 bg-gradient-to-b from-[#0e435b]/94 via-[#0b3549]/94 to-[#082839]/94 py-3.5 shadow-[4px_0_22px_rgba(4,18,28,0.5)] md:flex"
+        className="pointer-events-auto fixed top-0 bottom-0 left-0 z-30 hidden w-[58px] flex-col items-center justify-between border-r-2 border-[#ecd084]/85 bg-gradient-to-b from-[#0f455e]/95 via-[#0b3549]/96 to-[#072636]/96 py-3.5 shadow-[4px_0_24px_rgba(4,16,26,0.56)] md:flex"
       >
         <div className="flex flex-col items-center gap-3">
           <button
@@ -52,7 +66,7 @@ export function GameUtilityBar({
             onClick={onOpenCodex}
             aria-label="Открыть Кодекс законов"
             title="Кодекс законов"
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fcecc2] transition-all hover:bg-[#16516d] hover:text-[#ffd859] focus-visible:outline-2 focus-visible:outline-[#f6c959]"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fcecc2] transition-all hover:bg-[#175572] hover:text-[#ffd859] active:scale-95 focus-visible:outline-2 focus-visible:outline-[#f6c959]"
           >
             <BookOpen className="h-[22px] w-[22px]" />
           </button>
@@ -62,7 +76,7 @@ export function GameUtilityBar({
             onClick={onReturnHome ?? onPause}
             aria-label="На главный экран"
             title="На главный экран"
-            className="flex h-11 w-11 items-center justify-center rounded-[14px] border-2 border-[#f6c959] bg-[#a68128]/35 text-[#ffe694] shadow-[0_0_20px_rgba(246,201,89,0.58)] ring-1 ring-inset ring-[#fff4cf]/40 transition-all hover:bg-[#be932e]/50 focus-visible:outline-2 focus-visible:outline-white"
+            className="flex h-11 w-11 items-center justify-center rounded-[14px] border-2 border-[#f6c959] bg-[#b08726]/38 text-[#ffeb9e] shadow-[0_0_20px_rgba(246,201,89,0.62)] ring-1 ring-inset ring-[#fff4cf]/45 transition-all hover:bg-[#c5962b]/52 active:scale-95 focus-visible:outline-2 focus-visible:outline-white"
           >
             <Home className="h-[22px] w-[22px]" />
           </button>
@@ -72,9 +86,22 @@ export function GameUtilityBar({
             onClick={onOpenBadges ?? onOpenCodex}
             aria-label={`Значки исследователя (${unlockedBadgesCount} из 6)`}
             title={`Значки исследователя (${unlockedBadgesCount}/6)`}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fdf3da] transition-all hover:bg-[#16516d] hover:text-[#ffd45c] focus-visible:outline-2 focus-visible:outline-[#f6c959]"
+            className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-all hover:bg-[#175572] hover:text-[#ffd859] active:scale-95 focus-visible:outline-2 focus-visible:outline-[#f6c959] ${
+              hasUnseenBadge
+                ? 'border border-[#f6c959] bg-[#a67d20]/30 text-[#ffe68e] shadow-[0_0_14px_rgba(246,201,89,0.5)]'
+                : 'text-[#fdf3da]'
+            }`}
           >
             <Award className="h-[22px] w-[22px]" />
+            <span
+              className={`font-math absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border px-1 text-[10px] leading-none font-extrabold tabular-nums shadow-sm ${
+                hasUnseenBadge || unlockedBadgesCount > 0
+                  ? 'border-[#7d3305] bg-gradient-to-b from-[#ffd966] to-[#e2951e] text-[#112d3d]'
+                  : 'border-[#89c4d4]/70 bg-[#0d3549] text-[#cde9f0]'
+              }`}
+            >
+              {unlockedBadgesCount}
+            </span>
           </button>
 
           <button
@@ -82,7 +109,7 @@ export function GameUtilityBar({
             onClick={onToggleMute}
             aria-label={isMuted ? 'Включить звук' : 'Выключить звук'}
             title={isMuted ? 'Включить звук' : 'Выключить звук'}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fdf3da] transition-all hover:bg-[#16516d] hover:text-[#ffd45c] focus-visible:outline-2 focus-visible:outline-[#f6c959]"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fdf3da] transition-all hover:bg-[#175572] hover:text-[#ffd859] active:scale-95 focus-visible:outline-2 focus-visible:outline-[#f6c959]"
           >
             {isMuted ? (
               <VolumeX className="h-[22px] w-[22px] text-slate-400" />
@@ -97,22 +124,22 @@ export function GameUtilityBar({
           onClick={onPause}
           aria-label="Пауза и настройки (Esc)"
           title="Пауза и настройки (Esc)"
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fdf3da] transition-all hover:bg-[#16516d] hover:text-[#ffd45c] focus-visible:outline-2 focus-visible:outline-[#f6c959]"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-[#fdf3da] transition-all hover:bg-[#175572] hover:text-[#ffd859] active:scale-95 focus-visible:outline-2 focus-visible:outline-[#f6c959]"
         >
           <Settings className="h-[22px] w-[22px]" />
         </button>
       </aside>
 
-      {/* Top Floating Teal-and-Gold HUD Bar */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2.5 sm:gap-3 sm:p-4 md:pl-[78px]">
-        <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
+      {/* Top Floating Teal-and-Gold HUD Bar: Clean 2 Capsules Left + Equilibrium Right */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-start justify-between gap-1.5 p-2 sm:gap-3 sm:p-4 md:pl-[78px]">
+        <div className="pointer-events-auto flex min-w-0 items-center gap-1.5 sm:gap-3">
           {/* Mobile-only Pause button */}
           <button
             type="button"
             onClick={onPause}
             aria-label="Пауза и настройки (Esc)"
             title="Пауза и настройки (Esc)"
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-[#ffd45c] shadow-[0_6px_18px_rgba(4,18,28,0.52)] ring-1 ring-inset ring-[#fff4d6]/50 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white md:hidden"
+            className="storybook-teal-plaque flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#ffd859] transition-all hover:brightness-110 active:scale-95 focus-visible:outline-2 focus-visible:outline-white md:hidden"
           >
             <Pause className="h-4 w-4" />
           </button>
@@ -121,9 +148,11 @@ export function GameUtilityBar({
             type="button"
             onClick={onOpenCodex}
             aria-label={`Открыть Кодекс Равновесия: законов ${unlockedLawsCount} из 6, значков ${unlockedBadgesCount} из 6`}
-            className="flex h-10 items-center gap-2 rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 px-3.5 text-xs font-bold text-[#fff8e6] shadow-[0_0_0_1.5px_rgba(7,31,44,0.85),0_8px_18px_rgba(4,18,28,0.52)] ring-1 ring-inset ring-[#fff4d6]/60 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#f6c959] whitespace-nowrap shrink-0 sm:px-4.5 sm:text-[15px]"
+            className={`storybook-teal-plaque relative flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-[#fff8e6] transition-all hover:brightness-110 active:translate-y-[1px] focus-visible:outline-2 focus-visible:outline-[#f6c959] whitespace-nowrap shrink-0 sm:h-10 sm:gap-2 sm:px-4.5 sm:text-[15px] ${
+              hasUnseenBadge ? 'ring-2 ring-[#ffd859] md:ring-0' : ''
+            }`}
           >
-            <Layers className="h-4.5 w-4.5 shrink-0 text-[#f6c959]" />
+            <Layers className="h-4 w-4 shrink-0 text-[#f6c959] sm:h-4.5 sm:w-4.5" />
             <span>Кодекс</span>
             <span className="font-math font-extrabold text-[#ffd859] tabular-nums">
               {unlockedLawsCount}/6
@@ -135,7 +164,7 @@ export function GameUtilityBar({
               type="button"
               onClick={onOpenCrossroadsHint}
               aria-label={`Карта районов острова (${completedDistrictsCount} из 4)`}
-              className="hidden h-10 items-center gap-2 rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 px-4.5 text-[15px] font-bold text-[#fff8e6] shadow-[0_0_0_1.5px_rgba(7,31,44,0.85),0_8px_18px_rgba(4,18,28,0.52)] ring-1 ring-inset ring-[#fff4d6]/60 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#f6c959] whitespace-nowrap shrink-0 sm:flex"
+              className="storybook-teal-plaque hidden h-10 items-center gap-2 rounded-full px-4.5 text-[15px] font-bold text-[#fff8e6] transition-all hover:brightness-110 active:translate-y-[1px] focus-visible:outline-2 focus-visible:outline-[#f6c959] whitespace-nowrap shrink-0 sm:flex"
             >
               <Compass className="h-4.5 w-4.5 shrink-0 text-[#f6c959]" />
               <span>Районы</span>
@@ -147,23 +176,10 @@ export function GameUtilityBar({
 
           <button
             type="button"
-            onClick={onOpenBadges ?? onOpenCodex}
-            aria-label={`Открыть значки исследователя (${unlockedBadgesCount} из 6)`}
-            className="hidden h-10 items-center gap-2 rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 px-4.5 text-[15px] font-bold text-[#fff8e6] shadow-[0_0_0_1.5px_rgba(7,31,44,0.85),0_8px_18px_rgba(4,18,28,0.52)] ring-1 ring-inset ring-[#fff4d6]/60 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#f6c959] whitespace-nowrap shrink-0 lg:flex"
-          >
-            <Award className="h-4.5 w-4.5 shrink-0 text-[#f6c959]" />
-            <span>Значки</span>
-            <span className="font-math font-extrabold text-[#ffd859] tabular-nums">
-              {unlockedBadgesCount}/6
-            </span>
-          </button>
-
-          <button
-            type="button"
             onClick={onToggleMute}
             aria-label={isMuted ? 'Включить звук' : 'Выключить звук'}
             title={isMuted ? 'Включить звук' : 'Выключить звук'}
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/96 text-white shadow-[0_6px_18px_rgba(4,18,28,0.52)] ring-1 ring-inset ring-[#fff4d6]/50 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#f6c959] md:hidden"
+            className="storybook-teal-plaque flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-all hover:brightness-110 active:scale-95 focus-visible:outline-2 focus-visible:outline-[#f6c959] md:hidden"
           >
             {isMuted ? (
               <VolumeX className="h-4 w-4 text-slate-300" />
@@ -174,18 +190,24 @@ export function GameUtilityBar({
         </div>
 
         {/* Top-Right Wide Equilibrium Plaque */}
-        <div className="pointer-events-auto flex shrink-0 flex-col justify-center rounded-[20px] border-2 border-[#e5b55c] bg-gradient-to-b from-[#16536f]/96 to-[#0a3145]/97 px-3.5 py-2 shadow-[0_0_0_1.5px_rgba(7,31,44,0.85),0_8px_20px_rgba(4,18,28,0.54)] ring-1 ring-inset ring-[#b8eef9]/50 sm:min-w-[285px] sm:px-5 sm:py-2.5 lg:min-w-[315px]">
-          <div className="flex items-center justify-between gap-4 text-xs sm:text-[15px]">
+        <motion.div
+          key={balancePulseKey}
+          initial={balancePulseKey > 0 ? { scale: 1.035 } : false}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="storybook-teal-plaque pointer-events-auto flex shrink-0 flex-col justify-center rounded-[18px] px-3 py-1.5 sm:min-w-[290px] sm:rounded-[20px] sm:px-5 sm:py-2.5 lg:min-w-[325px]"
+        >
+          <div className="flex items-center justify-between gap-2.5 text-[11px] sm:gap-4 sm:text-[15px]">
             <span className="font-bold text-[#fff8e6]">Равновесие</span>
             <span className="font-math font-extrabold text-[#fff8e6] tabular-nums">
               {balanceIntegrity}%
             </span>
           </div>
-          <div className="mt-1.5 h-[7px] w-24 overflow-hidden rounded-full border border-[#62b7cc]/55 bg-[#062230]/90 sm:w-full">
+          <div className="mt-1 h-[6px] w-24 overflow-hidden rounded-full border border-[#67bdd1]/60 bg-[#05202d]/90 sm:mt-1.5 sm:h-[7px] sm:w-full">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 balanceIntegrity >= 80
-                  ? 'bg-gradient-to-r from-[#22dfb9] via-[#52f9d6] to-[#98ffea] shadow-[0_0_12px_rgba(82,249,214,0.7)]'
+                  ? 'bg-gradient-to-r from-[#22dfb9] via-[#52f9d6] to-[#98ffea] shadow-[0_0_12px_rgba(82,249,214,0.72)]'
                   : balanceIntegrity >= 55
                     ? 'bg-gradient-to-r from-[#d98c1f] to-[#ffd257]'
                     : 'bg-gradient-to-r from-[#c83d3d] to-[#ff766b]'
@@ -193,7 +215,7 @@ export function GameUtilityBar({
               style={{ width: `${balanceIntegrity}%` }}
             />
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
   );

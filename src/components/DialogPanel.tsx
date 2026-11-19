@@ -22,6 +22,7 @@ import type {
 } from '../game/types';
 import { FormulaBlock, MathText } from './MathText';
 import { SpeakerPortrait } from './SpeakerPortrait';
+import { ParchmentBackdrop, StorybookHeadingOrnament } from './StorybookFrames';
 
 interface DialogPanelProps {
   node: StoryNode;
@@ -248,20 +249,17 @@ export function DialogPanel({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       aria-label={node.episodeTitle}
-      className={`${positionClasses} flex flex-col overflow-visible rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] text-[#152d3c] ring-1 ring-inset ring-[#fff8e6]/80 shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_22px_52px_rgba(5,22,34,0.62),inset_0_0_30px_rgba(196,144,58,0.2)]`}
+      className={`${positionClasses} flex flex-col overflow-visible text-[#152d3c]`}
     >
-      {/* Inner concentric storybook page border */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-[6px] rounded-[13px] border border-[#d69c3c]/60"
-      />
+      {/* Sculpted Concave-Notched Parchment Manuscript Frame with Paper Grain */}
+      <ParchmentBackdrop notch={15} />
 
-      {/* Framed Storybook Character Portrait tucked cleanly at Top-Right */}
+      {/* Arched-Crest Storybook Character Portrait rising proud above Top-Right Border */}
       <div
         className={`pointer-events-none absolute z-30 ${
           node.isCrossroadsHub
-            ? '-top-7 right-3 sm:-top-8 sm:right-5'
-            : '-top-7 right-3 sm:-top-9 sm:right-5'
+            ? '-top-9 right-3 sm:-top-11 sm:right-5'
+            : '-top-9 right-3 sm:-top-12 sm:right-5'
         }`}
       >
         <SpeakerPortrait
@@ -274,30 +272,23 @@ export function DialogPanel({
 
       {/* Main Parchment Content */}
       <div
-        className={`quest-scroll relative z-10 flex-1 overflow-y-auto px-4 ${
+        className={`quest-scroll relative z-10 flex-1 overflow-y-auto px-5 ${
           node.isCrossroadsHub
-            ? 'space-y-2 pt-3 pb-3 sm:space-y-2.5 sm:px-6 sm:pt-4 sm:pb-4'
-            : 'space-y-2.5 pt-3 pb-3.5 sm:space-y-3 sm:px-7 sm:pt-5 sm:pb-5'
+            ? 'space-y-2 pt-3.5 pb-3.5 sm:space-y-2.5 sm:px-7 sm:pt-4.5 sm:pb-4.5'
+            : 'space-y-2.5 pt-3.5 pb-4 sm:space-y-3 sm:px-8 sm:pt-5.5 sm:pb-5.5'
         }`}
       >
         {/* Top-Left Speaker Kicker with Gold Diamond Ornament & Episode Subtitle */}
         <div
-          className={`border-b border-[#9d8150]/45 pb-2.5 ${
+          className={`pb-2.5 ${
             node.isCrossroadsHub
-              ? 'pr-28 sm:pr-44 lg:pr-48'
-              : 'pr-28 sm:pr-48 lg:pr-54'
+              ? 'pr-32 sm:pr-44 lg:pr-50'
+              : 'pr-34 sm:pr-50 lg:pr-56'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <span
-              aria-hidden="true"
-              className="hidden items-center sm:inline-flex"
-            >
-              <span className="h-[2px] w-4 bg-[#e09226]" />
-              <span className="h-2.5 w-2.5 rotate-45 border-[1.5px] border-[#d98520] bg-[#fff8e6]" />
-              <span className="h-[2px] w-3 bg-[#e09226]" />
-            </span>
-            <h2 className="font-display text-lg font-extrabold uppercase tracking-[0.02em] text-[#0d3347] sm:text-[24px]">
+            <StorybookHeadingOrnament />
+            <h2 className="font-display text-[17px] leading-tight font-extrabold uppercase tracking-[0.02em] text-[#0d3347] sm:text-[24px]">
               {node.speakerName}
             </h2>
           </div>
@@ -336,16 +327,16 @@ export function DialogPanel({
                       <button
                         type="button"
                         onClick={onToggleMobileModel}
-                        className="flex min-h-[32px] items-center gap-1.5 rounded-full border border-[#3d768d] bg-[#0e394f] px-3 py-1 text-xs font-semibold text-white hover:bg-[#15516e] lg:hidden"
+                        className="flex min-h-[36px] items-center gap-1.5 rounded-full border-2 border-[#ecd084]/85 bg-gradient-to-b from-[#16536f] to-[#0a3145] px-3.5 py-1 text-xs font-bold text-white shadow-xs hover:brightness-110 lg:hidden"
                       >
-                        <Scale className="h-3.5 w-3.5 text-[#f6c959]" />
+                        <Scale className="h-3.5 w-3.5 text-[#ffd859]" />
                         <span>Модель</span>
                       </button>
                     )}
                     {!hasInlineTaskRibbon && showTaskRibbon && (
                       <span
                         aria-hidden="true"
-                        className="hidden h-[1px] flex-1 bg-[#c59a58]/55 sm:block"
+                        className="storybook-ink-divider hidden flex-1 sm:block"
                       />
                     )}
                   </div>
@@ -353,6 +344,8 @@ export function DialogPanel({
               </>
             );
           })()}
+
+          <div aria-hidden="true" className="storybook-ink-divider mt-2.5" />
         </div>
 
         {/* Fixed-Height Narrative Prose Container: Ghost Full Text Sets Final Box Height Immediately */}
@@ -386,7 +379,7 @@ export function DialogPanel({
                             Задача
                           </span>
                         </span>
-                        <span className="h-[1.5px] flex-1 bg-[#c59a58]/55" />
+                        <span className="storybook-ink-divider flex-1" />
                       </div>
                     )}
                     <p className="text-pretty">
@@ -414,7 +407,7 @@ export function DialogPanel({
                           </span>
                           <span
                             aria-hidden="true"
-                            className="h-[1.5px] flex-1 bg-[#c59a58]/60"
+                            className="storybook-ink-divider flex-1"
                           />
                         </div>
                       )}
@@ -539,9 +532,10 @@ export function DialogPanel({
           </>
         )}
 
-        {/* Standard Choices styled as rounded-full storybook arrow capsules */}
+        {/* Standard Choices styled as tactile rounded-full storybook arrow capsules */}
         {node.choices && node.choices.length > 0 && (
-          <div className="space-y-2.5 border-t border-[#c59a58]/55 pt-3.5 pr-4 sm:pr-6">
+          <div className="space-y-3 pt-1 pr-3 sm:pr-5">
+            <div aria-hidden="true" className="storybook-ink-divider mb-3" />
             {node.choices.map((choice) => {
               const isSecret = Boolean(choice.secretId);
               const secretFound = Boolean(
@@ -555,21 +549,21 @@ export function DialogPanel({
                   key={choice.id}
                   type="button"
                   onClick={() => onChoice(choice)}
-                  className={`group flex min-h-[46px] w-full items-center justify-between gap-3 rounded-full border-2 px-5 py-2.5 text-left text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(8,32,46,0.18)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] sm:text-[15px] ${
+                  className={`group flex min-h-[48px] w-full items-center justify-between gap-3 rounded-full px-5 py-2.5 text-left text-sm font-bold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] sm:text-[15.5px] ${
                     secretFound
-                      ? 'border-[#2f856d] bg-gradient-to-b from-[#d8f5ea] to-[#bcead9] text-[#0c3f31] hover:brightness-97'
+                      ? 'border-2 border-[#2a8068] bg-gradient-to-b from-[#dcf7ec] to-[#bdebd9] text-[#0c3f31] shadow-[inset_0_1.5px_0_rgba(255,255,255,0.75),0_3px_0_#1e624f] hover:brightness-97 active:translate-y-[2px]'
                       : isSecret
-                        ? 'border-[#b97719] bg-gradient-to-b from-[#fbe5a8] to-[#f1cd77] text-[#452707] hover:from-[#ef932e] hover:to-[#c75b0e] hover:border-[#8b3c07] hover:text-white'
+                        ? 'storybook-btn-secret'
                         : isSingleContinue
-                          ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] text-white hover:from-[#f69f3f] hover:to-[#d96915]'
-                          : 'border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] text-[#0c2d3e] hover:from-[#ef932e] hover:to-[#c75b0e] hover:border-[#8b3c07] hover:text-white'
+                          ? 'storybook-btn-primary'
+                          : 'storybook-btn-sky'
                   }`}
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     {secretFound ? (
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-[#157a5e]" />
                     ) : isSecret ? (
-                      <Compass className="h-4 w-4 shrink-0 text-[#9c520a] group-hover:text-white" />
+                      <Compass className="h-4 w-4 shrink-0 text-[#9c520a] transition-colors group-hover:text-white group-focus-visible:text-white" />
                     ) : null}
                     <span>
                       <MathText text={choice.label} />
@@ -579,16 +573,16 @@ export function DialogPanel({
                   <span className="flex shrink-0 items-center gap-2">
                     {isSecret && (
                       <span
-                        className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                        className={`text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
                           secretFound
                             ? 'text-[#157a5e]'
-                            : 'text-[#874308] group-hover:text-white'
+                            : 'text-[#874308] group-hover:text-white group-focus-visible:text-white'
                         }`}
                       >
                         {secretFound ? 'Изучено' : 'Тайна'}
                       </span>
                     )}
-                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-4.5 w-4.5 shrink-0 transition-transform duration-150 group-hover:translate-x-1 group-focus-visible:translate-x-1" />
                   </span>
                 </button>
               );
@@ -650,7 +644,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+              className="storybook-btn-primary min-h-[48px] w-full rounded-full px-5 py-2.5 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Записать шаг черновика
             </button>
@@ -718,7 +712,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[46px] w-full rounded-full border-2 border-[#0b4f42] bg-gradient-to-b from-[#1e9e84] to-[#127662] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#24b094] hover:to-[#168871] focus-visible:outline-2 focus-visible:outline-[#0d3347]"
+              className="storybook-btn-emerald min-h-[48px] w-full rounded-full px-5 py-2.5 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить проверку
             </button>
@@ -754,7 +748,7 @@ export function DialogPanel({
               )}
               <button
                 type="submit"
-                className="min-h-[46px] shrink-0 rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
+                className="storybook-btn-primary min-h-[48px] shrink-0 rounded-full px-5 py-2.5 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347] whitespace-nowrap"
               >
                 Проверить
               </button>
@@ -809,7 +803,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
+              className="storybook-btn-primary min-h-[48px] w-full rounded-full px-5 py-2.5 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Подтвердить оба значения
             </button>
@@ -844,10 +838,8 @@ export function DialogPanel({
                               [row.id]: option,
                             }))
                           }
-                          className={`font-math min-h-[40px] rounded-full border-2 px-2 py-2 text-xs font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] transition-colors focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
-                            active
-                              ? 'border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] text-white'
-                              : 'border-[#3c7b90] bg-gradient-to-b from-[#cbeaf2] to-[#98cddc] text-[#0c2d3e] hover:brightness-97'
+                          className={`font-math min-h-[42px] rounded-full px-2 py-2 text-xs font-bold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-[#0d3347] ${
+                            active ? 'storybook-btn-primary' : 'storybook-btn-sky'
                           }`}
                         >
                           <MathText text={option} />
@@ -860,7 +852,7 @@ export function DialogPanel({
             </div>
             <button
               type="submit"
-              className="min-h-[46px] w-full rounded-full border-2 border-[#8b3c07] bg-gradient-to-b from-[#ef932e] via-[#df7519] to-[#c75b0e] px-5 py-2.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(8,32,46,0.18)] transition-all hover:from-[#f69f3f] hover:to-[#d96915] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
+              className="storybook-btn-primary min-h-[48px] w-full rounded-full px-5 py-2.5 text-sm font-extrabold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d3347]"
             >
               Составить уравнение
             </button>

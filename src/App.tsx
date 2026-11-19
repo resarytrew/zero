@@ -111,6 +111,7 @@ export default function App() {
   const [mobileModelOpen, setMobileModelOpen] = useState(false);
   const [lawBanner, setLawBanner] = useState<number | null>(null);
   const [badgeBanner, setBadgeBanner] = useState<BadgeId | null>(null);
+  const [hasUnseenBadge, setHasUnseenBadge] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [instantText, setInstantText] = useState<boolean>(() => loadInstantTextPref());
 
@@ -167,6 +168,7 @@ export default function App() {
     setMobileModelOpen(false);
     setLawBanner(null);
     setBadgeBanner(null);
+    setHasUnseenBadge(false);
     try {
       localStorage.removeItem(SAVE_STORAGE_KEY);
       setSavedState(null);
@@ -245,6 +247,7 @@ export default function App() {
 
     if (outcome.unlockedBadges && outcome.unlockedBadges.length > 0) {
       setBadgeBanner(outcome.unlockedBadges[outcome.unlockedBadges.length - 1]);
+      setHasUnseenBadge(true);
     }
 
     if (outcome.feedback?.isError) {
@@ -363,6 +366,7 @@ export default function App() {
           <GameUtilityBar
             unlockedLawsCount={playerState.unlockedLaws.length}
             unlockedBadgesCount={(playerState.unlockedBadges ?? []).length}
+            hasUnseenBadge={hasUnseenBadge}
             balanceIntegrity={playerState.balanceIntegrity}
             completedDistrictsCount={playerState.completedDistricts.length}
             inCrossroadsOrLater={inCrossroadsOrLater}
@@ -375,6 +379,7 @@ export default function App() {
             onOpenBadges={() => {
               soundEngine.playClick();
               setCodexTab('badges');
+              setHasUnseenBadge(false);
               setCodexOpen(true);
             }}
             onOpenCrossroadsHint={handleOpenCrossroadsHint}
@@ -400,7 +405,7 @@ export default function App() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   role="status"
-                  className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-full border-2 border-[#e5b55c] bg-gradient-to-b from-[#14516c]/96 to-[#0a3145]/97 px-4 py-2 text-xs text-white ring-1 ring-inset ring-[#fff4d6]/50 shadow-2xl sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
+                  className="storybook-teal-plaque pointer-events-auto flex w-full max-w-md items-center justify-between gap-2.5 rounded-full px-4 py-2 text-xs text-white sm:w-max sm:max-w-[calc(100vw-2rem)] sm:text-sm"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <Sparkles className="h-4 w-4 shrink-0 text-[#ffd859]" />
@@ -436,6 +441,7 @@ export default function App() {
                     type="button"
                     onClick={() => {
                       setCodexTab('badges');
+                      setHasUnseenBadge(false);
                       setCodexOpen(true);
                       setBadgeBanner(null);
                     }}

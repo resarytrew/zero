@@ -19,6 +19,7 @@ import {
 } from '../game/codexData';
 import type { BadgeId } from '../game/types';
 import { MathText } from './MathText';
+import { ParchmentBackdrop } from './StorybookFrames';
 
 interface CodexModalProps {
   unlockedLaws: number[];
@@ -68,35 +69,38 @@ export function CodexModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#061e2b]/78 p-4"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-[20px] border-[3px] border-[#df9d36] bg-[radial-gradient(ellipse_at_top_left,#fff9ea_0%,#faecc9_56%,#f2da9f_100%)] text-[#152d3c] shadow-[0_0_0_2px_rgba(148,92,18,0.75),0_24px_60px_rgba(4,18,28,0.75)]"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 6 }}
+        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex max-h-[86vh] w-full max-w-3xl flex-col overflow-visible p-[10px] text-[#152d3c]"
       >
-        {/* Deep Teal-Gold Header */}
-        <div className="flex items-center justify-between border-b-2 border-[#e5b55c] bg-gradient-to-b from-[#16516d] to-[#0a3145] px-5 py-4 text-[#fff8e6]">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-5 w-5 shrink-0 text-[#ffd859]" />
-            <div>
-              <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-[#fff8e6] sm:text-xl">
-                Кодекс Равновесия
-              </h2>
-              <p className="text-xs font-semibold text-[#cbe5ec] tabular-nums">
-                Законов: {unlockedLaws.length}/{CODEX_LAWS.length} · Значков:{' '}
-                {unlockedBadges.length}/{EXPLORER_BADGES.length}
-              </p>
+        <ParchmentBackdrop notch={16} />
+
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[13px]">
+          {/* Deep Teal-Gold Header */}
+          <div className="flex items-center justify-between border-b-2 border-[#e5b55c] bg-gradient-to-b from-[#16516d] to-[#0a3145] px-5 py-4 text-[#fff8e6]">
+            <div className="flex items-center gap-3">
+              <BookOpen className="h-5 w-5 shrink-0 text-[#ffd859]" />
+              <div>
+                <h2 className="font-display text-lg font-extrabold uppercase tracking-wide text-[#fff8e6] sm:text-xl">
+                  Кодекс Равновесия
+                </h2>
+                <p className="text-xs font-semibold text-[#cbe5ec] tabular-nums">
+                  Законов: {unlockedLaws.length}/{CODEX_LAWS.length} · Значков:{' '}
+                  {unlockedBadges.length}/{EXPLORER_BADGES.length}
+                </p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Закрыть Кодекс"
+              className="storybook-teal-plaque flex h-10 w-10 items-center justify-center rounded-full text-[#fff8e6] transition-all hover:brightness-110 active:scale-95 focus-visible:outline-2 focus-visible:outline-[#ffd859]"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Закрыть Кодекс"
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#e5b55c] bg-[#14516c] text-[#fff8e6] ring-1 ring-inset ring-[#fff4d6]/45 transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-[#ffd859]"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
 
         {/* Codex Tab Switcher */}
         <div
@@ -151,7 +155,7 @@ export function CodexModal({
                   className={`rounded-xl border-2 p-4 ${
                     isUnlocked
                       ? 'border-[#d49a3a] bg-[#fff9eb] shadow-xs'
-                      : 'border-[#ceb47e]/80 bg-[#efe0b9]/75 opacity-85'
+                      : 'border-[#ceb47e] bg-[#f3e4be]'
                   }`}
                 >
                   <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
@@ -211,7 +215,7 @@ export function CodexModal({
                     className={`rounded-xl border-2 p-4 transition-colors ${
                       isUnlocked
                         ? 'border-[#d49a3a] bg-[#fff9eb] shadow-xs'
-                        : 'border-[#ceb47e]/80 bg-[#efe0b9]/75 opacity-85'
+                        : 'border-[#ceb47e] bg-[#f3e4be]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -268,6 +272,7 @@ export function CodexModal({
             </div>
           </div>
         )}
+        </div>
       </motion.div>
     </div>
   );
